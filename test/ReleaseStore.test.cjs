@@ -5,6 +5,8 @@ const path = require("node:path");
 
 const HASH_A = "ab".repeat(32);
 const HASH_B = "cd".repeat(32);
+const BYTES_A = `0x${HASH_A}`;
+const BYTES_B = `0x${HASH_B}`;
 const WALLET_A = "0x1000000000000000000000000000000000000001";
 const WALLET_B = "0x2000000000000000000000000000000000000002";
 const WALLET_C = "0x3000000000000000000000000000000000000003";
@@ -154,11 +156,11 @@ describe("release data migrations and isolation", function () {
       id: "deployment-mainnet",
       chainId: 1,
       factoryAddress: WALLET_B,
-      factoryVersion: HASH_A,
-      collectionCreationCodeId: HASH_B,
+      factoryVersion: BYTES_A,
+      collectionCreationCodeId: BYTES_B,
       collectionAddress: WALLET_C,
-      configHash: HASH_A,
-      initCodeHash: HASH_B,
+      configHash: BYTES_A,
+      initCodeHash: BYTES_B,
       transactionHash: "0x" + "ef".repeat(32),
       blockNumber: 123,
     });
