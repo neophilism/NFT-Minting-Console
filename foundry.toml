@@ -1,0 +1,14 @@
+[profile.default]
+src = "contracts"
+test = "test-integration/foundry"
+out = "out-foundry"
+libs = ["node_modules", "vendor/creator-token-transfer-validator/lib"]
+solc_version = "0.8.24"
+evm_version = "prague"
+optimizer = true
+optimizer_runs = 1000000
+bytecode_hash = "none"
+cbor_metadata = false
+
+[fuzz]
+runs = 256

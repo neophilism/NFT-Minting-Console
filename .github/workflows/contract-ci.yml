@@ -36,3 +36,30 @@ jobs:
         run: npm run security:scan
       - name: Build application
         run: npm run build
+
+  real-validator:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: limitbreakinc/creator-token-transfer-validator
+          ref: 59adb8b36ab0256c7430b017b1c9f8b4841d6e1e
+          path: vendor/creator-token-transfer-validator
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09
+        with:
+          version: v1.3.6
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify pinned validator checkout
+        run: test "$(git -C vendor/creator-token-transfer-validator rev-parse HEAD)" = "59adb8b36ab0256c7430b017b1c9f8b4841d6e1e"
+      - name: Run real-validator integration and adversarial tests
+        run: npm run test:integration
+
