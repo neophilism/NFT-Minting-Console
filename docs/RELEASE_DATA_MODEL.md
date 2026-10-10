@@ -11,7 +11,7 @@ is scoped by `release_id`. Composite foreign keys prevent a token from
 referencing another release's edition or rights version. Identical token IDs and
 edition keys remain valid in different releases.
 
-SHA-256 values are stored as exact 64-character lowercase hexadecimal strings.
+Content SHA-256 values are stored as exact 64-character lowercase hexadecimal strings. On-chain creation-code, factory-version, config, init-code and transaction identifiers retain their exact `0x`-prefixed lowercase `bytes32` representation.
 Rights versions, token publication records, deployment profiles and activity
 events are append-only. Published asset hashes and URIs cannot be rewritten.
 Corrections therefore require a new version or event instead of destroying
