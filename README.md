@@ -1,6 +1,14 @@
 # NFT Console
 
-**Complete 36-PR implementation roadmap:** [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md). This plan is the canonical specification and handoff reference; features are not complete until acceptance gates pass.
+**Start here for independent handoff:**
+
+1. [36-PR Development Plan](docs/DEVELOPMENT_PLAN.md) — roadmap, dependencies and acceptance gates.
+2. [Recovered Product Decisions & Requirements](docs/HANDOFF_CONTEXT.md) — original custom contract rationale, royalties, NFT licensing and Galinsky Collectors Circle decisions, and E2EESA requirements.
+3. [Handoff Completeness & Current Blockers](docs/HANDOFF_STATUS.md) — source provenance, original test matrix, known CI defects and missing implementation work.
+4. [Frozen original contract/rights/metadata reference](reference/androids-of-the-vine/) — byte-identical example source, **not** the generic production contract.
+
+> **PROTOTYPE ONLY — NOT SAFE FOR PRIVATE ARTWORK OR MAINNET DEPLOYMENT.** The present upload route sends plaintext directly to public IPFS, lacks the required E2EE draft boundary, and has no completed OpenSea listing integration. The generic contract has not passed parity review/audit or the full real-validator integration suite. See [Handoff Status](docs/HANDOFF_STATUS.md) before running it.
+
 
 General-purpose NFT release, minting and listing console using the custom ERC-721C-compatible contract pattern developed for this project.
 
