@@ -1,0 +1,21 @@
+{
+  "schema_version": "0.1",
+  "configuration_id": "nft-console-web-draft-protection",
+  "standard_version": "0.1.0-dev",
+  "selected_profiles": [
+    "identity-account-root@0.1.0",
+    "pairwise-pqxdh-triple-ratchet@0.1.0",
+    "attachment-chunked-aead@0.1.0",
+    "secret-platform-keystore@0.1.0",
+    "transport-tls13-classical@0.1.0",
+    "client-web-hardened@0.1.0",
+    "server-ciphertext-only@0.1.0",
+    "metadata-minimized@0.1.0",
+    "backup-none@0.1.0",
+    "telemetry-none@0.1.0",
+    "assurance-a2-reviewed@0.1.0",
+    "vulnerability-disclosure-risk-adaptive@0.1.0"
+  ],
+  "accepted_nondefault_statuses": [],
+  "notes": "Candidate target for private NFT release drafts and authorized device recovery. Public IPFS publication and public blockchain records are outside the E2EE content boundary. Selection is not a conformance or certification claim."
+}
