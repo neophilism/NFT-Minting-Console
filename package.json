@@ -2,12 +2,22 @@
   "name": "nft-console",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.20.0",
+    "npm": "10.9.3"
+  },
+  "packageManager": "npm@10.9.3",
   "scripts": {
+    "build": "npm run compile && npm run check",
+    "ci": "npm run compile && npm run lint && npm run typecheck && npm test && npm run security:scan && npm run build",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:integration": "hardhat test test-integration/real-validator.test.cjs",
     "start": "node console/server.mjs",
-    "check": "node --check console/server.mjs && node --check console/public/app.js"
+    "check": "node --check console/server.mjs && node --check console/public/app.js",
+    "lint": "eslint .",
+    "security:scan": "npm audit --audit-level=high --omit=dev",
+    "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
     "@limitbreak/creator-token-standards": "5.0.0",
@@ -22,5 +32,14 @@
     "express": "4.21.2",
     "form-data": "4.0.4",
     "multer": "2.0.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.37.0",
+    "@types/express": "5.0.3",
+    "@types/multer": "2.0.0",
+    "@types/node": "22.18.10",
+    "eslint": "9.37.0",
+    "globals": "16.4.0",
+    "typescript": "5.9.3"
   }
 }
