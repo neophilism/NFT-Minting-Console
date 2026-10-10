@@ -59,8 +59,8 @@ async function insertPublication(releaseId, assetId, rightsId, tokenId = "1") {
 test("clean migration is atomic, repeatable and checksum bound", async () => {
   assert.deepEqual(await migrate(db), ["001_release_model.sql"]);
   assert.deepEqual(await migrate(db), []);
-  const flags = await db.query("SELECT rolsuper,rolbypassrls,rolcreatedb,rolcreaterole FROM pg_roles WHERE rolname='nft_console_api'");
-  assert.deepEqual(flags.rows[0], { rolsuper: false, rolbypassrls: false, rolcreatedb: false, rolcreaterole: false });
+  const flags = await db.query("SELECT rolsuper,rolbypassrls,rolcreatedb,rolcreaterole,rolcanlogin,rolinherit,rolreplication FROM pg_roles WHERE rolname='nft_console_api'");
+  assert.deepEqual(flags.rows[0], { rolsuper: false, rolbypassrls: false, rolcreatedb: false, rolcreaterole: false, rolcanlogin: false, rolinherit: false, rolreplication: false });
   const temporary = await mkdtemp(path.join(os.tmpdir(), "nft-schema-"));
   try {
     const source = await readFile(new URL("../db/migrations/001_release_model.sql", import.meta.url), "utf8");
