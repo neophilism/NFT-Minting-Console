@@ -17,7 +17,7 @@ BEGIN
              WHERE api.rolname = 'nft_console_api') THEN
     RAISE EXCEPTION 'nft_console_api must have no granted roles';
   END IF;
-END $;
+END $$;
 
 REVOKE ALL ON SCHEMA nft_console FROM PUBLIC;
 GRANT USAGE ON SCHEMA nft_console TO nft_console_api;
