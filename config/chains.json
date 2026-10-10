@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "chains": {
+    "1": {
+      "name": "Ethereum Mainnet",
+      "slug": "ethereum",
+      "production": true,
+      "validator": "0x721C008fdff27BF06E7E123956E2Fe03B63342e3",
+      "signedZone": "0x000056f7000000ece9003ca63978907a00ffd100"
+    },
+    "11155111": {
+      "name": "Ethereum Sepolia",
+      "slug": "sepolia",
+      "production": false,
+      "validator": null,
+      "signedZone": null
+    },
+    "31337": {
+      "name": "Hardhat",
+      "slug": "hardhat",
+      "production": false,
+      "validator": null,
+      "signedZone": null
+    }
+  }
+}
