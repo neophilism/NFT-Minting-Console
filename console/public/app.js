@@ -2,7 +2,7 @@
 const el=id=>document.getElementById(id);const text=(id,s)=>el(id).textContent=s;let provider,signer,account,csrf,config,prepared=null;
 const N=["collection","symbol","supply","royalty","owner","minter","recipient","address","start","editions","title","price","description","rights"];
 function snapshot(){return Object.fromEntries(N.map(n=>[n,el(n).value]));}
-function hydrate(){try{const v=JSON.parse(localStorage.getItem("nftconsole-draft")||"{}");N.forEach(n=>{if(v[n]!=null)el(n).value=v[n];});}catch{}}
+function hydrate(){try{const v=JSON.parse(localStorage.getItem("nftconsole-draft")||"{}");N.forEach(n=>{if(v[n]!=null)el(n).value=v[n];});}catch{localStorage.removeItem("nftconsole-draft");}}
 hydrate();N.forEach(n=>el(n).addEventListener("input",()=>localStorage.setItem("nftconsole-draft",JSON.stringify(snapshot()))));
 function needAddress(v,label){if(!ethers.isAddress(v))throw Error(label+" must be an Ethereum address");return v;}
 function fail(e){text("result","Error: "+(e.reason||e.shortMessage||e.message||e));}
