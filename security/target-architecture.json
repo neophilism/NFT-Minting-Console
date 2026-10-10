@@ -1,0 +1,432 @@
+{
+  "schema_version": "1",
+  "scope_kind": "target-architecture",
+  "product_id": "nft-console",
+  "components": [
+    {
+      "component_id": "browser",
+      "product_class": "storage-sync-endpoint",
+      "capabilities": [
+        "attachments",
+        "groups",
+        "backup",
+        "metadata-privacy",
+        "networked",
+        "sharing"
+      ],
+      "profile_refs": [
+        "identity-account-root@0.1.0",
+        "verify-account-root@0.1.0",
+        "group-mls-rfc9420@0.1.0",
+        "attachment-chunked-aead@0.1.0",
+        "secret-software-vault@0.1.0",
+        "backup-user-secret@0.1.0",
+        "client-web-hardened@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-none@0.1.0"
+      ],
+      "inventory_flow_ids": [
+        "draft-attachment",
+        "manifest-delivery",
+        "local-vault",
+        "encrypted-backup",
+        "publish-confirmation",
+        "wallet-login",
+        "chain-write"
+      ],
+      "host_obligations": []
+    },
+    {
+      "component_id": "authenticated-api",
+      "product_class": "authorized-processing-service",
+      "capabilities": [
+        "networked",
+        "metadata-privacy"
+      ],
+      "profile_refs": [
+        "server-ciphertext-only@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0"
+      ],
+      "inventory_flow_ids": [
+        "ciphertext-jobs"
+      ],
+      "host_obligations": []
+    },
+    {
+      "component_id": "object-storage",
+      "product_class": "authorized-processing-service",
+      "capabilities": [
+        "networked",
+        "metadata-privacy"
+      ],
+      "profile_refs": [
+        "server-ciphertext-only@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0"
+      ],
+      "inventory_flow_ids": [
+        "ciphertext-objects"
+      ],
+      "host_obligations": []
+    },
+    {
+      "component_id": "backup-storage",
+      "product_class": "authorized-processing-service",
+      "capabilities": [
+        "networked",
+        "metadata-privacy"
+      ],
+      "profile_refs": [
+        "server-ciphertext-only@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0"
+      ],
+      "inventory_flow_ids": [
+        "ciphertext-backups"
+      ],
+      "host_obligations": []
+    },
+    {
+      "component_id": "publication-proxy",
+      "product_class": "public-data-service",
+      "capabilities": [
+        "networked"
+      ],
+      "profile_refs": [
+        "server-ciphertext-only@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0"
+      ],
+      "inventory_flow_ids": [
+        "public-ipfs"
+      ],
+      "host_obligations": []
+    },
+    {
+      "component_id": "chain-marketplace-proxy",
+      "product_class": "public-data-service",
+      "capabilities": [
+        "networked"
+      ],
+      "profile_refs": [
+        "server-ciphertext-only@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0"
+      ],
+      "inventory_flow_ids": [
+        "public-chain-and-orders"
+      ],
+      "host_obligations": []
+    },
+    {
+      "component_id": "build-and-release",
+      "product_class": "development-process-only",
+      "capabilities": [],
+      "profile_refs": [
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "verification-combined@0.1.0",
+        "assurance-a2-reviewed@0.1.0",
+        "vulnerability-disclosure-risk-adaptive@0.1.0",
+        "vulnerability-prioritization-cvss-threat@0.1.0",
+        "advisory-csaf-2-0-iso20153@0.1.0"
+      ],
+      "inventory_flow_ids": [
+        "build-evidence"
+      ],
+      "host_obligations": []
+    }
+  ],
+  "flows": [
+    {
+      "flow_id": "draft-attachment",
+      "component_id": "browser",
+      "operation": "attachment",
+      "data_class": "protected",
+      "recipient_ids": [
+        "explicitly-authorized-release-devices"
+      ],
+      "key_authority_ids": [
+        "client-account-root"
+      ],
+      "profile_refs": [
+        "identity-account-root@0.1.0",
+        "verify-account-root@0.1.0",
+        "group-mls-rfc9420@0.1.0",
+        "attachment-chunked-aead@0.1.0",
+        "secret-software-vault@0.1.0",
+        "backup-user-secret@0.1.0",
+        "client-web-hardened@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-none@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "manifest-delivery",
+      "component_id": "browser",
+      "operation": "group-message",
+      "data_class": "protected",
+      "recipient_ids": [
+        "explicitly-authorized-release-devices"
+      ],
+      "key_authority_ids": [
+        "client-account-root"
+      ],
+      "profile_refs": [
+        "identity-account-root@0.1.0",
+        "verify-account-root@0.1.0",
+        "group-mls-rfc9420@0.1.0",
+        "attachment-chunked-aead@0.1.0",
+        "secret-software-vault@0.1.0",
+        "backup-user-secret@0.1.0",
+        "client-web-hardened@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-none@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "local-vault",
+      "component_id": "browser",
+      "operation": "local-storage",
+      "data_class": "protected",
+      "recipient_ids": [
+        "explicitly-authorized-release-devices"
+      ],
+      "key_authority_ids": [
+        "client-account-root"
+      ],
+      "profile_refs": [
+        "identity-account-root@0.1.0",
+        "verify-account-root@0.1.0",
+        "group-mls-rfc9420@0.1.0",
+        "attachment-chunked-aead@0.1.0",
+        "secret-software-vault@0.1.0",
+        "backup-user-secret@0.1.0",
+        "client-web-hardened@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-none@0.1.0"
+      ],
+      "networked": false
+    },
+    {
+      "flow_id": "encrypted-backup",
+      "component_id": "browser",
+      "operation": "backup",
+      "data_class": "protected",
+      "recipient_ids": [
+        "explicitly-authorized-release-devices"
+      ],
+      "key_authority_ids": [
+        "client-account-root"
+      ],
+      "profile_refs": [
+        "identity-account-root@0.1.0",
+        "verify-account-root@0.1.0",
+        "group-mls-rfc9420@0.1.0",
+        "attachment-chunked-aead@0.1.0",
+        "secret-software-vault@0.1.0",
+        "backup-user-secret@0.1.0",
+        "client-web-hardened@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-none@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "publish-confirmation",
+      "component_id": "browser",
+      "operation": "public-data",
+      "data_class": "intentionally-disclosed",
+      "recipient_ids": [
+        "public-nft-audience"
+      ],
+      "key_authority_ids": [],
+      "profile_refs": [
+        "client-web-hardened@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "wallet-login",
+      "component_id": "browser",
+      "operation": "business-processing",
+      "data_class": "intentionally-disclosed",
+      "recipient_ids": [
+        "authenticated-api"
+      ],
+      "key_authority_ids": [],
+      "profile_refs": [
+        "client-web-hardened@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "chain-write",
+      "component_id": "browser",
+      "operation": "public-data",
+      "data_class": "public",
+      "recipient_ids": [
+        "ethereum-public-chain"
+      ],
+      "key_authority_ids": [],
+      "profile_refs": [
+        "client-web-hardened@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "ciphertext-jobs",
+      "component_id": "authenticated-api",
+      "operation": "business-processing",
+      "data_class": "protected",
+      "recipient_ids": [
+        "explicitly-authorized-release-devices"
+      ],
+      "key_authority_ids": [
+        "client-account-root"
+      ],
+      "profile_refs": [
+        "server-ciphertext-only@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "ciphertext-objects",
+      "component_id": "object-storage",
+      "operation": "business-processing",
+      "data_class": "protected",
+      "recipient_ids": [
+        "explicitly-authorized-release-devices"
+      ],
+      "key_authority_ids": [
+        "client-account-root"
+      ],
+      "profile_refs": [
+        "server-ciphertext-only@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "ciphertext-backups",
+      "component_id": "backup-storage",
+      "operation": "business-processing",
+      "data_class": "protected",
+      "recipient_ids": [
+        "explicitly-authorized-release-devices"
+      ],
+      "key_authority_ids": [
+        "client-account-root"
+      ],
+      "profile_refs": [
+        "server-ciphertext-only@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "public-ipfs",
+      "component_id": "publication-proxy",
+      "operation": "public-data",
+      "data_class": "intentionally-disclosed",
+      "recipient_ids": [
+        "public-nft-audience"
+      ],
+      "key_authority_ids": [],
+      "profile_refs": [
+        "server-ciphertext-only@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "public-chain-and-orders",
+      "component_id": "chain-marketplace-proxy",
+      "operation": "public-data",
+      "data_class": "intentionally-disclosed",
+      "recipient_ids": [
+        "public-nft-audience"
+      ],
+      "key_authority_ids": [],
+      "profile_refs": [
+        "server-ciphertext-only@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "metadata-minimized@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0"
+      ],
+      "networked": true
+    },
+    {
+      "flow_id": "build-evidence",
+      "component_id": "build-and-release",
+      "operation": "public-data",
+      "data_class": "public",
+      "recipient_ids": [
+        "release-reviewers"
+      ],
+      "key_authority_ids": [],
+      "profile_refs": [
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "verification-combined@0.1.0",
+        "assurance-a2-reviewed@0.1.0",
+        "vulnerability-disclosure-risk-adaptive@0.1.0",
+        "vulnerability-prioritization-cvss-threat@0.1.0",
+        "advisory-csaf-2-0-iso20153@0.1.0"
+      ],
+      "networked": false
+    }
+  ],
+  "claim_limitations": [
+    "Target declaration only; the current plaintext prototype is not assessed as conformant.",
+    "No hardware protection, malicious-origin prevention, post-quantum confidentiality, availability, global recall, audit approval or certification claim.",
+    "server-ciphertext-only requires bounded retention no greater than 30 days; durable private cloud archives need a separately reviewed policy resolution before PR-12.",
+    "Account login and wallet signatures do not authorize E2EE recipient devices or supply content keys.",
+    "Public IPFS assets, chain configuration and marketplace orders are intentionally public."
+  ]
+}

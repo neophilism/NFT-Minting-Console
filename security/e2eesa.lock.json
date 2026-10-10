@@ -1,0 +1,51 @@
+{
+  "schema_version": "1",
+  "source": {
+    "repository": "https://github.com/neophilism/End-To-End-Everywhere-Security-Architecture-Standard",
+    "commit": "2883c792a766ae6ca860abb6fbe8b1654ba9d7de",
+    "release_version": "0.9.0-rc.2-dev",
+    "catalog_standard_version": "0.1.0-dev",
+    "standard_lock": {
+      "release_version": "0.9.0-rc.2-dev",
+      "tree_digest": "sha256:cb5511657ab264113dda8c38c1ebf3d5d51c705400de730eaa3763c58c2891f6",
+      "profile_catalog_digest": "sha256:037f18997df3940c2d04e73b9b57573ad22ca197df807d3649835b301660dc64",
+      "serialization_scheme": "e2eesa-jcs-integer-v1",
+      "digest_scheme": "e2eesa-sha256-domain-v1"
+    },
+    "file_sha256": {
+      "profiles/catalog.json": "3732c35cc10753baa5eb24a77d563562500e88a64b507276989e099af0c67c6c",
+      "registry/product-classes.json": "d70d008e15676484768deac6bd1fb15473bdd20c100a68e30012a330979d7604",
+      "registry/release-candidate.json": "2f9e6735674c9b54d996d0390b4679229d3b228758954f30589c393b5f0c64da",
+      "registry/security-properties.json": "ca0935455d01c518c8ae8079a1eeb1f57423e43e9047ce99160eea721d3d8106",
+      "spec/profile-configuration.md": "0055c28b7ece8fd76ca6e71169fc8e38de2376d0c12ac5a31021b11d287830a3",
+      "spec/attachments-file-encryption.md": "ecfe6fc9c193660a8ff1e218688b8fd024b5600134032e7d20a029e5974e44d8",
+      "spec/native-web-client-security.md": "cdd51961a8dd3da15f5124ff487b1851485e8b680322c702a0bbbc58625eafe1",
+      "spec/identity-device-architecture.md": "a688688bfc0cd2c13d812476b247f299c9226f87311e52dd3c3946f207598039",
+      "spec/secret-storage-hardware-protection.md": "7989750e32e102dcc5dd5921fa6b57b7c6c45437aeffae0044c65382cd12d822",
+      "spec/backup-recovery.md": "c57b5a2136bd85f981c7bf3ce88a5ba4cd5fb01301c56f12b46f6e6a2b2989c4",
+      "spec/server-trust-minimization.md": "52b83df28707350b210fbd63e7fe2fe69ab9bff74754f233002db9ebf931fb29",
+      "spec/transport-security.md": "602743ebfa656e1861b27f39c0094664c437209e24fda6d4b9739b450aa89b2a",
+      "spec/privacy-preserving-telemetry.md": "c0fc086bad36b186cdd5d174dc01cf3aacb811628e3a267b99c78113c3c367b9",
+      "scripts/scoped_assessment.py": "746cee1ea7bf49cae23cab0c77ae32c0ec068338d151ff2e6b423c57f2ddccbc",
+      "scripts/profile_engine.py": "fd37100cb990054ab20cb2952c7b23497ca868a6579af5d37a2c144c2837ab2d",
+      "scripts/profile_dependencies.py": "fb1cee67a1915e854254a3f67bad90cad4587d02c5f4617c0ab15efa66254cbf",
+      "scripts/component_inventory.py": "8b73d261828be504ceee134c152d360912e1253e396bde0653f3a0b69838583c",
+      "scripts/canonical_serialization.py": "c244699c340890e0831373e22b3f188bc8d6730f2832424db2badb13139398d5",
+      "scripts/digest_contracts.py": "c408052f6bc4ff095b89bab98166f3500efe2f4258c20fb9b6732d193d5840cd"
+    }
+  },
+  "scope_kind": "target-architecture",
+  "evaluation_policy": "configuration",
+  "evaluated_at": "2026-10-10T15:25:57Z",
+  "implementation_claims": [],
+  "production_certification_eligible": false,
+  "independent_review": {
+    "state": "pending",
+    "evidence_ref": null
+  },
+  "cryptography_implementation_gate": "Independent exact-source architecture/profile review required before PR-10; a configuration pass is not implementation approval.",
+  "rejected_upstream_head": {
+    "commit": "6ec85d51f9207da31f0e90fd8a7c82ffff8448f6",
+    "reason": "The committed frozen-file manifest no longer matches README.md; the preceding documentation commit retains a valid exact-source lock. No normative spec or profile is changed by this pin."
+  }
+}

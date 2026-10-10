@@ -20,7 +20,9 @@
     "typecheck": "tsc --project tsconfig.json",
     "deploy:rehearse": "hardhat run scripts/rehearse-deployments.cjs",
     "test:data": "node --test test-data/*.test.mjs",
-    "db:migrate": "node scripts/migrate.mjs"
+    "db:migrate": "node scripts/migrate.mjs",
+    "security:profiles": "python3 scripts/check_security_profiles.py",
+    "test:security-profiles": "python3 -m unittest discover -s test-security -v"
   },
   "dependencies": {
     "axios": "1.20.0",

@@ -1,0 +1,660 @@
+{
+  "artifact_kind": "configuration-only",
+  "claim_limitations": [
+    "Target declaration only; the current plaintext prototype is not assessed as conformant.",
+    "No hardware protection, malicious-origin prevention, post-quantum confidentiality, availability, global recall, audit approval or certification claim.",
+    "server-ciphertext-only requires bounded retention no greater than 30 days; durable private cloud archives need a separately reviewed policy resolution before PR-12.",
+    "Account login and wallet signatures do not authorize E2EE recipient devices or supply content keys.",
+    "Public IPFS assets, chain configuration and marketplace orders are intentionally public."
+  ],
+  "configuration_assessment": {
+    "assessment_id": "nft-console-pr08-target-configuration",
+    "claims": [],
+    "components": [
+      {
+        "component_id": "browser",
+        "configuration_valid": true,
+        "effective_profile_refs": [
+          "attachment-chunked-aead@0.1.0",
+          "backup-user-secret@0.1.0",
+          "client-web-hardened@0.1.0",
+          "group-mls-rfc9420@0.1.0",
+          "identity-account-root@0.1.0",
+          "metadata-minimized@0.1.0",
+          "secret-software-vault@0.1.0",
+          "telemetry-none@0.1.0",
+          "transport-tls13-classical@0.1.0",
+          "verify-account-root@0.1.0"
+        ]
+      },
+      {
+        "component_id": "authenticated-api",
+        "configuration_valid": true,
+        "effective_profile_refs": [
+          "development-ssdf-baseline@0.1.0",
+          "metadata-minimized@0.1.0",
+          "server-ciphertext-only@0.1.0",
+          "supply-chain-attested-reproducible@0.1.0",
+          "telemetry-minimized-diagnostics@0.1.0",
+          "transport-tls13-classical@0.1.0"
+        ]
+      },
+      {
+        "component_id": "object-storage",
+        "configuration_valid": true,
+        "effective_profile_refs": [
+          "development-ssdf-baseline@0.1.0",
+          "metadata-minimized@0.1.0",
+          "server-ciphertext-only@0.1.0",
+          "supply-chain-attested-reproducible@0.1.0",
+          "telemetry-minimized-diagnostics@0.1.0",
+          "transport-tls13-classical@0.1.0"
+        ]
+      },
+      {
+        "component_id": "backup-storage",
+        "configuration_valid": true,
+        "effective_profile_refs": [
+          "development-ssdf-baseline@0.1.0",
+          "metadata-minimized@0.1.0",
+          "server-ciphertext-only@0.1.0",
+          "supply-chain-attested-reproducible@0.1.0",
+          "telemetry-minimized-diagnostics@0.1.0",
+          "transport-tls13-classical@0.1.0"
+        ]
+      },
+      {
+        "component_id": "publication-proxy",
+        "configuration_valid": true,
+        "effective_profile_refs": [
+          "development-ssdf-baseline@0.1.0",
+          "metadata-minimized@0.1.0",
+          "server-ciphertext-only@0.1.0",
+          "supply-chain-attested-reproducible@0.1.0",
+          "telemetry-minimized-diagnostics@0.1.0",
+          "transport-tls13-classical@0.1.0"
+        ]
+      },
+      {
+        "component_id": "chain-marketplace-proxy",
+        "configuration_valid": true,
+        "effective_profile_refs": [
+          "development-ssdf-baseline@0.1.0",
+          "metadata-minimized@0.1.0",
+          "server-ciphertext-only@0.1.0",
+          "supply-chain-attested-reproducible@0.1.0",
+          "telemetry-minimized-diagnostics@0.1.0",
+          "transport-tls13-classical@0.1.0"
+        ]
+      },
+      {
+        "component_id": "build-and-release",
+        "configuration_valid": true,
+        "effective_profile_refs": [
+          "advisory-csaf-2-0-iso20153@0.1.0",
+          "assurance-a2-reviewed@0.1.0",
+          "development-ssdf-baseline@0.1.0",
+          "supply-chain-attested-reproducible@0.1.0",
+          "verification-combined@0.1.0",
+          "vulnerability-disclosure-risk-adaptive@0.1.0",
+          "vulnerability-prioritization-cvss-threat@0.1.0"
+        ]
+      }
+    ],
+    "configuration_valid": true,
+    "deployment_state": "not-assessed",
+    "errors": [],
+    "independent_review_state": "pending",
+    "inventory_supported": false,
+    "limitations": [
+      "Inventory is declared only; trusted source/build observations and completeness assessment are pending."
+    ],
+    "production_certification_eligible": false,
+    "request_digest": "sha256:0b2269294d01fa5bd20ec15d16abf84c583c00a483990ee03739aaa9ece49357",
+    "result_class": "configuration",
+    "result_digest": "sha256:53b3a05f4d1c1af80ed90e22b611be466824f990e0ff4e894dea9be5810ea95a",
+    "schema_version": "0.2",
+    "standard_lock": {
+      "digest_scheme": "e2eesa-sha256-domain-v1",
+      "profile_catalog_digest": "sha256:037f18997df3940c2d04e73b9b57573ad22ca197df807d3649835b301660dc64",
+      "release_version": "0.9.0-rc.2-dev",
+      "serialization_scheme": "e2eesa-jcs-integer-v1",
+      "tree_digest": "sha256:cb5511657ab264113dda8c38c1ebf3d5d51c705400de730eaa3763c58c2891f6"
+    },
+    "verdict": "pass"
+  },
+  "control_count": 16,
+  "crosswalk_valid": true,
+  "cryptography_implementation_gate": "closed",
+  "implementation_controls_verified": false,
+  "independent_review": "pending",
+  "privacy_retention_design_gate": "pending-independent-review",
+  "profile_resolutions": [
+    {
+      "auto_added_profiles": [],
+      "configuration_id": "browser",
+      "effective_profiles": [
+        "attachment-chunked-aead@0.1.0",
+        "backup-user-secret@0.1.0",
+        "client-web-hardened@0.1.0",
+        "group-mls-rfc9420@0.1.0",
+        "identity-account-root@0.1.0",
+        "metadata-minimized@0.1.0",
+        "secret-software-vault@0.1.0",
+        "telemetry-none@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "verify-account-root@0.1.0"
+      ],
+      "errors": [],
+      "family_selections": {
+        "advisory-interoperability": [],
+        "assurance-level": [],
+        "attachment-encryption": [
+          "attachment-chunked-aead@0.1.0"
+        ],
+        "backup-recovery": [
+          "backup-user-secret@0.1.0"
+        ],
+        "client-security": [
+          "client-web-hardened@0.1.0"
+        ],
+        "contact-discovery": [],
+        "formal-verification": [],
+        "group-e2ee": [
+          "group-mls-rfc9420@0.1.0"
+        ],
+        "identity-architecture": [
+          "identity-account-root@0.1.0"
+        ],
+        "key-transparency": [],
+        "key-verification": [
+          "verify-account-root@0.1.0"
+        ],
+        "metadata-privacy": [
+          "metadata-minimized@0.1.0"
+        ],
+        "pairwise-e2ee": [],
+        "real-time-media": [],
+        "secret-storage": [
+          "secret-software-vault@0.1.0"
+        ],
+        "secure-development": [],
+        "security-verification": [],
+        "server-trust": [],
+        "software-supply-chain": [],
+        "telemetry": [
+          "telemetry-none@0.1.0"
+        ],
+        "transport-security": [
+          "transport-tls13-classical@0.1.0"
+        ],
+        "vulnerability-disclosure": [],
+        "vulnerability-prioritization": []
+      },
+      "requested_profiles": [
+        "attachment-chunked-aead@0.1.0",
+        "backup-user-secret@0.1.0",
+        "client-web-hardened@0.1.0",
+        "group-mls-rfc9420@0.1.0",
+        "identity-account-root@0.1.0",
+        "metadata-minimized@0.1.0",
+        "secret-software-vault@0.1.0",
+        "telemetry-none@0.1.0",
+        "transport-tls13-classical@0.1.0",
+        "verify-account-root@0.1.0"
+      ],
+      "security_properties": [
+        "SP-AUTHORIZATION-INTEGRITY",
+        "SP-BACKUP-CONFIDENTIALITY",
+        "SP-CONFIDENTIALITY",
+        "SP-DOWNGRADE-RESISTANCE",
+        "SP-FORWARD-SECRECY",
+        "SP-INTEGRITY",
+        "SP-KEY-CONSISTENCY",
+        "SP-MESSAGE-AUTHENTICITY",
+        "SP-METADATA-MINIMIZATION",
+        "SP-PEER-AUTHENTICATION",
+        "SP-POST-COMPROMISE-SECURITY",
+        "SP-RECOVERY-CONFIDENTIALITY",
+        "SP-REPLAY-RESISTANCE",
+        "SP-ROLLBACK-RESISTANCE",
+        "SP-SOFTWARE-INTEGRITY"
+      ],
+      "standard_version": "0.1.0-dev",
+      "valid": true,
+      "warnings": []
+    },
+    {
+      "auto_added_profiles": [],
+      "configuration_id": "authenticated-api",
+      "effective_profiles": [
+        "development-ssdf-baseline@0.1.0",
+        "metadata-minimized@0.1.0",
+        "server-ciphertext-only@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "errors": [],
+      "family_selections": {
+        "advisory-interoperability": [],
+        "assurance-level": [],
+        "attachment-encryption": [],
+        "backup-recovery": [],
+        "client-security": [],
+        "contact-discovery": [],
+        "formal-verification": [],
+        "group-e2ee": [],
+        "identity-architecture": [],
+        "key-transparency": [],
+        "key-verification": [],
+        "metadata-privacy": [
+          "metadata-minimized@0.1.0"
+        ],
+        "pairwise-e2ee": [],
+        "real-time-media": [],
+        "secret-storage": [],
+        "secure-development": [
+          "development-ssdf-baseline@0.1.0"
+        ],
+        "security-verification": [],
+        "server-trust": [
+          "server-ciphertext-only@0.1.0"
+        ],
+        "software-supply-chain": [
+          "supply-chain-attested-reproducible@0.1.0"
+        ],
+        "telemetry": [
+          "telemetry-minimized-diagnostics@0.1.0"
+        ],
+        "transport-security": [
+          "transport-tls13-classical@0.1.0"
+        ],
+        "vulnerability-disclosure": [],
+        "vulnerability-prioritization": []
+      },
+      "requested_profiles": [
+        "development-ssdf-baseline@0.1.0",
+        "metadata-minimized@0.1.0",
+        "server-ciphertext-only@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "security_properties": [
+        "SP-AUTHORIZATION-INTEGRITY",
+        "SP-BUILD-PROVENANCE",
+        "SP-CONFIDENTIALITY",
+        "SP-DOWNGRADE-RESISTANCE",
+        "SP-FORWARD-SECRECY",
+        "SP-INTEGRITY",
+        "SP-METADATA-MINIMIZATION",
+        "SP-PEER-AUTHENTICATION",
+        "SP-SOFTWARE-INTEGRITY"
+      ],
+      "standard_version": "0.1.0-dev",
+      "valid": true,
+      "warnings": []
+    },
+    {
+      "auto_added_profiles": [],
+      "configuration_id": "object-storage",
+      "effective_profiles": [
+        "development-ssdf-baseline@0.1.0",
+        "metadata-minimized@0.1.0",
+        "server-ciphertext-only@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "errors": [],
+      "family_selections": {
+        "advisory-interoperability": [],
+        "assurance-level": [],
+        "attachment-encryption": [],
+        "backup-recovery": [],
+        "client-security": [],
+        "contact-discovery": [],
+        "formal-verification": [],
+        "group-e2ee": [],
+        "identity-architecture": [],
+        "key-transparency": [],
+        "key-verification": [],
+        "metadata-privacy": [
+          "metadata-minimized@0.1.0"
+        ],
+        "pairwise-e2ee": [],
+        "real-time-media": [],
+        "secret-storage": [],
+        "secure-development": [
+          "development-ssdf-baseline@0.1.0"
+        ],
+        "security-verification": [],
+        "server-trust": [
+          "server-ciphertext-only@0.1.0"
+        ],
+        "software-supply-chain": [
+          "supply-chain-attested-reproducible@0.1.0"
+        ],
+        "telemetry": [
+          "telemetry-minimized-diagnostics@0.1.0"
+        ],
+        "transport-security": [
+          "transport-tls13-classical@0.1.0"
+        ],
+        "vulnerability-disclosure": [],
+        "vulnerability-prioritization": []
+      },
+      "requested_profiles": [
+        "development-ssdf-baseline@0.1.0",
+        "metadata-minimized@0.1.0",
+        "server-ciphertext-only@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "security_properties": [
+        "SP-AUTHORIZATION-INTEGRITY",
+        "SP-BUILD-PROVENANCE",
+        "SP-CONFIDENTIALITY",
+        "SP-DOWNGRADE-RESISTANCE",
+        "SP-FORWARD-SECRECY",
+        "SP-INTEGRITY",
+        "SP-METADATA-MINIMIZATION",
+        "SP-PEER-AUTHENTICATION",
+        "SP-SOFTWARE-INTEGRITY"
+      ],
+      "standard_version": "0.1.0-dev",
+      "valid": true,
+      "warnings": []
+    },
+    {
+      "auto_added_profiles": [],
+      "configuration_id": "backup-storage",
+      "effective_profiles": [
+        "development-ssdf-baseline@0.1.0",
+        "metadata-minimized@0.1.0",
+        "server-ciphertext-only@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "errors": [],
+      "family_selections": {
+        "advisory-interoperability": [],
+        "assurance-level": [],
+        "attachment-encryption": [],
+        "backup-recovery": [],
+        "client-security": [],
+        "contact-discovery": [],
+        "formal-verification": [],
+        "group-e2ee": [],
+        "identity-architecture": [],
+        "key-transparency": [],
+        "key-verification": [],
+        "metadata-privacy": [
+          "metadata-minimized@0.1.0"
+        ],
+        "pairwise-e2ee": [],
+        "real-time-media": [],
+        "secret-storage": [],
+        "secure-development": [
+          "development-ssdf-baseline@0.1.0"
+        ],
+        "security-verification": [],
+        "server-trust": [
+          "server-ciphertext-only@0.1.0"
+        ],
+        "software-supply-chain": [
+          "supply-chain-attested-reproducible@0.1.0"
+        ],
+        "telemetry": [
+          "telemetry-minimized-diagnostics@0.1.0"
+        ],
+        "transport-security": [
+          "transport-tls13-classical@0.1.0"
+        ],
+        "vulnerability-disclosure": [],
+        "vulnerability-prioritization": []
+      },
+      "requested_profiles": [
+        "development-ssdf-baseline@0.1.0",
+        "metadata-minimized@0.1.0",
+        "server-ciphertext-only@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "security_properties": [
+        "SP-AUTHORIZATION-INTEGRITY",
+        "SP-BUILD-PROVENANCE",
+        "SP-CONFIDENTIALITY",
+        "SP-DOWNGRADE-RESISTANCE",
+        "SP-FORWARD-SECRECY",
+        "SP-INTEGRITY",
+        "SP-METADATA-MINIMIZATION",
+        "SP-PEER-AUTHENTICATION",
+        "SP-SOFTWARE-INTEGRITY"
+      ],
+      "standard_version": "0.1.0-dev",
+      "valid": true,
+      "warnings": []
+    },
+    {
+      "auto_added_profiles": [],
+      "configuration_id": "publication-proxy",
+      "effective_profiles": [
+        "development-ssdf-baseline@0.1.0",
+        "metadata-minimized@0.1.0",
+        "server-ciphertext-only@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "errors": [],
+      "family_selections": {
+        "advisory-interoperability": [],
+        "assurance-level": [],
+        "attachment-encryption": [],
+        "backup-recovery": [],
+        "client-security": [],
+        "contact-discovery": [],
+        "formal-verification": [],
+        "group-e2ee": [],
+        "identity-architecture": [],
+        "key-transparency": [],
+        "key-verification": [],
+        "metadata-privacy": [
+          "metadata-minimized@0.1.0"
+        ],
+        "pairwise-e2ee": [],
+        "real-time-media": [],
+        "secret-storage": [],
+        "secure-development": [
+          "development-ssdf-baseline@0.1.0"
+        ],
+        "security-verification": [],
+        "server-trust": [
+          "server-ciphertext-only@0.1.0"
+        ],
+        "software-supply-chain": [
+          "supply-chain-attested-reproducible@0.1.0"
+        ],
+        "telemetry": [
+          "telemetry-minimized-diagnostics@0.1.0"
+        ],
+        "transport-security": [
+          "transport-tls13-classical@0.1.0"
+        ],
+        "vulnerability-disclosure": [],
+        "vulnerability-prioritization": []
+      },
+      "requested_profiles": [
+        "development-ssdf-baseline@0.1.0",
+        "metadata-minimized@0.1.0",
+        "server-ciphertext-only@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "security_properties": [
+        "SP-AUTHORIZATION-INTEGRITY",
+        "SP-BUILD-PROVENANCE",
+        "SP-CONFIDENTIALITY",
+        "SP-DOWNGRADE-RESISTANCE",
+        "SP-FORWARD-SECRECY",
+        "SP-INTEGRITY",
+        "SP-METADATA-MINIMIZATION",
+        "SP-PEER-AUTHENTICATION",
+        "SP-SOFTWARE-INTEGRITY"
+      ],
+      "standard_version": "0.1.0-dev",
+      "valid": true,
+      "warnings": []
+    },
+    {
+      "auto_added_profiles": [],
+      "configuration_id": "chain-marketplace-proxy",
+      "effective_profiles": [
+        "development-ssdf-baseline@0.1.0",
+        "metadata-minimized@0.1.0",
+        "server-ciphertext-only@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "errors": [],
+      "family_selections": {
+        "advisory-interoperability": [],
+        "assurance-level": [],
+        "attachment-encryption": [],
+        "backup-recovery": [],
+        "client-security": [],
+        "contact-discovery": [],
+        "formal-verification": [],
+        "group-e2ee": [],
+        "identity-architecture": [],
+        "key-transparency": [],
+        "key-verification": [],
+        "metadata-privacy": [
+          "metadata-minimized@0.1.0"
+        ],
+        "pairwise-e2ee": [],
+        "real-time-media": [],
+        "secret-storage": [],
+        "secure-development": [
+          "development-ssdf-baseline@0.1.0"
+        ],
+        "security-verification": [],
+        "server-trust": [
+          "server-ciphertext-only@0.1.0"
+        ],
+        "software-supply-chain": [
+          "supply-chain-attested-reproducible@0.1.0"
+        ],
+        "telemetry": [
+          "telemetry-minimized-diagnostics@0.1.0"
+        ],
+        "transport-security": [
+          "transport-tls13-classical@0.1.0"
+        ],
+        "vulnerability-disclosure": [],
+        "vulnerability-prioritization": []
+      },
+      "requested_profiles": [
+        "development-ssdf-baseline@0.1.0",
+        "metadata-minimized@0.1.0",
+        "server-ciphertext-only@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "telemetry-minimized-diagnostics@0.1.0",
+        "transport-tls13-classical@0.1.0"
+      ],
+      "security_properties": [
+        "SP-AUTHORIZATION-INTEGRITY",
+        "SP-BUILD-PROVENANCE",
+        "SP-CONFIDENTIALITY",
+        "SP-DOWNGRADE-RESISTANCE",
+        "SP-FORWARD-SECRECY",
+        "SP-INTEGRITY",
+        "SP-METADATA-MINIMIZATION",
+        "SP-PEER-AUTHENTICATION",
+        "SP-SOFTWARE-INTEGRITY"
+      ],
+      "standard_version": "0.1.0-dev",
+      "valid": true,
+      "warnings": []
+    },
+    {
+      "auto_added_profiles": [],
+      "configuration_id": "build-and-release",
+      "effective_profiles": [
+        "advisory-csaf-2-0-iso20153@0.1.0",
+        "assurance-a2-reviewed@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "verification-combined@0.1.0",
+        "vulnerability-disclosure-risk-adaptive@0.1.0",
+        "vulnerability-prioritization-cvss-threat@0.1.0"
+      ],
+      "errors": [],
+      "family_selections": {
+        "advisory-interoperability": [
+          "advisory-csaf-2-0-iso20153@0.1.0"
+        ],
+        "assurance-level": [
+          "assurance-a2-reviewed@0.1.0"
+        ],
+        "attachment-encryption": [],
+        "backup-recovery": [],
+        "client-security": [],
+        "contact-discovery": [],
+        "formal-verification": [],
+        "group-e2ee": [],
+        "identity-architecture": [],
+        "key-transparency": [],
+        "key-verification": [],
+        "metadata-privacy": [],
+        "pairwise-e2ee": [],
+        "real-time-media": [],
+        "secret-storage": [],
+        "secure-development": [
+          "development-ssdf-baseline@0.1.0"
+        ],
+        "security-verification": [
+          "verification-combined@0.1.0"
+        ],
+        "server-trust": [],
+        "software-supply-chain": [
+          "supply-chain-attested-reproducible@0.1.0"
+        ],
+        "telemetry": [],
+        "transport-security": [],
+        "vulnerability-disclosure": [
+          "vulnerability-disclosure-risk-adaptive@0.1.0"
+        ],
+        "vulnerability-prioritization": [
+          "vulnerability-prioritization-cvss-threat@0.1.0"
+        ]
+      },
+      "requested_profiles": [
+        "advisory-csaf-2-0-iso20153@0.1.0",
+        "assurance-a2-reviewed@0.1.0",
+        "development-ssdf-baseline@0.1.0",
+        "supply-chain-attested-reproducible@0.1.0",
+        "verification-combined@0.1.0",
+        "vulnerability-disclosure-risk-adaptive@0.1.0",
+        "vulnerability-prioritization-cvss-threat@0.1.0"
+      ],
+      "security_properties": [
+        "SP-BUILD-PROVENANCE",
+        "SP-SOFTWARE-INTEGRITY"
+      ],
+      "standard_version": "0.1.0-dev",
+      "valid": true,
+      "warnings": []
+    }
+  ],
+  "scope_kind": "target-architecture",
+  "standard_commit": "2883c792a766ae6ca860abb6fbe8b1654ba9d7de",
+  "threat_count": 10
+}
