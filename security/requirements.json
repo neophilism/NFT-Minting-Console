@@ -1,0 +1,167 @@
+{
+  "schema_version": "1",
+  "scope_kind": "target-architecture",
+  "independent_review": "pending",
+  "controls": [
+    {
+      "id": "NFT-FILE-001",
+      "profile_ref": "attachment-chunked-aead@0.1.0",
+      "upstream_file": "spec/attachments-file-encryption.md",
+      "section": "1. Core invariant",
+      "control": "Client encrypts draft files and manifest before service upload; server has no content key.",
+      "state": "unimplemented",
+      "gate": "PR-10/12",
+      "required_evidence": "Exact-source service compromise exercise including objects, logs, backups and provider credentials."
+    },
+    {
+      "id": "NFT-FILE-002",
+      "profile_ref": "attachment-chunked-aead@0.1.0",
+      "upstream_file": "spec/attachments-file-encryption.md",
+      "section": "6. AEAD and nonce construction",
+      "control": "Fresh 256-bit file keys, allowed AEAD and unique 96-bit prefix/counter nonces; bounded chunks.",
+      "state": "unimplemented",
+      "gate": "PR-10",
+      "required_evidence": "Known-answer/provider tests and nonce/key reuse adversarial tests."
+    },
+    {
+      "id": "NFT-FILE-003",
+      "profile_ref": "attachment-chunked-aead@0.1.0",
+      "upstream_file": "spec/attachments-file-encryption.md",
+      "section": "7. Chunk associated data",
+      "control": "Bind manifest digest, file/position/count/length; authenticate before rendering and verify final hash.",
+      "state": "unimplemented",
+      "gate": "PR-10/18",
+      "required_evidence": "Reorder, truncation, replay, substitution, wrong range/length and premature plaintext release failures."
+    },
+    {
+      "id": "NFT-PARENT-001",
+      "profile_ref": "group-mls-rfc9420@0.1.0",
+      "upstream_file": "spec/attachments-file-encryption.md",
+      "section": "9. Key distribution",
+      "control": "Deliver file keys/private manifests only through authenticated E2EE parent messages in the same flow.",
+      "state": "design-resolved-only",
+      "gate": "PR-10/11",
+      "required_evidence": "Reviewed protocol library/provider and membership-bound key delivery; negative configuration test is not runtime evidence."
+    },
+    {
+      "id": "NFT-IDENTITY-001",
+      "profile_ref": "identity-account-root@0.1.0",
+      "upstream_file": "spec/identity-device-architecture.md",
+      "section": "2. Account identity is not cryptographic authority",
+      "control": "Root-authorized device state is separate from SIWE/Safe login; service cannot enroll recipients.",
+      "state": "unimplemented",
+      "gate": "PR-09/11",
+      "required_evidence": "Server-only enrollment/replay rejection and signed exact preceding-state transitions."
+    },
+    {
+      "id": "NFT-VAULT-001",
+      "profile_ref": "secret-software-vault@0.1.0",
+      "upstream_file": "spec/secret-storage-hardware-protection.md",
+      "section": "10. Profile D — software vault fallback",
+      "control": "Explicit unlock and authenticated local vault; Argon2id v0x13 meets an upstream RFC 9106 floor.",
+      "state": "unimplemented",
+      "gate": "PR-10/11",
+      "required_evidence": "Reviewed browser-capable implementation, bounded memory, crash consistency and unavailable-key recovery."
+    },
+    {
+      "id": "NFT-RECOVERY-001",
+      "profile_ref": "backup-user-secret@0.1.0",
+      "upstream_file": "spec/backup-recovery.md",
+      "section": "1. Core invariant",
+      "control": "Fresh backup keys, client-held recovery secret, prior device authorization and independently assessed rollback anchor.",
+      "state": "review-blocked",
+      "gate": "PR-11/12",
+      "required_evidence": "Lost/all-device recovery design, stale backup rejection, provider-compromise test and no signing-key reuse."
+    },
+    {
+      "id": "NFT-WEB-001",
+      "profile_ref": "client-web-hardened@0.1.0",
+      "upstream_file": "spec/native-web-client-security.md",
+      "section": "1. Supported execution profiles",
+      "control": "Disclose hosted origin trust; do not claim malicious-origin prevention or hardware isolation.",
+      "state": "documented-limitation-only",
+      "gate": "PR-08/31",
+      "required_evidence": "Reviewed user disclosures plus exact deployed-browser inspection."
+    },
+    {
+      "id": "NFT-WEB-002",
+      "profile_ref": "client-web-hardened@0.1.0",
+      "upstream_file": "spec/native-web-client-security.md",
+      "section": "2. Release identity and update trust",
+      "control": "Bind complete executable closure, independent trust roots, signed update metadata and rollback/freeze protections.",
+      "state": "unimplemented",
+      "gate": "PR-31/32",
+      "required_evidence": "Authenticated artifact/signature verification and rollback/freeze/partial update failures."
+    },
+    {
+      "id": "NFT-WEB-003",
+      "profile_ref": "client-web-hardened@0.1.0",
+      "upstream_file": "spec/native-web-client-security.md",
+      "section": "3. Code transparency",
+      "control": "Real independent log and witness, continuity proofs and no invented independence.",
+      "state": "external-gate",
+      "gate": "PR-31/32",
+      "required_evidence": "Authenticated operator/ownership assessment and verified log/witness proofs."
+    },
+    {
+      "id": "NFT-WEB-004",
+      "profile_ref": "client-web-hardened@0.1.0",
+      "upstream_file": "spec/native-web-client-security.md",
+      "section": "5. Browser controls",
+      "control": "HTTPS/HSTS, exact hash-authorized CSP/SRI, safe DOM, frame isolation, no third-party code in key context or plaintext local storage.",
+      "state": "prototype-fails",
+      "gate": "PR-09/10/15/31",
+      "required_evidence": "Browser injection, origin/source messaging, CSRF and executable-byte tests."
+    },
+    {
+      "id": "NFT-SERVER-001",
+      "profile_ref": "server-ciphertext-only@0.1.0",
+      "upstream_file": "spec/server-trust-minimization.md",
+      "section": "3. Queues, attachments and derived content",
+      "control": "Active service ciphertext retention no greater than 30 days; long-term private archives require a reviewed resolution.",
+      "state": "review-blocked",
+      "gate": "PR-12/32",
+      "required_evidence": "Bounded cleanup across primary, replica, orphan, queue, backup and cache paths."
+    },
+    {
+      "id": "NFT-SERVER-002",
+      "profile_ref": "server-ciphertext-only@0.1.0",
+      "upstream_file": "spec/server-trust-minimization.md",
+      "section": "4. Metadata, operations and deliberate endpoint services",
+      "control": "Minimize and encrypt service metadata at rest; keep keys and draft content out of telemetry.",
+      "state": "unimplemented",
+      "gate": "PR-09/12/14/32",
+      "required_evidence": "Redacted diagnostics, schema/access inventory, quota/budget and metadata-at-rest provider checks."
+    },
+    {
+      "id": "NFT-PUBLISH-001",
+      "profile_ref": "server-ciphertext-only@0.1.0",
+      "upstream_file": "spec/server-trust-minimization.md",
+      "section": "4. Metadata, operations and deliberate endpoint services",
+      "control": "Public upload only after explicit selected-byte declassification; cancel makes no public object.",
+      "state": "prototype-fails",
+      "gate": "PR-13/19/20",
+      "required_evidence": "Cancel/retry boundary tests, legal-byte/hash round trip and private-collector metadata exclusion."
+    },
+    {
+      "id": "NFT-SUPPLY-001",
+      "profile_ref": "supply-chain-attested-reproducible@0.1.0",
+      "upstream_file": "spec/native-web-client-security.md",
+      "section": "6. Evidence and limitations",
+      "control": "Exact-source independent review, locked transitive dependencies, SBOM, signed provenance and reproduced artifact.",
+      "state": "partial-ci-only",
+      "gate": "PR-30/31",
+      "required_evidence": "Authenticated independent reviewer report, signed artifacts and independent byte reproduction."
+    },
+    {
+      "id": "NFT-CLAIM-001",
+      "profile_ref": "verification-combined@0.1.0",
+      "upstream_file": "spec/profile-configuration.md",
+      "section": "8. Security properties",
+      "control": "Configuration consistency, implementation evidence, deployed state and certification remain separate.",
+      "state": "diagnostic-tested-only",
+      "gate": "PR-08/30/31/33",
+      "required_evidence": "No runtime/certification claims from diagnostics; authenticated exact-scope external verification."
+    }
+  ]
+}

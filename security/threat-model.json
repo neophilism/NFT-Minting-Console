@@ -1,0 +1,18 @@
+{
+  "schema_version": "1",
+  "scope_kind": "target-architecture",
+  "implementation_verified": false,
+  "independent_review": "pending",
+  "threats": [
+    {"id":"NFT-T01","attacker":"Compromised API/database/storage administrator","flows":["ciphertext-jobs","ciphertext-objects","ciphertext-backups"],"required_controls":["NFT-FILE-001","NFT-IDENTITY-001","NFT-SERVER-001","NFT-SERVER-002"]},
+    {"id":"NFT-T02","attacker":"Malicious origin or authorized build signer","flows":["draft-attachment","local-vault","manifest-delivery"],"required_controls":["NFT-WEB-001","NFT-WEB-002","NFT-WEB-003","NFT-WEB-004"],"residual_limit":"Ordinary hosted web origin can serve malicious executable code; monitoring does not prevent execution."},
+    {"id":"NFT-T03","attacker":"Compromised live browser, extension or authorized recipient","flows":["draft-attachment","local-vault"],"required_controls":["NFT-VAULT-001","NFT-WEB-004"],"residual_limit":"Authorized endpoint can disclose plaintext; no global recall or browser/OS compromise prevention claim."},
+    {"id":"NFT-T04","attacker":"Auth replay, phishing or unauthorized wallet/device","flows":["wallet-login","manifest-delivery","chain-write"],"required_controls":["NFT-IDENTITY-001","NFT-WEB-004"],"additional_gate":"PR-09/21/23 domain/chain/nonce/session and precise signing preflight."},
+    {"id":"NFT-T05","attacker":"Malicious range/chunk/manifest storage response","flows":["draft-attachment","ciphertext-objects"],"required_controls":["NFT-FILE-002","NFT-FILE-003","NFT-PARENT-001"]},
+    {"id":"NFT-T06","attacker":"Revoked or newly enrolled device seeking historical keys","flows":["manifest-delivery","encrypted-backup"],"required_controls":["NFT-IDENTITY-001","NFT-RECOVERY-001","NFT-PARENT-001"]},
+    {"id":"NFT-T07","attacker":"Recovery provider, stolen backup or rollback source","flows":["encrypted-backup","ciphertext-backups","local-vault"],"required_controls":["NFT-RECOVERY-001","NFT-VAULT-001","NFT-SERVER-001"]},
+    {"id":"NFT-T08","attacker":"Accidental publication or private collector-record disclosure","flows":["publish-confirmation","public-ipfs"],"required_controls":["NFT-PUBLISH-001","NFT-SERVER-002"],"additional_gate":"PR-14 counsel/privacy checkpoint; no personal Circle data or financial promises in default metadata."},
+    {"id":"NFT-T09","attacker":"Hostile owner-selected validator/operator or false chain/listing response","flows":["chain-write","public-chain-and-orders"],"required_controls":["NFT-CLAIM-001"],"additional_gate":"PR-05/21/25/27 adversarial approval, bytecode/read-back, receipt/order/settlement checks; OWNER remains trusted for policy."},
+    {"id":"NFT-T10","attacker":"Compromised dependency or CI/build distribution","flows":["build-evidence","local-vault","draft-attachment"],"required_controls":["NFT-SUPPLY-001","NFT-WEB-002","NFT-CLAIM-001"]}
+  ]
+}

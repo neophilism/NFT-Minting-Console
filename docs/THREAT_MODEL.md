@@ -9,8 +9,12 @@ signing keys remain exclusively in the connected wallet. The service may
 authorize requests and store ciphertext but is never trusted with draft
 plaintext or signing keys.
 
-Trust boundaries exist between the browser and wallet, browser and platform
-keystore, browser and application service, application service and storage,
+This is an unimplemented target architecture. The current prototype fails the
+private-draft boundary. Exact controls, flows and residual limits are tracked in
+`security/threat-model.json` and `security/requirements.json`.
+
+Trust boundaries exist between the browser and wallet, browser and local software
+vault, browser and application service, application service and storage,
 authorized devices, dependency/build systems, and the irreversible public
 IPFS/blockchain/marketplace publication boundary.
 
@@ -21,16 +25,16 @@ IPFS/blockchain/marketplace publication boundary.
 | Network control | Interception, replay, downgrade, traffic analysis | TLS 1.3 plus end-to-end authenticated encryption; timing and volume leakage remains |
 | Service compromise | Ciphertext theft, deletion, rollback, forged routing | Ciphertext-only storage, authenticated versions, monotonic revisions; availability remains |
 | Account takeover | Unauthorized device enrollment or publication | Wallet-bound challenges, explicit device authorization and high-risk reauthentication |
-| Endpoint compromise | Plaintext/key theft, malicious extensions, UI substitution | Hardened client, CSP, platform keystore, minimal lifetime; active endpoint compromise remains |
-| Physical device access | Offline extraction and session abuse | Platform protection, lock-screen binding, revocation; unlocked compromised devices remain |
+| Endpoint compromise | Plaintext/key theft, malicious extensions, UI substitution | Hardened client, CSP, explicit software-vault unlock, minimal lifetime; active endpoint compromise remains |
+| Physical device access | Offline extraction and session abuse | Authenticated vault and revocation; no hardware isolation or non-exportability claim |
 | Malicious insider | Log inspection, storage access, targeted rollback | Least privilege, no plaintext telemetry, immutable administrative evidence |
 | Update compromise | Malicious application bundle or dependency | Pinned dependencies, reviewed builds, provenance and reproducibility requirements |
 | Supply-chain compromise | Backdoored package, action, compiler, or profile input | Exact pins and hashes, lockfiles, attestation, independent review |
-| Backup compromise | Escrow disclosure or stale-key restoration | No server key/plaintext backup in candidate scope; loss of every device is unrecoverable |
+| Backup compromise | Recovery-secret theft or stale-state restoration | User-held recovery secret, fresh backup keys and independent rollback/device authorization; all-device-loss recovery still requires review |
 | Metadata analysis | Relationship, timing, size and release inference | Minimize retained fields; public chain and publication metadata remain observable |
 | Replay and rollback | Stale draft or authorization restoration | AEAD-bound identifiers, revisions, transcript/context binding, rejection of stale state |
 | Weak randomness or clock | Key/nonce reuse, expiry bypass | OS CSPRNG only; avoid clock as uniqueness source; fail closed on entropy failure |
-| Future quantum attacker | Store-now-decrypt-later against draft sync | Candidate hybrid/PQ pairwise profile; actual parameters await review |
+| Future quantum attacker | Store-now-decrypt-later against draft sync | Classical MLS/TLS target provides no post-quantum confidentiality claim |
 | Denial of service | Upload exhaustion, ciphertext deletion, chain congestion | Quotas, idempotency, retries and local durability; no confidentiality tradeoff |
 | Blockchain observer | Wallet linkage and permanent public data extraction | Explicit publication warning; confidentiality cannot be restored after publication |
 
@@ -57,3 +61,8 @@ device enrollment and revocation, recovery behavior, ciphertext framing,
 revision counters, associated data, multi-device conflict handling, and
 declassification mechanics. Until then, the selected profiles are requirements
 inputs only and no home-grown protocol is permitted.
+
+The service profile's maximum 30-day ciphertext retention conflicts with
+indefinite cloud archives. A reviewed archive/profile policy, browser-capable
+MLS/Argon2 providers, independent rollback anchor and actual code-transparency
+log/witness operators remain explicit design gates.
