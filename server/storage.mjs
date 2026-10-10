@@ -8,6 +8,7 @@ import { ethers } from "ethers";
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 const migrationDir = path.join(moduleDir, "migrations");
 const HASH = /^[0-9a-f]{64}$/;
+const BYTES32 = /^0x[0-9a-f]{64}$/;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/;
 
 function now() {
@@ -23,6 +24,12 @@ function checkedId(value, label = "ID") {
 function checkedHash(value, label = "SHA-256") {
   const text = String(value || "");
   if (!HASH.test(text)) throw new Error(`${label} must be 64 lowercase hexadecimal characters`);
+  return text;
+}
+
+function checkedBytes32(value, label) {
+  const text = String(value || "");
+  if (!BYTES32.test(text)) throw new Error(`${label} must be a 0x-prefixed lowercase bytes32 value`);
   return text;
 }
 
@@ -177,10 +184,10 @@ export class ReleaseStore {
        transaction_hash, block_number, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
       id, checkedId(releaseId, "Release ID"), Number(input.chainId),
-      checkedAddress(input.factoryAddress, "Factory address"), checkedHash(input.factoryVersion, "Factory version"),
-      checkedHash(input.collectionCreationCodeId, "Creation-code ID"),
-      checkedAddress(input.collectionAddress, "Collection address"), checkedHash(input.configHash, "Config hash"),
-      checkedHash(input.initCodeHash, "Init-code hash"), String(input.transactionHash),
+      checkedAddress(input.factoryAddress, "Factory address"), checkedBytes32(input.factoryVersion, "Factory version"),
+      checkedBytes32(input.collectionCreationCodeId, "Creation-code ID"),
+      checkedAddress(input.collectionAddress, "Collection address"), checkedBytes32(input.configHash, "Config hash"),
+      checkedBytes32(input.initCodeHash, "Init-code hash"), checkedBytes32(input.transactionHash, "Transaction hash"),
       Number(input.blockNumber), input.createdAt || now(),
     );
     return id;
