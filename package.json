@@ -17,7 +17,8 @@
     "check": "node --check console/server.mjs && node --check console/public/app.js",
     "lint": "eslint .",
     "security:scan": "npm audit --audit-level=high --omit=dev",
-    "typecheck": "tsc --project tsconfig.json"
+    "typecheck": "tsc --project tsconfig.json",
+    "deploy:rehearse": "hardhat run scripts/rehearse-deployments.cjs"
   },
   "dependencies": {
     "axios": "1.20.0",
