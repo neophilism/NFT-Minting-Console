@@ -163,6 +163,28 @@ Status values describe evidence at the reviewed commit, not intent.
 | List ownership, options-6 EOA/Safe/EIP-7702 direct transfers, unauthorized marketplace block, SignedZone sale, owner policy administration | Missing | PR-05 |
 | Dependency/interface parity repeated on every Limit Break, OpenZeppelin, or compiler upgrade | Missing automated guard | PR-04/05 |
 
+## PR-04 completion evidence
+
+PR-04 corrected the constructor validation order so zero royalty recipients and
+royalty rates above 10,000 bps now produce the generic contract's documented
+errors before the inherited ERC-2981 initializer. It added test-only blocking
+validator, interface-ID, and smart-wallet call helpers without adding production
+authority.
+
+GitHub Actions run 38062625412 compiled 26 Solidity files and passed all 18
+contract tests. The suite now covers the PR-04 rows above: runtime size,
+independent parameterized deployments, constructor boundaries, absence of
+mutation/automatic-approval functions, exact work persistence/events, all
+single-mint validation branches, manual/automatic close, batch bounds and
+rollback, ownership, validator ownership/code/null behavior, blocking policy,
+Safe-like owner/minter calls, interface IDs, and royalty persistence. Lint,
+TypeScript validation, the zero-vulnerability production audit, and build also
+passed.
+
+Real Limit Break validator, ruleset 255/options 6, SignedZone, malicious
+operator, Safe/EIP-7702 policy, and marketplace royalty-bypass evidence remain
+PR-05 work. The historical audit status is still not inherited.
+
 ## Required follow-up
 
 PR-04 may change the generic contract only where a matrix test demonstrates a
