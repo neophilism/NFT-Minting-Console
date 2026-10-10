@@ -9,6 +9,8 @@
 5. [Frozen original contract/rights/metadata reference](reference/androids-of-the-vine/) - byte-identical example source, **not** the generic production contract.
 6. [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md) - PR-03 executable diff, preserved invariants, threat findings, and corrective test matrix.
 7. [Release Data Model](docs/RELEASE_DATA_MODEL.md) - PR-07 normalized ownership, migrations, immutable evidence and isolation rules.
+8. [E2EESA Applicability](docs/E2EESA_APPLICABILITY.md) - pinned candidate profiles, scope, claim limits, and independent-review gate.
+9. [Threat Model](docs/THREAT_MODEL.md) and [Privacy Inventory](docs/PRIVACY_INVENTORY.md) - attacker capabilities, trust boundaries, and sensitive-data handling.
 
 > **PROTOTYPE ONLY - NOT SAFE FOR PRIVATE ARTWORK OR MAINNET DEPLOYMENT.** The present upload route sends plaintext directly to public IPFS, lacks the required E2EE draft boundary, and has no completed OpenSea listing integration. The generic contract has not passed an external audit or live marketplace integration. See [Handoff Status](docs/HANDOFF_STATUS.md) before running it.
 
@@ -28,6 +30,7 @@ General-purpose NFT release, minting and listing console using the custom ERC-72
 ## Safety and delivery gates
 
 - GitHub CI must compile and run contract unit and real-validator integration tests before deployment.
+- E2EESA inputs and selected profiles are candidate requirements only; independent review is required before cryptography implementation.
 - The backend must require an authorized admin wallet before it spends IPFS pinning resources; never expose Pinata/OpenSea keys or wallet private keys to browsers.
 - Contract deployment and minting always require signed on-chain transactions by an authorized wallet; this console never holds signing keys.
 - Do not advertise automatic marketplace listing until it is tested end to end on a disposable mainnet collection with real OpenSea orders and royalty settlement.
