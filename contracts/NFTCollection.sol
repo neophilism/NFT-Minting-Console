@@ -63,16 +63,27 @@ contract NFTCollection is OwnableBasic, ERC721OpenZeppelin, CreatorTokenBase, Ba
         address owner_,
         address minter_,
         address royaltyRecipient_
-    ) ERC721OpenZeppelin(collectionName_, symbol_) BasicRoyalties(royaltyRecipient_, royaltyBps_) {
-        if (owner_ == address(0) || minter_ == address(0) || royaltyRecipient_ == address(0)) revert ZeroAddress();
+    ) ERC721OpenZeppelin(collectionName_, symbol_)
+        BasicRoyalties(_validatedRoyaltyRecipient(royaltyRecipient_), _validatedRoyaltyBps(royaltyBps_))
+    {
+        if (owner_ == address(0) || minter_ == address(0)) revert ZeroAddress();
         if (bytes(collectionName_).length == 0 || bytes(symbol_).length == 0) revert EmptyValue();
         if (seriesSize_ == 0) revert InvalidSeriesSize();
-        if (royaltyBps_ > 10_000) revert InvalidRoyalty();
         SERIES_SIZE = seriesSize_;
         CREATOR_ROYALTY_BPS = royaltyBps_;
         MINTER = minter_;
         ROYALTY_RECIPIENT = royaltyRecipient_;
         _transferOwnership(owner_);
+    }
+
+    function _validatedRoyaltyRecipient(address recipient) private pure returns (address) {
+        if (recipient == address(0)) revert ZeroAddress();
+        return recipient;
+    }
+
+    function _validatedRoyaltyBps(uint96 bps) private pure returns (uint96) {
+        if (bps > 10_000) revert InvalidRoyalty();
+        return bps;
     }
 
     modifier onlyMinter() {
