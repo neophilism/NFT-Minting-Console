@@ -7,6 +7,7 @@
 3. [Recovered Product Decisions & Requirements](docs/HANDOFF_CONTEXT.md) - original custom contract rationale, royalties, NFT licensing and Galinsky Collectors Circle decisions, and E2EESA requirements.
 4. [Handoff Completeness & Current Blockers](docs/HANDOFF_STATUS.md) - source provenance, original test matrix, known CI defects and missing implementation work.
 5. [Frozen original contract/rights/metadata reference](reference/androids-of-the-vine/) - byte-identical example source, **not** the generic production contract.
+6. [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md) - PR-03 executable diff, preserved invariants, threat findings, and corrective test matrix.
 
 > **PROTOTYPE ONLY - NOT SAFE FOR PRIVATE ARTWORK OR MAINNET DEPLOYMENT.** The present upload route sends plaintext directly to public IPFS, lacks the required E2EE draft boundary, and has no completed OpenSea listing integration. The generic contract has not passed parity review/audit or the full real-validator integration suite. See [Handoff Status](docs/HANDOFF_STATUS.md) before running it.
 
@@ -31,4 +32,22 @@ General-purpose NFT release, minting and listing console using the custom ERC-72
 - Do not advertise automatic marketplace listing until it is tested end to end on a disposable mainnet collection with real OpenSea orders and royalty settlement.
 - Prefer one collection deployment per release, many NFTs minted under that collection. Initial pricing is an off-chain OpenSea listing decision, not a contract sale price.
 
-Implementation status and test commands will be updated as code is added.
+## Deterministic development
+
+Use Node.js 22.20.0 and npm 10.9.3. Install exactly the committed dependency
+graph and run every local CI gate with:
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+npm run ci
+```
+
+`npm run ci` compiles Solidity, lints and type-checks the JavaScript sources,
+runs the contract unit tests, audits production dependencies at high severity,
+and performs the application build check. GitHub Actions runs the same gates as
+separate fail-closed steps so a failed compile or incomplete job cannot appear
+green.
+
+The real-validator integration suite remains a later development-plan gate
+(PR-05). Until that fixture and suite are committed, do not treat the unit suite
+as validator parity or production-readiness evidence.
