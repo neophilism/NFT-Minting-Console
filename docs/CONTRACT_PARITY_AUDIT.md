@@ -158,9 +158,9 @@ Status values describe evidence at the reviewed commit, not intent.
 | ERC-165 IDs for ERC-721, metadata, ERC-2981, `ICreatorToken`, and legacy creator token | Missing | PR-04 |
 | ERC-2981 arithmetic and immutable recipient/rate across policy changes | Partial: one calculation | PR-04/05 |
 | Owner-only validator update; validator must contain code; null/default behavior documented | Partial | PR-04/05 |
-| Allowed/blocked transfers use the real validator; mint is not blocked as a transfer | Missing against real validator | PR-05 |
-| Malicious owner-selected validator cannot transfer without holder approval; no validator-wide autoapproval ABI/path | Partial: local negative operator test | PR-05 |
-| List ownership, options-6 EOA/Safe/EIP-7702 direct transfers, unauthorized marketplace block, SignedZone sale, owner policy administration | Missing | PR-05 |
+| Allowed/blocked transfers use the real validator; mint is not blocked as a transfer | Covered by pinned-source Foundry suite | PR-05 |
+| Malicious owner-selected validator cannot transfer without holder approval; no validator-wide autoapproval ABI/path | Covered by unit and pinned-source adversarial tests | PR-05 |
+| List ownership, options-6 EOA/Safe/EIP-7702 direct transfers, unauthorized marketplace block, SignedZone-pattern sale, owner policy administration | Covered by pinned-source Foundry suite | PR-05 |
 | Dependency/interface parity repeated on every Limit Break, OpenZeppelin, or compiler upgrade | Missing automated guard | PR-04/05 |
 
 ## PR-04 completion evidence
@@ -181,15 +181,16 @@ Safe-like owner/minter calls, interface IDs, and royalty persistence. Lint,
 TypeScript validation, the zero-vulnerability production audit, and build also
 passed.
 
-Real Limit Break validator, ruleset 255/options 6, SignedZone, malicious
-operator, Safe/EIP-7702 policy, and marketplace royalty-bypass evidence remain
-PR-05 work. The historical audit status is still not inherited.
+PR-05 pins Limit Break validator commit `59adb8b36ab0256c7430b017b1c9f8b4841d6e1e`
+and CI run 38063935748 passes 15/15 Foundry tests for ruleset 255/options 6,
+SignedZone-pattern authorization, malicious operators, Safe/EIP-7702 policy,
+freeze/restore, and royalty-free direct transfers. This source-level evidence
+does not inherit historical audit status or prove a live OpenSea settlement.
 
 ## Required follow-up
 
-PR-04 may change the generic contract only where a matrix test demonstrates a
-defect or an acceptance requirement demands it. It must preserve the invariants
-above and update this record for any ABI or authority change. PR-05 must use the
-pinned real validator implementation and record the exact source revision.
+Later contract work must preserve the invariants above and update this record
+for any ABI, dependency, compiler, bytecode, or authority change. PR-06 must
+carry the pinned validator and collection identities into deployment artifacts.
 No deployment, marketplace-compatibility, royalty-enforcement, audit, or
 production claim is permitted from this parity review alone.
