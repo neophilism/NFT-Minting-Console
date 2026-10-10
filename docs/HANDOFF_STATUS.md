@@ -25,6 +25,8 @@ If instructions conflict, do **not** silently prefer a newer draft over the orig
 | Token 1 metadata template | `reference/androids-of-the-vine/token-001.metadata.template.json` | `96f2cac4483679c2e1df2d0124126f41f605471eb7a1b9d1b961c00ede8b4219` | Verified; IPFS placeholders not published |
 | Final example package overview | `reference/androids-of-the-vine/ORIGINAL_PACKAGE_README.md` | Git blob SHA `86a395ac9e8b0570bfa2996292ff1767d06e1edc` | Verified byte-for-byte against original overview |
 
+**Historical audit preserved:** [September 2026 v5 real-validator re-audit](../reference/audits/2026-09-v5-real-validator-reaudit.txt) (superseded design; explains earlier high-risk findings, **not** a security audit of the current generic contract or final minimal reference).
+
 The prior complete **`androids-of-the-vine-current-simple-instructions.zip`** had SHA-256 `dc613479d4fc385f49a2bd8b2c32244ed9b5fe31e4231d4c4ae9990f6529b950`; the full ZIP (including the historical tests and compiled validator fixtures) is **not yet in this GitHub repository**. The frozen Solidity/right/metadata/README sources above are, so the core architectural reference is now available from another account. Original video artwork and private user wallet/API credentials are not intended to be published in GitHub.
 
 ## Original test matrix that must be ported/rebuilt
