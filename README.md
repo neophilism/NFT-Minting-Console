@@ -1,5 +1,7 @@
 # NFT Console
 
+**Complete 36-PR implementation roadmap:** [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md). This plan is the canonical specification and handoff reference; features are not complete until acceptance gates pass.
+
 General-purpose NFT release, minting and listing console using the custom ERC-721C-compatible contract pattern developed for this project.
 
 **Not specific to Androids Of The Vine.** Every release must choose its own collection name, token symbol, maximum supply, creator royalty rate/recipient, owner/minter wallets, media files, metadata, optional preview images and rights terms. The smart contract records per-token media and rights SHA-256 hashes immutably and intentionally omits `AutomaticValidatorTransferApproval`.
