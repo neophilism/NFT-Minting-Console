@@ -6,7 +6,7 @@ import {NFTCollection} from "./NFTCollection.sol";
 /// @notice Stateless CREATE2 deployment boundary for NFT Console releases.
 /// @dev The factory never owns a collection, holds funds, or stores signing keys.
 contract NFTCollectionFactory {
-    bytes32 public constant FACTORY_VERSION = keccak256("nft-console.collection-factory.v1");
+    bytes32 public constant FACTORY_VERSION = keccak256("nft-console.collection-factory.v2");
     bytes32 public constant COLLECTION_CREATION_CODE_ID = keccak256(type(NFTCollection).creationCode);
 
     struct CollectionConfig {
@@ -19,10 +19,12 @@ contract NFTCollectionFactory {
         address royaltyRecipient;
     }
 
-    mapping(bytes32 releaseId => address collection) public collectionForRelease;
+    // A release identifier is meaningful within its transaction sender's namespace.
+    // Permissionless callers cannot reserve another wallet's deployment slot.
+    mapping(address requester => mapping(bytes32 releaseId => address collection)) public collectionForRelease;
 
     error EmptyReleaseId();
-    error DuplicateRelease(bytes32 releaseId, address collection);
+    error DuplicateRelease(address requester, bytes32 releaseId, address collection);
     error EmptyValue();
     error InvalidSeriesSize();
     error InvalidRoyalty();
@@ -44,10 +46,10 @@ contract NFTCollectionFactory {
         CollectionConfig calldata config
     ) external returns (address collection) {
         _validate(releaseId, config);
-        address existing = collectionForRelease[releaseId];
-        if (existing != address(0)) revert DuplicateRelease(releaseId, existing);
+        address existing = collectionForRelease[msg.sender][releaseId];
+        if (existing != address(0)) revert DuplicateRelease(msg.sender, releaseId, existing);
 
-        bytes32 salt = deploymentSalt(releaseId);
+        bytes32 salt = deploymentSalt(msg.sender, releaseId);
         bytes32 configHash = hashConfig(config);
         bytes32 initCodeHash = collectionInitCodeHash(config);
         collection = address(new NFTCollection{salt: salt}(
@@ -59,7 +61,7 @@ contract NFTCollectionFactory {
             config.minter,
             config.royaltyRecipient
         ));
-        collectionForRelease[releaseId] = collection;
+        collectionForRelease[msg.sender][releaseId] = collection;
 
         emit CollectionDeployed(
             releaseId,
@@ -74,6 +76,7 @@ contract NFTCollectionFactory {
     }
 
     function predictCollectionAddress(
+        address requester,
         bytes32 releaseId,
         CollectionConfig calldata config
     ) external view returns (address) {
@@ -81,13 +84,14 @@ contract NFTCollectionFactory {
         return address(uint160(uint256(keccak256(abi.encodePacked(
             bytes1(0xff),
             address(this),
-            deploymentSalt(releaseId),
+            deploymentSalt(requester, releaseId),
             collectionInitCodeHash(config)
         )))));
     }
 
-    function deploymentSalt(bytes32 releaseId) public view returns (bytes32) {
-        return keccak256(abi.encode(FACTORY_VERSION, block.chainid, releaseId));
+    function deploymentSalt(address requester, bytes32 releaseId) public view returns (bytes32) {
+        if (requester == address(0)) revert ZeroAddress();
+        return keccak256(abi.encode(FACTORY_VERSION, block.chainid, requester, releaseId));
     }
 
     function hashConfig(CollectionConfig calldata config) public pure returns (bytes32) {
