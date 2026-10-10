@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "status": "candidate-unassessed",
+  "upstream": {
+    "repository": "neophilism/End-To-End-Everywhere-Security-Architecture-Standard",
+    "commit": "6ec85d51f9207da31f0e90fd8a7c82ffff8448f6",
+    "version_file": "0.9.0-rc.2-dev",
+    "catalog_standard_version": "0.1.0-dev",
+    "catalog_blob_sha": "87fac03bca714ff22e30cc3abf3260f80a8462ae",
+    "security_properties_blob_sha": "bd4d6bf125bea69ef9b6cd5df836816e428477a4"
+  },
+  "claims": {
+    "conformant": false,
+    "certified": false,
+    "independently_reviewed": false,
+    "production_ready": false
+  },
+  "review_gate": {
+    "required_before_cryptography_implementation": true,
+    "state": "pending-independent-review",
+    "required_scope": [
+      "profile applicability and dependency resolution",
+      "browser trust and key custody boundaries",
+      "threat model and privacy inventory",
+      "public publication declassification boundary"
+    ]
+  }
+}
