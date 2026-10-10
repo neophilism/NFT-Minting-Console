@@ -11,6 +11,7 @@
     "types": ["node"]
   },
   "include": [
+    "console/**/*.ts",
     "console/**/*.js",
     "console/**/*.mjs",
     "hardhat.config.cjs",
