@@ -68,10 +68,13 @@ state constraints. CI also retains the contract and real-validator gates.
 PGlite establishes SQL behavior, not hosted Neon permissions, concurrent network
 connections, TLS, backups or production availability; those require staging tests.
 
-The concurrent SQLite PR-07 proposal uses a different backend than the approved
-PostgreSQL architecture and exposes private draft names, media types and plaintext
-hashes as schema columns. Its JavaScript numeric conversions also cannot preserve
-the generic contract's uint256 range. This PostgreSQL proposal records the
-resolution explicitly instead of treating the alternative as equivalent or
-silently declaring both implementations canonical. Choose and review one
-canonical model before PR-09, PR-15 or any production integration consumes it.
+The previously merged SQLite PR-07 implementation conflicted with the approved
+PostgreSQL architecture, exposed private draft names/media types/plaintext hashes
+as schema columns, and used JavaScript numeric conversions that cannot preserve
+uint256 values. This change replaces that unused SQLite repository and its
+migrations/tests rather than maintaining two competing canonical models. No
+application route consumed it and no hosted data migration is asserted. Existing
+local experimental SQLite files are left untouched; importing any real records
+requires separately validated, privacy-preserving migration work after review.
+PostgreSQL is the canonical planned model. Its independent security review must
+pass before PR-09 or PR-15 consumes this foundation.

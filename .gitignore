@@ -10,3 +10,4 @@ out-foundry/
 cache-foundry/
 *.log
 .DS_Store
+data/*.sqlite*
