@@ -11,8 +11,9 @@
 1. [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) — full 36 PR work packages, prerequisites, acceptance criteria and release gates.
 2. [HANDOFF_CONTEXT.md](HANDOFF_CONTEXT.md) — user-approved decisions, reasons rejected architectures failed, AOTV example rights/economics and E2EESA boundaries.
 3. [Original frozen reference files](../reference/androids-of-the-vine/) — authoritative last-finalized example contract, legal rights, metadata and package rationale. **Read-only for comparison**, not the current generic deployable source.
-4. Current [NFTCollection.sol](../contracts/NFTCollection.sol), [tests](../test/), [console](../console/) and CI — an **unverified prototype** that must be brought into alignment.
-5. The independent E2EESA source repo (version pin/applicability matrix required in PR-08), and real Limit Break/Seaport sources verified against deployed bytecode.
+4. [Contract parity review](CONTRACT_PARITY_REVIEW.md) and [corrective test matrix](contract-parity-test-matrix.json) — the exact PR-03 comparison and remaining PR-04/05 gates.
+5. Current [NFTCollection.sol](../contracts/NFTCollection.sol), [tests](../test/), [console](../console/) and CI — an **unverified prototype** that must be brought into alignment.
+6. The independent E2EESA source repo (version pin/applicability matrix required in PR-08), and real Limit Break/Seaport sources verified against deployed bytecode.
 
 If instructions conflict, do **not** silently prefer a newer draft over the original security invariants or override user-approved rights. Record the conflict in a PR and justify the resolution.
 
@@ -66,12 +67,12 @@ The last example package included **13 unit tests and 8 real validator integrati
 - **P0 — Validator integration not finished:** the console deploys contracts but does not automatically establish/read back the validated marketplace/authorizer policy. The generic contract is an unaudited adaptation; no authority exists to call it secure simply because the prior fixed-series variant was reviewed.
 - **P0 — OpenSea listing not implemented:** UI only generates an OpenSea NFT URL; it does not obtain seller approvals, sign/post a valid Seaport order, verify active price/status, or prove secondary royalty payment. Do not report “listed.”
 - **P0 — Mainnet release gates absent:** no verified disposable mainnet sale + payout, no actual production deployment, no external code audit, no evidence-backed E2EESA conformance. A green build alone cannot satisfy these.
-- **P1 — Current CI red:** at the time of this audit the latest reviewed workflow run compiled successfully and passed **5 of 6 unit tests**; test #6 failed because a Hardhat-local transfer called the library's default transfer validator at an address with **no deployed code** (`CreatorTokenBase._preValidateTransfer`). Fix the local validator fixture/test harness in PR-02/05; do not paper over it or weaken contract validation. Source: GitHub Actions run [38059078683](https://github.com/neophilism/NFT-Minting-Console/actions/runs/38059078683); later runs continued to fail in `npm test`.
+- **Resolved foundation gate:** PR-01 added a deployed test-only validator without changing production contract behavior. PR-02 run [38061975050](https://github.com/neophilism/NFT-Minting-Console/actions/runs/38061975050) passed locked install, compile, lint, TypeScript validation, 6/6 unit tests, high-severity production dependency audit, and build.
 - **P1 — Integration command broken/missing:** `package.json` includes `npm run test:integration` pointing at `test-integration/real-validator.test.cjs`, but that file and the original validator artifact fixture were **not committed to this generic repo**.
-- **P1 — Reproducibility:** no committed `package-lock.json` yet for generic repo; CI temporarily runs `npm install` rather than `npm ci`. Pin dependencies, add lockfile and restore deterministic CI; add comprehensive UI/server tests and security checks.
+- **Resolved reproducibility gate:** PR-02 committed the npm lockfile, pinned Node/npm/direct dependencies and action commits, and restored `npm ci` plus mandatory compile/lint/typecheck/test/audit/build steps. Comprehensive application and adversarial coverage remains in later plan items.
 - **P1 — Backend maturity:** no persistent encrypted multi-release model, durable job queue, encrypted object storage, device recovery/key management, production-grade administrative authorization/CSRF/replay and upload quotas, real price/listing status reconciler or working Render/Neon deployment.
 - **P1 — Rights byte handling:** generic server turns user-entered rights into sanitized/trimmed text before hashing/pinning. The console must review and hash **exact final legal bytes**, verify them after IPFS retrieval, and distinguish release-wide vs per-token language. Changes after mint must not silently alter hashed rights.
-- **P1 — Generality:** first-pass UI defaults (40, 6%, 1 ETH) mirror AOTV; defaults may be edited and saved but must not silently make those values the only usable launch configuration or leak personal Collector Circle language into new releases.
+- **Resolved baseline generality:** PR-01 removed the AOTV-derived supply, royalty, and listing-price defaults and documented the generic release model. Complete multi-release behavior remains planned work.
 - **P1 — E2EESA version pin and evidence:** security standard is still in pre-1.0 development; PR-08 must select exact upstream source commit, applicable profiles and evidence scope, then the app implements those controls. Do not state certification.
 
 ## Unknowns that do not block ordinary coding
@@ -81,4 +82,4 @@ The last example package included **13 unit tests and 8 real validator integrati
 
 ## First task for the successor
 
-Start at **PR-01** in the [36-PR development plan](DEVELOPMENT_PLAN.md), audit the already committed prototype, then **PR-02/03** to restore deterministic CI and ensure contract parity with the frozen reference. Do **not** deploy or mint real mainnet NFTs from the existing app. Continue dependent PRs after passing gates, using GitHub itself as the handoff source; do not rely on earlier ChatGPT conversational memory.
+PR-01 through PR-03 establish the product baseline, deterministic CI, and exact parity analysis. Continue with **PR-04**, using the [corrective test matrix](contract-parity-test-matrix.json) to stabilize the generic contract, then PR-05 for the pinned real-validator suite. Do **not** deploy or mint real mainnet NFTs from the existing app. Continue dependent PRs after passing gates, using GitHub itself as the handoff source; do not rely on earlier ChatGPT conversational memory.
