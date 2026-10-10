@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import crypto from "node:crypto";
 import fs from "node:fs";
-import path from "node:path";
+import path from "node:path";\nimport process from "node:process";
 import { fileURLToPath } from "node:url";
 import { ethers } from "ethers";
 
