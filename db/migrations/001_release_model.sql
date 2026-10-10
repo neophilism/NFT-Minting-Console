@@ -10,7 +10,14 @@ BEGIN
                   OR rolcanlogin OR rolinherit OR rolreplication)) THEN
     RAISE EXCEPTION 'nft_console_api must be NOLOGIN, NOINHERIT, NOREPLICATION and non-administrative';
   END IF;
-END $$;
+  -- NOINHERIT does not prevent SET ROLE to an existing granted role.
+  -- A previously provisioned API role must not assume any other privileges.
+  IF EXISTS (SELECT 1 FROM pg_auth_members memberships
+             JOIN pg_roles api ON api.oid = memberships.member
+             WHERE api.rolname = 'nft_console_api') THEN
+    RAISE EXCEPTION 'nft_console_api must have no granted roles';
+  END IF;
+END $;
 
 REVOKE ALL ON SCHEMA nft_console FROM PUBLIC;
 GRANT USAGE ON SCHEMA nft_console TO nft_console_api;
