@@ -7,6 +7,10 @@ The integration suite checks out Limit Break's `creator-token-transfer-validator
 forge-std submodules. Tests deploy the real validator, management modules, and whitelist ruleset;
 they do not substitute the unit-test validator.
 
+The Foundry profile omits CBOR compiler metadata. The validator's ruleset purity scanner examines
+every deployed byte as an opcode; omitting the import-path-dependent metadata trailer keeps the
+pinned source build deterministic and limits that scan to executable ruleset bytecode.
+
 The collection uses fixed/custom ruleset ID `255`, the deployed whitelist ruleset, and
 `rulesetOptions = 6`. In this version, `6` is a bitmask enabling OTC transfers for EIP-7702
 delegates and smart wallets. The `BLOCK_ALL_OTC` bit is not set, so ordinary direct owner
@@ -34,4 +38,3 @@ tests the validator authorization handshake, not a live OpenSea oracle signature
 or royalty settlement. Live deployed addresses, bytecode read-back, and marketplace transactions
 remain later PR-21, PR-22, PR-27, and PR-33 gates. OWNER remains trusted and can loosen, tighten,
 freeze, or accidentally block transfers through validator policy changes.
-
