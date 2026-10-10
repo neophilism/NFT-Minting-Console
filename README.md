@@ -48,7 +48,17 @@ and performs the application build check. GitHub Actions runs the same gates as
 separate fail-closed steps so a failed compile or incomplete job cannot appear
 green.
 
-`npm run test:integration` checks out the exact Limit Break validator revision
-recorded in the CI workflow and runs the Foundry integration/adversarial suite.
-Passing local and pinned-source tests is not a live marketplace, external-audit,
-or production-readiness claim.
+PR-05 adds a separate real-validator suite. With Foundry v1.3.6 installed:
+
+```sh
+git clone https://github.com/limitbreakinc/creator-token-transfer-validator.git vendor/creator-token-transfer-validator
+git -C vendor/creator-token-transfer-validator checkout 59adb8b36ab0256c7430b017b1c9f8b4841d6e1e
+git -C vendor/creator-token-transfer-validator submodule update --init --recursive
+npm run test:integration
+```
+
+The command checks the exact source and submodule revisions and exercises the
+application's Hardhat collection artifact against the real validator. GitHub
+Actions runs both suites. See [security assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md)
+for evidence and limits. Passing these tests does not establish live OpenSea
+compatibility, royalty settlement, external audit approval, or production readiness.
