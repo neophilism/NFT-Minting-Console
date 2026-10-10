@@ -1,0 +1,75 @@
+v5 is a large improvement. Every v4 finding is either fixed or deliberately redesigned, the package compiles, and all 24 shipped tests pass. I also tested it against the actual Limit Break Transfer Validator v5 source, not only the package's mocks, and the core design works: the collection owns its marketplace list, ordinary wallet-to-wallet transfers work, unauthorized marketplaces are blocked, and authorized sales go through.
+
+However, I found two new high-severity problems and one medium one, each proven by a test. The most urgent is that **your production plan mints every token into a Safe, and the configured policy does not let a Safe transfer tokens directly**. I recommend not deploying until these are resolved.
+
+## Scope and method
+
+I verified the package checksums (all 18 files match `SHA256SUMS.txt`), installed the exact dependencies, compiled with solc 0.8.24, and ran the shipped suite. I then cloned Limit Break's validator repository (commit `59adb8b`, March 2026), compiled the real validator, its management modules, and its Whitelist, Vanilla, and Soulbound rulesets, and deployed them locally. Your collection ran against that real code in 13 new adversarial tests. I did not have access to Ethereum mainnet, so I could not confirm the live validator's bytecode, which rulesets Limit Break has registered there, or OpenSea's behavior.
+
+## v4 findings: remediation status
+
+**Finding 1 (renounceOwnership bricking) is fixed.** `renounceOwnership()` always reverts, ownership can only move to a nonzero address, and no transfer state depends on renouncing.
+
+**Finding 2 (third-party list control) is fixed.** Against the real validator, `createList` called by the collection makes the collection the list owner, and only the list owner can edit a list. The validator also offers no function the collection doesn't expose for changing list ownership, so the collection stays the owner permanently.
+
+**Finding 3 (loss of adaptability) is addressed by design.** A Policy Admin remains able to maintain compatibility. The new problem is that this role is more powerful than the documentation says (New Finding 2 below).
+
+**Findings 4, 5, 7, and 8 are fixed.** Activation verifies the prepared policy by reading it back, the MINTER can permanently close minting, mints always go to the MINTER, and approvals are blocked before activation.
+
+**Finding 6 (failing tests) is fixed.** All 24 tests pass, and the revert tests now check for specific named errors.
+
+**The informational items are fixed.** The pragma is pinned, the metadata has an `image` poster, and the rights file has no placeholders. Its SHA-256 matches the value in the preflight script.
+
+## New findings
+
+### 1. High: tokens minted into the MINTER Safe cannot be transferred directly
+
+Your runbook makes the MINTER a Safe, and `mintWork` always mints to the MINTER. The policy you pinned (ruleset options set to 0) allows direct transfers only when the holder is an ordinary wallet. The real Whitelist ruleset blocks a direct transfer when the holder is a smart-contract wallet, unless that wallet is on the collection's whitelist. Your contract deliberately exposes no way to add anything to that whitelist.
+
+I confirmed this with a Safe-like contract as MINTER. Minting works, but the Safe's direct transfer to a buyer reverts. The token can leave the Safe only through an authorized marketplace sale. Whether OpenSea accepts listings signed by a Safe is something you would have to confirm. If it does not, all minted works would be stuck until the Policy Admin migrates the validator.
+
+The Sepolia rehearsal will not catch this because it uses ordinary MetaMask wallets. The same restriction applies to any collector who holds the token in a Safe or in a MetaMask smart account (EIP-7702). Those collectors cannot send the token to another wallet directly. The rights agreement and README say direct wallet-to-wallet transfers "may remain permitted," which is incomplete for these wallet types.
+
+There are two ways to fix this. The first is to make the MINTER a hardware-wallet EOA instead of a Safe. The second is to have `prepareInitialV5Policy` and `prepareV5ValidatorMigration` add the immutable MINTER address, and only that address, to the whitelist, with no admin function to change it. Either way, the rights agreement should state that direct transfers work from ordinary wallets but not from smart-contract wallets.
+
+### 2. High: the Policy Admin can remove royalty enforcement or freeze every holder instantly, contrary to the documentation
+
+The documentation says the Policy Admin cannot pause trading and that migrating to an unfamiliar validator requires a seven-day public delay. My tests show four ways around those protections, each of which works immediately.
+
+The seven-day delay can be bypassed. The delay applies only to the "generic" migration path. The v5 migration path has no delay, and it accepts any contract that answers the v5 introspection calls correctly. I wrote a fake validator that reports the expected policy but approves every transfer. The Policy Admin installed it with two immediate transactions, and a royalty-free operator then moved a token.
+
+`updateActiveV5Ruleset` accepts any ruleset registered on the validator, instantly. Limit Break's standard rulesets include Vanilla, which enforces nothing, and Soulbound, which blocks every transfer. In my tests, switching to Vanilla let a royalty-free operator move a token, and switching to Soulbound froze every holder. Limit Break's own test setup registers both. You should check on mainnet with `isRulesetRegistered` before assuming either is unavailable there.
+
+The Policy Admin can also pause all transfers by calling the validator directly. The validator recognizes `owner()`, so the Policy Admin can change the collection's policy directly on the validator. The collection then detects the mismatch and blocks every transfer until the Policy Admin restores it. I confirmed that this blocks all transfers.
+
+Finally, `addPolicyAuthorizers` accepts any contract, and an authorizer can approve any sale, including one that pays no royalty. I confirmed this with a rogue authorizer. This one is inherent to having an admin, but it should be disclosed.
+
+A 2-of-3 Safe makes misuse much less likely, but the stated security guarantees are not what the code enforces. To fix this, put one timelock on every change that weakens enforcement: executing a v5 migration, changing the ruleset, and adding an authorizer. Removing an authorizer can stay instant because it only tightens the policy. In addition, pin the ruleset by code hash to the audited Whitelist ruleset, so that changing to a different ruleset also goes through the timelock. Make `restoreActiveV5Policy()` callable by anyone, since it can only restore the approved snapshot, which removes the instant-pause lever. Then correct the README, the contract comments, and the operations guide to describe the remaining powers accurately.
+
+### 3. Medium: the OpenSea integration is untested before the irreversible step
+
+Your design uses OpenSea's SignedZone as an authorizer on Limit Break's v5 validator, not OpenSea's own registry. OpenSea's documentation says the SignedZone can serve as an authorizer on either OpenSea's registry or Limit Break's CreatorTokenTransferValidator. The address in your handoff matches the SignedZone OpenSea published for Seaport 1.6. So the design is supported on paper. The authorization pattern also worked in my local test.
+
+Two things remain unverified. First, OpenSea's "enforce earnings" button in Studio may try to call `setTransferValidator`. Before activation, that call silently erases your prepared policy. After activation, it reverts. Second, I could not confirm that OpenSea shows the collection as purchasable when its validator is Limit Break v5 with a custom list.
+
+The v4 guide included a disposable mainnet rehearsal with a real low-value OpenSea sale. The v5 guide dropped it, so the first end-to-end sale would happen with the canonical Token #1 after activation, which cannot be undone. Reinstate the disposable mainnet rehearsal, using the exact production setup (the same Safes, the same validator, and the SignedZone), and complete a real sale before touching the canonical contract.
+
+### 4. Informational
+
+`getTransferValidator()` returns the zero address before preparation, whereas Limit Break's base contracts return their default validator. This is harmless because transfers are blocked until activation, but indexers may report "no validator" until then.
+
+The Payment Processor exploit from last week affected Payment Processor, not the Transfer Validator, according to the reports we reviewed earlier. However, the v5 validator also contains PermitC transfer functions. Holders should never approve the validator itself as an operator, and nothing in your flow requires them to.
+
+I generated the `package-lock.json` your handoff requested from the exact pinned dependencies, and it is included in the attached package.
+
+## Answers to your handoff questions
+
+Your checklist asked twelve specific questions. On the ones I could test, the answers are as follows.
+
+The manual `ICreatorToken` implementation works with the Seaport-style authorization pattern. Its interface IDs match Limit Break's exactly, and the ERC-173 ID is correct. The v5 struct layout and function signatures match the real v5 source. The collection becomes the permanent owner of its list. Ruleset 255 with options 0 produces exactly the properties you listed: no automatic rebinding, no default-list extension, authorization mode on, ordinary-wallet transfers allowed, and smart-wallet and 7702 transfers blocked.
+
+Account freezing and expansion settings changed directly on the validator have no effect while the options stay 0. Any other direct policy change blocks all transfers rather than weakening them. I found no reentrancy risk that matters. No path lets the Policy Admin or the MINTER take a collector's token or change token data.
+
+The seven-day delay is not adequately bounded, because of New Finding 2. Whether a Safe works as OpenSea's recognized owner, and the live mainnet addresses, need on-chain confirmation, which I could not do from here.
+
+The attached package contains the 13 audit tests, the compiled real validator, the helper contracts (test-only, never to be deployed), the lockfile, and run instructions. With it, 37 tests pass.
