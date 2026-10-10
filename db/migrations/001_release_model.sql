@@ -3,11 +3,12 @@
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'nft_console_api') THEN
-    CREATE ROLE nft_console_api NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
+    CREATE ROLE nft_console_api NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS;
   END IF;
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'nft_console_api'
-             AND (rolsuper OR rolbypassrls OR rolcreatedb OR rolcreaterole)) THEN
-    RAISE EXCEPTION 'nft_console_api must not have administrative or RLS-bypass privileges';
+             AND (rolsuper OR rolbypassrls OR rolcreatedb OR rolcreaterole
+                  OR rolcanlogin OR rolinherit OR rolreplication)) THEN
+    RAISE EXCEPTION 'nft_console_api must be NOLOGIN, NOINHERIT, NOREPLICATION and non-administrative';
   END IF;
 END $$;
 
