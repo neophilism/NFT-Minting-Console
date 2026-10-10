@@ -10,7 +10,7 @@ async function api(path,options={}){const headers={...(options.headers||{})};if(
 async function wallet(){if(!window.ethereum||!window.ethers)throw Error("Install a browser wallet (such as MetaMask)");provider=new ethers.BrowserProvider(window.ethereum);await provider.send("eth_requestAccounts",[]);signer=await provider.getSigner();account=await signer.getAddress();if(!el("owner").value)el("owner").value=account;if(!el("minter").value)el("minter").value=account;if(!el("recipient").value)el("recipient").value=account;return signer;}
 async function chain(){await wallet();const n=Number((await provider.getNetwork()).chainId);if(n!==config.chainId)throw Error("Wallet network "+n+" does not match console target "+config.chainId+". Switch your wallet before signing.");}
 el("connect").onclick=async()=>{try{await wallet();const r=await api("/api/auth/challenge",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({wallet:account})});const signature=await signer.signMessage(r.message);const login=await api("/api/auth/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({wallet:account,signature})});csrf=login.csrf;el("connect").textContent="Signed in "+account.slice(0,6)+"...";text("result","Signed in. Configure a release below.");}catch(e){fail(e);}};
-function releaseIdFor(name,symbol){const key="nftconsole-release-id:"+config.chainId+":"+name+":"+symbol;let id=localStorage.getItem(key);if(!id){id=ethers.keccak256(ethers.toUtf8Bytes("nft-console:"+config.chainId+":"+crypto.randomUUID()));localStorage.setItem(key,id);}return id;}
+function releaseIdFor(name,symbol,requester){const key="nftconsole-release-id:v2:"+config.chainId+":"+requester.toLowerCase()+":"+name+":"+symbol;let id=localStorage.getItem(key);if(!id){id=ethers.keccak256(ethers.toUtf8Bytes("nft-console:"+config.chainId+":"+crypto.randomUUID()));localStorage.setItem(key,id);}return id;}
 function saveDeploymentReceipt(value){const receipts=JSON.parse(localStorage.getItem("nftconsole-deployment-receipts")||"[]");receipts.push(value);localStorage.setItem("nftconsole-deployment-receipts",JSON.stringify(receipts));}
 el("deploy").onclick=async()=>{try{
 await chain();
@@ -19,22 +19,26 @@ if(!name||!symbol||!Number.isSafeInteger(supply)||supply<=0||!Number.isInteger(r
 if(!config.deploymentFactory||!ethers.isAddress(config.deploymentFactory))throw Error("This chain has no configured deployment factory");
 const art=await api("/api/artifact");
 const factory=new ethers.Contract(config.deploymentFactory,art.factory.abi,signer);
-const releaseId=releaseIdFor(name,symbol);
+if(await factory.FACTORY_VERSION()!==art.factory.version)throw Error("Configured factory version is incompatible; a reviewed v2 factory is required");
+if(await factory.COLLECTION_CREATION_CODE_ID()!==art.collection.creationCodeId)throw Error("Factory collection artifact does not match this console build");
+const requester=await signer.getAddress();
+const releaseId=releaseIdFor(name,symbol,requester);
 const values={name,symbol,seriesSize:supply,royaltyBps:Math.round(royalty*100),owner:needAddress(el("owner").value,"OWNER"),minter:needAddress(el("minter").value,"MINTER"),royaltyRecipient:needAddress(el("recipient").value,"Royalty recipient")};
-const existing=await factory.collectionForRelease(releaseId);
-if(existing!==ethers.ZeroAddress){el("address").value=existing;text("result","This release is already deployed at "+existing+". No duplicate transaction was sent.");return;}
-const predicted=await factory.predictCollectionAddress(releaseId,values);
+const predicted=await factory.predictCollectionAddress(requester,releaseId,values);
+const existing=await factory.collectionForRelease(requester,releaseId);
+if(existing!==ethers.ZeroAddress){if(existing.toLowerCase()!==predicted.toLowerCase())throw Error("This release was deployed with different immutable settings; restore those settings before resuming");if((await provider.getCode(existing))==="0x")throw Error("Existing deployment has no collection bytecode");el("address").value=existing;text("result","This release is already deployed at "+existing+". No duplicate transaction was sent.");return;}
+const configHash=await factory.hashConfig(values),initCodeHash=await factory.collectionInitCodeHash(values);
 text("result","Confirm deterministic collection deployment in wallet. Predicted address: "+predicted);
 const tx=await factory.deployCollection(releaseId,values);
 text("result","Deployment transaction submitted: "+tx.hash+"\nWaiting for chain receipt...");
 const receipt=await tx.wait();
 if(receipt.status!==1)throw Error("Deployment failed on-chain");
-const deployed=receipt.logs.map(log=>{try{return factory.interface.parseLog(log);}catch{return null;}}).find(entry=>entry?.name==="CollectionDeployed");
-if(!deployed||deployed.args.releaseId!==releaseId||deployed.args.collection.toLowerCase()!==predicted.toLowerCase())throw Error("Deployment receipt does not match the release request");
+const deployed=receipt.logs.filter(log=>log.address.toLowerCase()===config.deploymentFactory.toLowerCase()).map(log=>{try{return factory.interface.parseLog(log);}catch{return null;}}).find(entry=>entry?.name==="CollectionDeployed");
+if(!deployed||deployed.args.releaseId!==releaseId||deployed.args.requester.toLowerCase()!==requester.toLowerCase()||deployed.args.collection.toLowerCase()!==predicted.toLowerCase()||deployed.args.chainId!==BigInt(config.chainId)||deployed.args.factoryVersion!==art.factory.version||deployed.args.collectionCreationCodeId!==art.collection.creationCodeId||deployed.args.configHash!==configHash||deployed.args.initCodeHash!==initCodeHash)throw Error("Deployment receipt does not match the release request");
 if((await provider.getCode(predicted))==="0x")throw Error("Deployment receipt has no collection bytecode");
 el("address").value=predicted;
 localStorage.setItem("nftconsole-draft",JSON.stringify(snapshot()));
-saveDeploymentReceipt({releaseId,collection:predicted,factory:config.deploymentFactory,chainId:config.chainId,transactionHash:tx.hash,blockNumber:receipt.blockNumber,factoryVersion:deployed.args.factoryVersion,collectionCreationCodeId:deployed.args.collectionCreationCodeId,configHash:deployed.args.configHash,initCodeHash:deployed.args.initCodeHash});
+saveDeploymentReceipt({releaseId,requester,collection:predicted,factory:config.deploymentFactory,chainId:config.chainId,transactionHash:tx.hash,blockNumber:receipt.blockNumber,factoryVersion:deployed.args.factoryVersion,collectionCreationCodeId:deployed.args.collectionCreationCodeId,configHash:deployed.args.configHash,initCodeHash:deployed.args.initCodeHash});
 text("result","Collection deployed and verified at "+predicted+". Receipt "+tx.hash+". Configure and verify validator policy before minting.");
 }catch(e){fail(e);}};
 el("prepare").onclick=async()=>{try{if(!csrf)throw Error("Connect and sign in before uploading");const count=Number(el("editions").value),media=el("media").files,poster=el("poster").files;if(!Number.isInteger(count)||count<1||count>10)throw Error("Prepare 1–10 tokens at a time");if(media.length!==1&&media.length!==count)throw Error("Upload one media file for all editions or exactly one per edition");if(poster.length!==0&&poster.length!==1&&poster.length!==count)throw Error("Upload zero, one or one-per-token display images");if(!el("rights").value.trim())throw Error("Enter release-specific legal rights");const form=new FormData();const fields={collection:el("collection").value,symbol:el("symbol").value,supply:el("supply").value,startingId:el("start").value,editions:el("editions").value,title:el("title").value,description:el("description").value,rightsText:el("rights").value};Object.entries(fields).forEach(([k,v])=>form.append(k,v));[...media].forEach(f=>form.append("media",f));[...poster].forEach(f=>form.append("poster",f));text("result","Hashing files and uploading metadata/rights/media to IPFS…");prepared=await api("/api/prepare",{method:"POST",body:form});el("preflight").disabled=false;el("mint").disabled=true;text("result",prepared.works.map(w=>"#"+w.tokenId+" "+w.title+"\nmedia SHA256: "+w.mediaHash+"\nmetadata: "+w.metadataURI).join("\n\n")+"\n\nPrepared; now check the deployed contract.");}catch(e){fail(e);}};

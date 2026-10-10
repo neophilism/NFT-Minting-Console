@@ -2,7 +2,8 @@ const { ethers } = require("hardhat");
 
 async function deployRelease(factory, releaseKey, config) {
   const releaseId = ethers.id(releaseKey);
-  const predicted = await factory.predictCollectionAddress(releaseId, config);
+  const requester = await factory.runner.getAddress();
+  const predicted = await factory.predictCollectionAddress(requester, releaseId, config);
   const tx = await factory.deployCollection(releaseId, config);
   const receipt = await tx.wait();
   if (receipt.status !== 1) throw new Error("Collection deployment failed");
@@ -12,12 +13,13 @@ async function deployRelease(factory, releaseKey, config) {
       try { return factory.interface.parseLog(log); } catch { return null; }
     })
     .find((entry) => entry?.name === "CollectionDeployed");
-  if (!event || event.args.releaseId !== releaseId || event.args.collection !== predicted) {
+  if (!event || event.args.releaseId !== releaseId || event.args.collection !== predicted || event.args.requester !== requester) {
     throw new Error("Deployment receipt did not match the request");
   }
 
   return Object.freeze({
     releaseId,
+    requester,
     collection: predicted,
     transactionHash: receipt.hash,
     blockNumber: receipt.blockNumber,

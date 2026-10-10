@@ -24,7 +24,7 @@ describe("NFTCollectionFactory", function () {
   it("publishes stable version and collection creation-code identifiers", async function () {
     const { factory } = await fixture();
     const artifact = await artifacts.readArtifact("NFTCollection");
-    expect(await factory.FACTORY_VERSION()).to.equal(ethers.id("nft-console.collection-factory.v1"));
+    expect(await factory.FACTORY_VERSION()).to.equal(ethers.id("nft-console.collection-factory.v2"));
     expect(await factory.COLLECTION_CREATION_CODE_ID()).to.equal(ethers.keccak256(artifact.bytecode));
   });
 
@@ -36,7 +36,7 @@ describe("NFTCollectionFactory", function () {
       minter: minter.address,
       royaltyRecipient: recipient.address,
     });
-    const predicted = await factory.predictCollectionAddress(releaseId, values);
+    const predicted = await factory.predictCollectionAddress(requester.address, releaseId, values);
     const configHash = await factory.hashConfig(values);
     const initCodeHash = await factory.collectionInitCodeHash(values);
     const chainId = (await ethers.provider.getNetwork()).chainId;
@@ -53,11 +53,11 @@ describe("NFTCollectionFactory", function () {
         configHash,
         initCodeHash,
       );
-    expect(await factory.collectionForRelease(releaseId)).to.equal(predicted);
+    expect(await factory.collectionForRelease(requester.address, releaseId)).to.equal(predicted);
   });
 
   it("rejects duplicate release deployments without creating another collection", async function () {
-    const { factory, owner, minter, recipient } = await fixture();
+    const { factory, requester, owner, minter, recipient } = await fixture();
     const releaseId = ethers.id("release/duplicate");
     const values = config({
       owner: owner.address,
@@ -65,10 +65,72 @@ describe("NFTCollectionFactory", function () {
       royaltyRecipient: recipient.address,
     });
     await factory.deployCollection(releaseId, values);
-    const deployed = await factory.collectionForRelease(releaseId);
-    await expect(factory.deployCollection(releaseId, values))
+    const deployed = await factory.collectionForRelease(requester.address, releaseId);
+    await expect(factory.deployCollection(releaseId, { ...values, symbol: "CHANGED" }))
       .to.be.revertedWithCustomError(factory, "DuplicateRelease")
-      .withArgs(releaseId, deployed);
+      .withArgs(requester.address, releaseId, deployed);
+  });
+
+  for (const copiedConfig of [true, false]) {
+    it(`prevents another requester from reserving a release ID with ${copiedConfig ? "copied" : "different"} configuration`, async function () {
+      const { factory, requester, owner, minter, recipient, other } = await fixture();
+      const releaseId = ethers.id("release/mempool-front-run");
+      const values = config({ owner: owner.address, minter: minter.address, royaltyRecipient: recipient.address });
+      const attackerValues = copiedConfig ? values : config({ owner: other.address, minter: other.address, royaltyRecipient: other.address });
+      const predicted = await factory.predictCollectionAddress(requester.address, releaseId, values);
+      const attackerPredicted = await factory.predictCollectionAddress(other.address, releaseId, attackerValues);
+      expect(predicted).not.to.equal(attackerPredicted);
+      // An observer sees the ID and constructor inputs before the user's transaction lands.
+      await factory.connect(other).deployCollection(releaseId, attackerValues);
+      expect(await factory.collectionForRelease(requester.address, releaseId)).to.equal(ethers.ZeroAddress);
+      await expect(factory.deployCollection(releaseId, values)).not.to.be.reverted;
+      expect(await factory.collectionForRelease(requester.address, releaseId)).to.equal(predicted);
+      expect(await factory.collectionForRelease(other.address, releaseId)).to.equal(attackerPredicted);
+    });
+  }
+
+  it("binds actual contract-wallet requests to the contract sender rather than its EOA executor", async function () {
+    const { factory, requester, recipient } = await fixture();
+    const safe = await (await ethers.getContractFactory("CallExecutor")).deploy();
+    await safe.waitForDeployment();
+    const releaseId = ethers.id("release/safe-requester");
+    const values = config({ owner: safe.target, minter: safe.target, royaltyRecipient: recipient.address });
+    const predicted = await factory.predictCollectionAddress(safe.target, releaseId, values);
+    const payload = factory.interface.encodeFunctionData("deployCollection", [releaseId, values]);
+    await expect(safe.execute(factory.target, payload)).to.emit(factory, "CollectionDeployed");
+    expect(await factory.collectionForRelease(safe.target, releaseId)).to.equal(predicted);
+    expect(await factory.collectionForRelease(requester.address, releaseId)).to.equal(ethers.ZeroAddress);
+    await expect(safe.execute(factory.target, payload)).to.be.revertedWithCustomError(factory, "DuplicateRelease");
+  });
+
+  it("reconciles only the requested wallet's deployed slot through the server boundary", async function () {
+    const { factory, requester, owner, minter, recipient, other } = await fixture();
+    const { reconcileDeployment } = await import("../console/deployment.mjs");
+    const releaseId = ethers.id("release/server-reconcile");
+    const values = config({ owner: owner.address, minter: minter.address, royaltyRecipient: recipient.address });
+    await factory.connect(other).deployCollection(releaseId, values);
+    const inputs = { factory: factory.target, releaseId, requester: requester.address, chainId: 31337 };
+    const before = await reconcileDeployment(ethers.provider, inputs);
+    expect(before.collection).to.equal(ethers.ZeroAddress);
+    expect(before.deployed).to.equal(false);
+    await factory.deployCollection(releaseId, values);
+    const after = await reconcileDeployment(ethers.provider, inputs);
+    expect(after.requester).to.equal(requester.address);
+    expect(after.collection).to.equal(await factory.collectionForRelease(requester.address, releaseId));
+    expect(after.deployed).to.equal(true);
+    const attacker = await reconcileDeployment(ethers.provider, { ...inputs, requester: other.address });
+    expect(after.collection).not.to.equal(attacker.collection);
+  });
+
+  it("rejects unscoped reconciliation, wrong networks and factories without code", async function () {
+    const { factory, requester, other } = await fixture();
+    const { reconcileDeployment } = await import("../console/deployment.mjs");
+    const inputs = { factory: factory.target, releaseId: ethers.id("release/bad-reconcile"), requester: requester.address, chainId: 31337 };
+    for (const requester of [undefined, ethers.ZeroAddress, "not-an-address"]) {
+      await expect(reconcileDeployment(ethers.provider, { ...inputs, requester })).to.be.rejectedWith("Requester address required");
+    }
+    await expect(reconcileDeployment(ethers.provider, { ...inputs, chainId: 1 })).to.be.rejectedWith("RPC chain does not match");
+    await expect(reconcileDeployment(ethers.provider, { ...inputs, factory: other.address })).to.be.rejectedWith("factory has no bytecode");
   });
 
   it("validates every constructor boundary before CREATE2", async function () {
