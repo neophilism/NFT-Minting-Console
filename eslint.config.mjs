@@ -8,7 +8,7 @@ export default [
   js.configs.recommended,
   {
     files: ["console/public/**/*.js"],
-    languageOptions: { globals: { ...globals.browser, ethers: "readonly" } },
+    languageOptions: { globals: globals.browser },
   },
   {
     files: ["console/**/*.mjs"],
