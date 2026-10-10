@@ -60,6 +60,8 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Verify pinned validator checkout
         run: test "$(git -C vendor/creator-token-transfer-validator rev-parse HEAD)" = "59adb8b36ab0256c7430b017b1c9f8b4841d6e1e"
+      - name: Compile application collection artifact
+        run: npm run compile
       - name: Run real-validator integration and adversarial tests
         run: npm run test:integration
 

@@ -9,7 +9,7 @@
 5. [Frozen original contract/rights/metadata reference](reference/androids-of-the-vine/) - byte-identical example source, **not** the generic production contract.
 6. [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md) - PR-03 executable diff, preserved invariants, threat findings, and corrective test matrix.
 
-> **PROTOTYPE ONLY - NOT SAFE FOR PRIVATE ARTWORK OR MAINNET DEPLOYMENT.** The present upload route sends plaintext directly to public IPFS, lacks the required E2EE draft boundary, and has no completed OpenSea listing integration. The generic contract has not passed parity review/audit or the full real-validator integration suite. See [Handoff Status](docs/HANDOFF_STATUS.md) before running it.
+> **PROTOTYPE ONLY - NOT SAFE FOR PRIVATE ARTWORK OR MAINNET DEPLOYMENT.** The present upload route sends plaintext directly to public IPFS, lacks the required E2EE draft boundary, and has no completed OpenSea listing integration. The generic contract has not passed an external audit or live marketplace integration. See [Handoff Status](docs/HANDOFF_STATUS.md) before running it.
 
 General-purpose NFT release, minting and listing console using the custom ERC-721C-compatible contract pattern developed for this project.
 
@@ -48,6 +48,17 @@ and performs the application build check. GitHub Actions runs the same gates as
 separate fail-closed steps so a failed compile or incomplete job cannot appear
 green.
 
-The real-validator integration suite remains a later development-plan gate
-(PR-05). Until that fixture and suite are committed, do not treat the unit suite
-as validator parity or production-readiness evidence.
+PR-05 adds a separate real-validator suite. With Foundry v1.3.6 installed:
+
+```sh
+git clone https://github.com/limitbreakinc/creator-token-transfer-validator.git vendor/creator-token-transfer-validator
+git -C vendor/creator-token-transfer-validator checkout 59adb8b36ab0256c7430b017b1c9f8b4841d6e1e
+git -C vendor/creator-token-transfer-validator submodule update --init --recursive
+npm run test:integration
+```
+
+The command checks the exact source and submodule revisions and exercises the
+application's Hardhat collection artifact against the real validator. GitHub
+Actions runs both suites. See [security assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md)
+for evidence and limits. Passing these tests does not establish live OpenSea
+compatibility, royalty settlement, external audit approval, or production readiness.
