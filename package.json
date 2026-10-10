@@ -20,26 +20,26 @@
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
-    "@limitbreak/creator-token-standards": "5.0.0",
-    "@openzeppelin/contracts": "4.8.3",
-    "@nomicfoundation/hardhat-ethers": "3.1.0",
-    "@nomicfoundation/hardhat-chai-matchers": "2.0.9",
-    "chai": "4.5.0",
-    "ethers": "6.15.0",
-    "hardhat": "2.26.5",
-    "axios": "1.12.2",
+    "axios": "1.20.0",
     "dotenv": "16.6.1",
-    "express": "4.21.2",
-    "form-data": "4.0.4",
-    "multer": "2.0.2"
+    "ethers": "6.17.0",
+    "express": "4.22.3",
+    "form-data": "4.0.6",
+    "multer": "2.4.0"
   },
   "devDependencies": {
     "@eslint/js": "9.37.0",
+    "@limitbreak/creator-token-standards": "5.0.0",
+    "@nomicfoundation/hardhat-chai-matchers": "2.0.9",
+    "@nomicfoundation/hardhat-ethers": "3.1.0",
+    "@openzeppelin/contracts": "4.8.3",
     "@types/express": "5.0.3",
     "@types/multer": "2.0.0",
     "@types/node": "22.18.10",
+    "chai": "4.5.0",
     "eslint": "9.37.0",
     "globals": "16.4.0",
+    "hardhat": "2.26.5",
     "typescript": "5.9.3"
   }
 }
