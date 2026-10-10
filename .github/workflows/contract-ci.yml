@@ -4,6 +4,10 @@ on: [push, pull_request]
 permissions:
   contents: read
 
+concurrency:
+  group: lockfile-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lockfile:
     runs-on: ubuntu-latest
@@ -17,6 +21,5 @@ jobs:
       - name: Emit generated lockfile
         run: |
           echo 'LOCKFILE_BEGIN'
-          base64 -w 0 package-lock.json
-          echo
+          base64 package-lock.json
           echo 'LOCKFILE_END'
