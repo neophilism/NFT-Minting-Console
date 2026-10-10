@@ -108,7 +108,7 @@ contract NFTCollectionRealValidatorTest is RulesetTest {
 
         safe.execute(
             address(collection),
-            abi.encodeCall(NFTCollection.transferFrom, (address(safe), buyer, 2))
+            abi.encodeWithSignature("transferFrom(address,address,uint256)", address(safe), buyer, 2)
         );
 
         assertEq(collection.ownerOf(2), buyer);
@@ -273,4 +273,3 @@ contract NFTCollectionRealValidatorTest is RulesetTest {
         accounts[0] = account;
     }
 }
-
