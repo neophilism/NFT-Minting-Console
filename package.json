@@ -1,0 +1,26 @@
+{
+  "name": "nft-console",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:integration": "hardhat test test-integration/real-validator.test.cjs",
+    "start": "node console/server.mjs",
+    "check": "node --check console/server.mjs && node --check console/public/app.js"
+  },
+  "dependencies": {
+    "@limitbreak/creator-token-standards": "5.0.0",
+    "@openzeppelin/contracts": "4.8.3",
+    "@nomicfoundation/hardhat-ethers": "3.1.0",
+    "@nomicfoundation/hardhat-chai-matchers": "2.0.9",
+    "chai": "4.5.0",
+    "ethers": "6.15.0",
+    "hardhat": "2.26.5",
+    "axios": "1.12.2",
+    "dotenv": "16.6.1",
+    "express": "4.21.2",
+    "form-data": "4.0.4",
+    "multer": "2.0.2"
+  }
+}
