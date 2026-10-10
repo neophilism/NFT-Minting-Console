@@ -1,0 +1,7 @@
+@limitbreak/creator-token-standards/=node_modules/@limitbreak/creator-token-standards/
+@limitbreak/permit-c/=vendor/creator-token-transfer-validator/lib/PermitC/src/
+@limitbreak/tm-core-lib/=vendor/creator-token-transfer-validator/lib/tm-core-lib/
+@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/
+forge-std/=vendor/creator-token-transfer-validator/lib/forge-std/src/
+src/=vendor/creator-token-transfer-validator/src/
+
