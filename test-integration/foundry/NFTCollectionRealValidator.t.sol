@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {RulesetTest} from "../../../vendor/creator-token-transfer-validator/test/rulesets/RulesetTest.t.sol";
+import {RulesetTest} from "../../vendor/creator-token-transfer-validator/test/rulesets/RulesetTest.t.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {CreatorTokenTransferValidator} from "src/CreatorTokenTransferValidator.sol";
 import {CollectionSecurityPolicy} from "src/DataTypes.sol";
 import {
@@ -11,6 +12,7 @@ import {
     FLAG_GLOBAL_ENABLE_ACCOUNT_FREEZING_MODE
 } from "src/Constants.sol";
 import {NFTCollection} from "../../contracts/NFTCollection.sol";
+import {BlockingTransferValidator} from "../../contracts/test/ContractTestHelpers.sol";
 
 contract OperatorProxy {
     function transfer(address collection, address from, address to, uint256 tokenId) external {
@@ -49,8 +51,8 @@ contract DelegateTarget {}
 
 contract NFTCollectionRealValidatorTest is RulesetTest {
     uint16 private constant REQUIRED_RULESET_OPTIONS = 6;
-    bytes32 private constant MEDIA_HASH = keccak256("media");
-    bytes32 private constant RIGHTS_HASH = keccak256("rights");
+    bytes32 private constant MEDIA_HASH = sha256("media");
+    bytes32 private constant RIGHTS_HASH = sha256("rights");
 
     NFTCollection private collection;
     OperatorProxy private operator;
@@ -59,7 +61,16 @@ contract NFTCollectionRealValidatorTest is RulesetTest {
 
     function setUp() public override {
         super.setUp();
-        collection = new NFTCollection("Validator Integration", "VALID", 12, 600, address(this), address(this), address(0xBEEF));
+        // Exercise the application artifact, not a collection recompiled with
+        // the validator's different optimization and metadata settings.
+        bytes memory creationCode = vm.getCode("artifacts/contracts/NFTCollection.sol/NFTCollection.json");
+        bytes memory initCode = abi.encodePacked(creationCode, abi.encode(
+            "Validator Integration", "VALID", 12, 600, address(this), address(this), address(0xBEEF)
+        ));
+        address deployed;
+        assembly { deployed := create(0, add(initCode, 32), mload(initCode)) }
+        require(deployed != address(0), "Collection artifact deployment failed");
+        collection = NFTCollection(deployed);
         operator = new OperatorProxy();
         signedZone = new SignedZonePattern();
 
@@ -85,15 +96,21 @@ contract NFTCollectionRealValidatorTest is RulesetTest {
     }
 
     function testEOADirectTransferSucceedsWithoutRoyaltyPayment() public {
+        address holder = vm.addr(100);
         address buyer = vm.addr(101);
         _mint(1);
+        collection.transferFrom(address(this), holder, 1);
+        assertEq(holder.code.length, 0);
         (address recipientBefore, uint256 royaltyBefore) = collection.royaltyInfo(1, 1 ether);
         uint256 buyerBalance = buyer.balance;
+        uint256 recipientBalance = recipientBefore.balance;
 
-        collection.transferFrom(address(this), buyer, 1);
+        vm.prank(holder);
+        collection.transferFrom(holder, buyer, 1);
 
         assertEq(collection.ownerOf(1), buyer);
         assertEq(buyer.balance, buyerBalance);
+        assertEq(recipientBefore.balance, recipientBalance);
         (address recipientAfter, uint256 royaltyAfter) = collection.royaltyInfo(1, 1 ether);
         assertEq(recipientAfter, recipientBefore);
         assertEq(royaltyAfter, royaltyBefore);
@@ -108,7 +125,7 @@ contract NFTCollectionRealValidatorTest is RulesetTest {
 
         safe.execute(
             address(collection),
-            abi.encodeWithSignature("transferFrom(address,address,uint256)", address(safe), buyer, 2)
+            abi.encodeCall(IERC721.transferFrom, (address(safe), buyer, 2))
         );
 
         assertEq(collection.ownerOf(2), buyer);
@@ -147,6 +164,11 @@ contract NFTCollectionRealValidatorTest is RulesetTest {
 
         signedZone.executeSale(validator, operator, collection, address(this), buyer, 5);
 
+        assertEq(collection.ownerOf(5), buyer);
+        vm.prank(buyer);
+        collection.approve(address(operator), 5);
+        vm.expectRevert();
+        operator.transfer(address(collection), buyer, vm.addr(200), 5);
         assertEq(collection.ownerOf(5), buyer);
     }
 
@@ -235,6 +257,30 @@ contract NFTCollectionRealValidatorTest is RulesetTest {
         vm.expectRevert();
         collection.transferFrom(address(this), buyer, 9);
         assertEq(collection.ownerOf(9), address(this));
+        assertFalse(collection.isApprovedForAll(address(this), address(validator)));
+        _authorizeSignedZone();
+        vm.expectRevert();
+        signedZone.executeSale(validator, operator, collection, address(this), buyer, 9);
+        assertEq(collection.ownerOf(9), address(this));
+    }
+
+    function testMaliciousOwnerSelectedValidatorCannotSeize() public {
+        _mint(11);
+        BlockingTransferValidator malicious = new BlockingTransferValidator();
+        collection.setTransferValidator(address(malicious));
+        assertFalse(collection.isApprovedForAll(address(this), address(malicious)));
+        vm.prank(address(malicious));
+        vm.expectRevert();
+        collection.transferFrom(address(this), vm.addr(201), 11);
+        assertEq(collection.ownerOf(11), address(this));
+    }
+
+    function testMintRemainsPossibleWithRealSoulboundPolicy() public {
+        validator.setRulesetOfCollection(address(collection), RULESET_ID_SOULBOUND, address(0), 0, 0);
+        _mint(12);
+        assertEq(collection.ownerOf(12), address(this));
+        vm.expectRevert();
+        collection.transferFrom(address(this), vm.addr(202), 12);
     }
 
     function testRoyaltyConfigurationSurvivesPolicyChanges() public {

@@ -2,13 +2,15 @@
 src = "contracts"
 test = "test-integration/foundry"
 out = "out-foundry"
+cache_path = "cache-foundry"
 libs = ["node_modules", "vendor/creator-token-transfer-validator/lib"]
 solc_version = "0.8.24"
 evm_version = "prague"
 optimizer = true
 optimizer_runs = 1000000
-bytecode_hash = "none"
+# The pinned validator rejects rulesets containing compiler metadata opcodes.
 cbor_metadata = false
+bytecode_hash = "none"
 
 [fuzz]
 runs = 256

@@ -5,5 +5,8 @@ cache/
 .env.*
 !.env.example
 coverage/
+vendor/
+out-foundry/
+cache-foundry/
 *.log
 .DS_Store
