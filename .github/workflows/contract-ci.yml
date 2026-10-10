@@ -65,3 +65,36 @@ jobs:
       - name: Run real-validator integration and adversarial tests
         run: npm run test:integration
 
+  e2eesa-profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: neophilism/End-To-End-Everywhere-Security-Architecture-Standard
+          ref: 6ec85d51f9207da31f0e90fd8a7c82ffff8448f6
+          path: vendor/e2eesa
+          persist-credentials: false
+      - name: Verify pinned E2EESA inputs
+        shell: bash
+        run: |
+          test "$(git -C vendor/e2eesa rev-parse HEAD)" = "6ec85d51f9207da31f0e90fd8a7c82ffff8448f6"
+          test "$(git -C vendor/e2eesa hash-object profiles/catalog.json)" = "87fac03bca714ff22e30cc3abf3260f80a8462ae"
+          test "$(git -C vendor/e2eesa hash-object registry/security-properties.json)" = "bd4d6bf125bea69ef9b6cd5df836816e428477a4"
+      - name: Resolve candidate profile
+        run: |
+          python vendor/e2eesa/scripts/profile_engine.py \
+            vendor/e2eesa/profiles/catalog.json \
+            security/e2eesa-configuration.json \
+            --property-registry vendor/e2eesa/registry/security-properties.json \
+            | tee /tmp/e2eesa-resolution.json
+      - name: Require a valid dependency resolution
+        run: |
+          python - <<'PY'
+          import json
+          with open("/tmp/e2eesa-resolution.json", encoding="utf-8") as handle:
+              result = json.load(handle)
+          assert result["valid"] is True
+          assert result["errors"] == []
+          PY
