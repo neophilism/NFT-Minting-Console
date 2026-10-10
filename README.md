@@ -9,7 +9,7 @@
 5. [Frozen original contract/rights/metadata reference](reference/androids-of-the-vine/) - byte-identical example source, **not** the generic production contract.
 6. [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md) - PR-03 executable diff, preserved invariants, threat findings, and corrective test matrix.
 
-> **PROTOTYPE ONLY - NOT SAFE FOR PRIVATE ARTWORK OR MAINNET DEPLOYMENT.** The present upload route sends plaintext directly to public IPFS, lacks the required E2EE draft boundary, and has no completed OpenSea listing integration. The generic contract has not passed parity review/audit or the full real-validator integration suite. See [Handoff Status](docs/HANDOFF_STATUS.md) before running it.
+> **PROTOTYPE ONLY - NOT SAFE FOR PRIVATE ARTWORK OR MAINNET DEPLOYMENT.** The present upload route sends plaintext directly to public IPFS, lacks the required E2EE draft boundary, and has no completed OpenSea listing integration. The generic contract has not passed an external audit or live marketplace integration. See [Handoff Status](docs/HANDOFF_STATUS.md) before running it.
 
 General-purpose NFT release, minting and listing console using the custom ERC-721C-compatible contract pattern developed for this project.
 
@@ -48,6 +48,7 @@ and performs the application build check. GitHub Actions runs the same gates as
 separate fail-closed steps so a failed compile or incomplete job cannot appear
 green.
 
-The real-validator integration suite remains a later development-plan gate
-(PR-05). Until that fixture and suite are committed, do not treat the unit suite
-as validator parity or production-readiness evidence.
+`npm run test:integration` checks out the exact Limit Break validator revision
+recorded in the CI workflow and runs the Foundry integration/adversarial suite.
+Passing local and pinned-source tests is not a live marketplace, external-audit,
+or production-readiness claim.
