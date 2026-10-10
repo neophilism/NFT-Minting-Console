@@ -1,0 +1,34 @@
+{
+  "name": "Androids Of The Vine #1",
+  "description": "Token 1 of the 40-work Androids Of The Vine digital video NFT series.",
+  "image": "ipfs://REPLACE_WITH_POSTER_CID",
+  "animation_url": "ipfs://REPLACE_WITH_VIDEO_CID",
+  "attributes": [
+    {
+      "trait_type": "Series",
+      "value": "Androids Of The Vine"
+    },
+    {
+      "trait_type": "Series Size",
+      "value": 40
+    },
+    {
+      "trait_type": "Series Token ID",
+      "value": 1
+    },
+    {
+      "trait_type": "Work",
+      "value": "Androids Of The Vine"
+    },
+    {
+      "trait_type": "Creator Royalty",
+      "value": "6%"
+    }
+  ],
+  "properties": {
+    "media_sha256": "950a845421f19c0e9bb2c6483dfb9ff95067fcad36cdb555159230670511627d",
+    "poster_sha256": "e271a41a7a911b4beff3aaf2bf947638dd4981a9331c3d72bf5c0985237339e1",
+    "rights_uri": "ipfs://REPLACE_WITH_RIGHTS_CID",
+    "rights_sha256": "0ddcfae9f5fc2d2e059ed12e7a33ea5815e00a64e70930485602bc73f3f374c9"
+  }
+}
