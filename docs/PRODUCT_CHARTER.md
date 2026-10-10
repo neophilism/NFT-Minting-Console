@@ -1,6 +1,6 @@
 # NFT Console Product Charter
 
-**Status:** Approved implementation baseline. The ordered work packages and acceptance gates in [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) remain authoritative.
+**Status:** Implementation baseline for PR-01. The ordered work packages and acceptance gates in [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) remain authoritative.
 
 ## Product identity and scope
 
@@ -26,7 +26,7 @@ The application uses these product states:
 | --- | --- | --- |
 | Draft | Private, editable release configuration and assets. No public publication or chain write is implied. | Validated, Archived |
 | Validated | Automated checks passed for the exact current draft. Any relevant edit invalidates this result. | Published, Draft, Archived |
-| Published | The user explicitly approved the identified plaintext assets, rights, and metadata for public content-addressed storage. | Deployed, Draft |
+| Published | The user explicitly approved the identified plaintext assets, rights, and metadata for public content-addressed storage. Publication cannot be undone. | Deployed, Archived |
 | Deployed | One verified collection contract exists for the release and its immutable configuration has been read back. | Policy configured |
 | Policy configured | Transfer-validator configuration has been provisioned and verified. | Minting |
 | Minting | One or more tokens are minted, or a resumable mint job is in progress. | Listed, Minting closed |
@@ -64,6 +64,6 @@ When implementation material conflicts, resolve it in this order:
 2. This charter for generic product identity, lifecycle, and domain ownership.
 3. [HANDOFF_CONTEXT.md](HANDOFF_CONTEXT.md) for recovered approved decisions and rejected alternatives.
 4. [HANDOFF_STATUS.md](HANDOFF_STATUS.md) for factual current gaps and preserved test requirements.
-5. Frozen historical sources under `reference/` for comparison and evidence only.
+5. Frozen historical sources under [`../reference/`](../reference/) for comparison and evidence only.
 
 No implementation or documentation may claim deployment, an active listing, royalty settlement, audit approval, or security-standard conformance without the corresponding evidence required by the development plan.
