@@ -194,4 +194,19 @@ test("idempotency, truthful listing observations and encrypted audit boundaries 
   for (const forbidden of ["filename","title","rights_text","content_key","private_key","seed_phrase"]) assert.equal(columns.includes(forbidden),false);
 });
 
+test("existing API role memberships cannot escalate through SET ROLE", async () => {
+  const isolated = new PGlite();
+  await isolated.waitReady;
+  try {
+    await isolated.exec(`CREATE ROLE nft_console_api NOLOGIN NOINHERIT;
+      CREATE ROLE privileged_parent CREATEROLE NOLOGIN;
+      GRANT privileged_parent TO nft_console_api;`);
+    await assert.rejects(migrate(isolated), /nft_console_api must have no granted roles/);
+    const schemas = await isolated.query("SELECT count(*)::integer AS total FROM pg_namespace WHERE nspname='nft_console'");
+    assert.equal(schemas.rows[0].total, 0, "failed migrations must roll back the schema");
+  } finally {
+    await isolated.close();
+  }
+});
+
 test.after(async () => { await db.close(); });
