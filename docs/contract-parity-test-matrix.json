@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "planItem": "PR-03",
+  "reference": {
+    "path": "reference/androids-of-the-vine/AndroidsOfTheVineCollection.sol",
+    "sha256": "75b83275c7f18901c290d4aaccba49ebb409f25fdffb7fa5860833788b2f32fb",
+    "solidity": "0.8.24",
+    "creatorTokenStandards": "5.0.0",
+    "openZeppelinContracts": "4.8.3"
+  },
+  "statuses": ["existing", "partial", "missing", "external"],
+  "cases": [
+    {"id":"PAR-001","gate":"PR-04","status":"partial","area":"constructor","requirement":"Reject zero owner, minter, and royalty recipient; empty name/symbol; zero supply; and royalty above 10000 bps."},
+    {"id":"PAR-002","gate":"PR-04","status":"partial","area":"constructor","requirement":"Deploy two unrelated collections and prove independent name, symbol, supply, royalty, owner, minter, and recipient values."},
+    {"id":"PAR-003","gate":"PR-04","status":"missing","area":"immutability","requirement":"Scan ABI and exercise roles to prove no supply, royalty, recipient, minter, title, URI, or hash mutation path exists."},
+    {"id":"PAR-004","gate":"PR-04","status":"partial","area":"mint","requirement":"Reject zero, over-supply, duplicate, empty-field, and zero-hash single mints with specific errors."},
+    {"id":"PAR-005","gate":"PR-04","status":"missing","area":"mint","requirement":"Prove manual closure and automatic closure at arbitrary maximum supply are irreversible, including sparse token IDs."},
+    {"id":"PAR-006","gate":"PR-04","status":"partial","area":"batch","requirement":"Accept batches 1 through 10 and reject empty or 11-item batches."},
+    {"id":"PAR-007","gate":"PR-04","status":"partial","area":"batch","requirement":"Prove duplicate IDs and a failure at every later item revert the whole batch, storage, counters, and events."},
+    {"id":"PAR-008","gate":"PR-04","status":"missing","area":"batch","requirement":"Prove ordered WorkMinted events and exactly one MintingClosed event when a batch reaches capacity."},
+    {"id":"PAR-009","gate":"PR-04","status":"missing","area":"batch","requirement":"Measure worst-case ten-item gas and test validator callback/reentrancy assumptions."},
+    {"id":"PAR-010","gate":"PR-04","status":"partial","area":"roles","requirement":"Separate deployer, owner, minter, recipient, and holder; prove only minter mints and only owner changes validator."},
+    {"id":"PAR-011","gate":"PR-04","status":"partial","area":"ownership","requirement":"Prove renunciation always reverts and ownership can transfer only through inherited non-zero-owner semantics, including a Safe-like owner."},
+    {"id":"PAR-012","gate":"PR-04","status":"missing","area":"royalty","requirement":"Assert ERC-2981 recipient and arithmetic at 0, typical, and 10000 bps and disclose non-enforcement on direct transfers."},
+    {"id":"PAR-013","gate":"PR-04","status":"missing","area":"interfaces","requirement":"Assert ERC-721, metadata, ERC-2981, ICreatorToken, and legacy interface IDs and reject 0xffffffff."},
+    {"id":"PAR-014","gate":"PR-04","status":"missing","area":"abi","requirement":"Snapshot constructor, mintWork selector, batch tuple ABI, events, errors, and public getters for versioned deployment clients."},
+    {"id":"PAR-015","gate":"PR-05","status":"partial","area":"operator","requirement":"Install a malicious validator and prove it can block but cannot transfer a holder token without holder approval; automatic validator approval remains absent."},
+    {"id":"PAR-016","gate":"PR-05","status":"missing","area":"validator","requirement":"Run allow/block transfers against pinned real Limit Break v5 source and verify list ownership and ruleset 255/options 6."},
+    {"id":"PAR-017","gate":"PR-05","status":"missing","area":"wallets","requirement":"Exercise EOA, Safe-like contract, and EIP-7702 direct transfers and authorized marketplace paths."},
+    {"id":"PAR-018","gate":"PR-05","status":"missing","area":"marketplace","requirement":"Test authorized SignedZone and rogue authorizer paths without Payment Processor or validator operator approval."},
+    {"id":"PAR-019","gate":"release","status":"external","area":"mainnet","requirement":"Verify live validator/ruleset/authorizer bytecode and complete disposable OpenSea sale, royalty settlement, and direct-transfer rehearsal."},
+    {"id":"PAR-020","gate":"review","status":"external","area":"audit","requirement":"Obtain independent review of generic constructor, batch path, compiled bytecode, and all corrective evidence before production."}
+  ]
+}
