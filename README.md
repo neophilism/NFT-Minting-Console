@@ -8,8 +8,9 @@
 4. [Handoff Completeness & Current Blockers](docs/HANDOFF_STATUS.md) - source provenance, original test matrix, known CI defects and missing implementation work.
 5. [Frozen original contract/rights/metadata reference](reference/androids-of-the-vine/) - byte-identical example source, **not** the generic production contract.
 6. [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md) - PR-03 executable diff, preserved invariants, threat findings, and corrective test matrix.
+7. [Real Validator Security Assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md) - PR-05 pinned Limit Break v5 fixture, executable policy assertions, and residual limitations.
 
-> **PROTOTYPE ONLY - NOT SAFE FOR PRIVATE ARTWORK OR MAINNET DEPLOYMENT.** The present upload route sends plaintext directly to public IPFS, lacks the required E2EE draft boundary, and has no completed OpenSea listing integration. The generic contract has not passed parity review/audit or the full real-validator integration suite. See [Handoff Status](docs/HANDOFF_STATUS.md) before running it.
+> **PROTOTYPE ONLY - NOT SAFE FOR PRIVATE ARTWORK OR MAINNET DEPLOYMENT.** The present upload route sends plaintext directly to public IPFS, lacks the required E2EE draft boundary, and has no completed OpenSea listing integration. The pinned real-validator suite does not verify production deployments or marketplace royalty settlement. See [Handoff Status](docs/HANDOFF_STATUS.md) before running it.
 
 General-purpose NFT release, minting and listing console using the custom ERC-721C-compatible contract pattern developed for this project.
 
@@ -48,6 +49,7 @@ and performs the application build check. GitHub Actions runs the same gates as
 separate fail-closed steps so a failed compile or incomplete job cannot appear
 green.
 
-The real-validator integration suite remains a later development-plan gate
-(PR-05). Until that fixture and suite are committed, do not treat the unit suite
-as validator parity or production-readiness evidence.
+Run the pinned real-validator fixture independently with
+`npm run test:integration`. Passing it is compatibility evidence for the tested
+source and policies, not proof of production deployment addresses, OpenSea
+signature flows, or unavoidable royalty payment.
