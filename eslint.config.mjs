@@ -11,7 +11,7 @@ export default [
     languageOptions: { globals: globals.browser },
   },
   {
-    files: ["console/**/*.mjs", "scripts/**/*.mjs"],
+    files: ["console/**/*.mjs", "scripts/**/*.mjs", "test-data/**/*.mjs"],
     languageOptions: { globals: globals.node },
     rules: { "no-control-regex": "off" },
   },
