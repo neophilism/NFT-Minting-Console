@@ -46,8 +46,9 @@ records roll back together. There is no destructive down-migration command;
 rollbacks preserve evidence and use tested restores or a forward corrective
 migration. Provider setup and a hosted restore drill belong to PR-32.
 
-`nft_console_api` is a non-login role without administrator or RLS-bypass
-privileges. A separate restricted runtime login may assume it; that login must
+`nft_console_api` is a non-login, non-inheriting role without replication,
+administrator, RLS-bypass privileges, or membership in any granted role. In
+particular, `NOINHERIT` alone does not prevent `SET ROLE` escalation. A separate restricted runtime login may assume it; that login must
 not own the schema or carry migration privileges. All 14 domain tables enable
 and force RLS. Only the release owner has access in this foundation. Authentication
 in PR-09 must validate the session and, on a checked-out connection, start a
