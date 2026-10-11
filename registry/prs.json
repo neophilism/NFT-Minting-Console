@@ -10,49 +10,76 @@
       "id": "NFT-01",
       "title": "Repository baseline and project charter",
       "origin": "original",
-      "prs": []
+      "prs": [
+        1
+      ],
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
     },
     {
       "id": "NFT-02",
       "title": "CI reliability and reproducibility",
       "origin": "original",
-      "prs": []
+      "prs": [
+        2
+      ],
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
     },
     {
       "id": "NFT-03",
       "title": "Audit parity: original custom contract vs current generic fork",
       "origin": "original",
-      "prs": []
+      "prs": [
+        3
+      ],
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
     },
     {
       "id": "NFT-04",
       "title": "Generic collection contract stabilization",
       "origin": "original",
-      "prs": []
+      "prs": [
+        5
+      ],
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
     },
     {
       "id": "NFT-05",
       "title": "Real Limit Break validator integration & adversarial suite",
       "origin": "original",
-      "prs": []
+      "prs": [
+        6,
+        9
+      ],
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
     },
     {
       "id": "NFT-06",
       "title": "Deployment factory artifacts and deployment contracts",
       "origin": "original",
-      "prs": []
+      "prs": [
+        10,
+        16
+      ],
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
     },
     {
       "id": "NFT-07",
       "title": "Release schema, ownership and data migrations",
       "origin": "original",
-      "prs": []
+      "prs": [
+        12
+      ],
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
     },
     {
       "id": "NFT-08",
       "title": "E2EESA applicability, profile lock, threat model and privacy inventory",
       "origin": "original",
-      "prs": []
+      "prs": [
+        13,
+        15
+      ],
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
     },
     {
       "id": "NFT-09",
