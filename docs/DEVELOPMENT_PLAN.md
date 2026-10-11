@@ -1,3 +1,5 @@
+> **Canonical PR work registry:** [`registry/roadmap.json`](../registry/roadmap.json). The detailed plan below is retained; agents must update PR counts and mappings in the registry file.
+
 # NFT Console — Complete Development & Handoff Plan
 
 **Status:** Approved *scope proposal* / implementation plan; individual PRs are not marked complete until verified.  
