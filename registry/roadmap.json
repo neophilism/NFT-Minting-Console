@@ -177,7 +177,13 @@
     {
       "id": "NFT-23",
       "title": "Safe/EOA wallet signing and transaction queue",
-      "origin": "original"
+      "origin": "original",
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/MINT_JOURNAL.md"
+      ],
+      "journalScope": "Wallet/chain-scoped durable reservations and public transaction reconciliation; production wallet, Safe, publication and validator integration remain separate."
     },
     {
       "id": "NFT-24",
@@ -192,12 +198,14 @@
       "acceptanceStatus": "pending",
       "evidenceFiles": [
         "docs/MINT_RECONCILIATION.md",
-        "docs/PR25_ACCEPTANCE.md"
+        "docs/PR25_ACCEPTANCE.md",
+        "docs/MINT_JOURNAL.md"
       ],
       "scope": "Direct-EOA unsigned batch planning, simulation and immutable receipt reconciliation; disposable local factory rehearsal. Persistent wallet/Safe/publication/validator/Sepolia/production integration remains pending.",
       "pullRequests": [
         25
-      ]
+      ],
+      "journalScope": "Wallet/chain-scoped durable reservations and public transaction reconciliation; production wallet, Safe, publication and validator integration remain separate."
     },
     {
       "id": "NFT-26",

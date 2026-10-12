@@ -5,6 +5,7 @@ import {readFile,mkdtemp,writeFile,rm} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {PGlite} from '@electric-sql/pglite';
+import {journalCases} from './journal-cases.mjs';
 import pg from 'pg';
 import {migrate} from '../scripts/migrate.mjs';
 import {migrateAuth} from '../scripts/migrate-auth.mjs';
@@ -38,14 +39,14 @@ test('durable store and release API repository against PostgreSQL',async t=>{
   const repo=new ReleaseRepository({pool,knownRoles:()=>roles});
   t.diagnostic(native?'Native PostgreSQL through pg; synthetic data only.':'Embedded PostgreSQL; serialized connection leases, not a native pg-driver claim.');
   await t.test('baseline and authorization migrations are checksum-bound and repeatable',async()=>{
-    assert.deepEqual(baseline,['001_release_model.sql']);assert.deepEqual(authorization,['001_auth_store.sql','002_release_rbac.sql']);
+    assert.deepEqual(baseline,['001_release_model.sql']);assert.deepEqual(authorization,['001_auth_store.sql','002_release_rbac.sql','003_mint_journal.sql']);
     assert.deepEqual(await migrate(db),[]);assert.deepEqual(await migrateAuth(db),[]);
     const directory=await mkdtemp(path.join(os.tmpdir(),'nft-auth-migration-'));
     try{
       for(const name of authorization)await writeFile(path.join(directory,name),await readFile(new URL('../db/auth-migrations/'+name,import.meta.url)));
       const first=await readFile(path.join(directory,authorization[0]),'utf8');await writeFile(path.join(directory,authorization[0]),first+'\n-- modified history');
       await assert.rejects(migrateAuth(db,directory),/migration changed/);await writeFile(path.join(directory,authorization[0]),first);
-      await writeFile(path.join(directory,'003_failure.sql'),'CREATE TABLE nft_console_auth.rollback_fixture(id integer); SELECT deliberately_missing_function();');
+      await writeFile(path.join(directory,'004_failure.sql'),'CREATE TABLE nft_console_auth.rollback_fixture(id integer); SELECT deliberately_missing_function();');
       await assert.rejects(migrateAuth(db,directory));assert.equal((await db.query("SELECT to_regclass('nft_console_auth.rollback_fixture') AS name")).rows[0].name,null);
     }finally{await rm(directory,{recursive:true,force:true});}
   });
@@ -100,4 +101,5 @@ test('durable store and release API repository against PostgreSQL',async t=>{
     await repo.create({wallet:O,role:'owner',chainId},envelope(randomUUID()));assert.deepEqual((await repo.list(owner)).items.map(row=>row.id),[id]);assert.deepEqual((await repo.list(editor)).items,[]);
     const client=await pool.connect();try{await client.query('BEGIN');await client.query('SET LOCAL ROLE nft_console_api');assert.equal((await client.query('SELECT id FROM nft_console.releases')).rows.length,0);await client.query('COMMIT');}catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
   });
+  await journalCases(t,repo,owner,{wallet:O,role:'owner',chainId});
 });
