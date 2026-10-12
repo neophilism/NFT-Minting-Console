@@ -1,0 +1,54 @@
+name: UI toolchain bootstrap
+on:
+  pull_request:
+    paths: ['.github/workflows/ui-toolchain-bootstrap.yml']
+permissions:
+  contents: read
+jobs:
+  resolve:
+    if: github.head_ref == 'codex/nft15-react-console'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Resolve once, pin exactly, and return for review
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          const manifest=JSON.parse(fs.readFileSync('package.json','utf8'));
+          const versions={};
+          for(const [section,names] of Object.entries({dependencies:['react','react-dom'],devDependencies:['vite','@vitejs/plugin-react','@types/react','@types/react-dom','typescript-eslint','@playwright/test','@axe-core/playwright']})) {
+            for(const name of names) {
+              const version=JSON.parse(execFileSync('npm',['view',name+'@latest','version','--json'],{encoding:'utf8'}));
+              if(typeof version!=='string'||!/^\d+\.\d+\.\d+$/.test(version))throw new Error('Expected stable exact version: '+name);
+              manifest[section][name]=version; versions[name]=version;
+            }
+          }
+          if(versions.react!==versions['react-dom']||!versions.react.startsWith('19.'))throw new Error('Review unexpected React release before proceeding.');
+          fs.writeFileSync('package.json',JSON.stringify(manifest,null,2)+'\n');
+          fs.writeFileSync('ui-versions.json',JSON.stringify(versions,null,2)+'\n');
+          JS
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm audit --omit=dev --audit-level=high
+          mkdir -p "$RUNNER_TEMP/ui-toolchain"
+          cp package.json package-lock.json ui-versions.json "$RUNNER_TEMP/ui-toolchain/"
+          tar -czf "$RUNNER_TEMP/ui-toolchain/dependencies.tgz" node_modules
+          cd "$RUNNER_TEMP/ui-toolchain"
+          sha256sum package.json package-lock.json ui-versions.json dependencies.tgz > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ui-toolchain-${{ github.run_id }}
+          path: ${{ runner.temp }}/ui-toolchain/
+          retention-days: 1
+          if-no-files-found: error
+          compression-level: 0
