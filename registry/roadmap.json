@@ -162,7 +162,17 @@
     {
       "id": "NFT-22",
       "title": "Local + Sepolia end-to-end rehearsal orchestration",
-      "origin": "original"
+      "origin": "original",
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/MINT_RECONCILIATION.md",
+        "docs/PR25_ACCEPTANCE.md"
+      ],
+      "scope": "Direct-EOA unsigned batch planning, simulation and immutable receipt reconciliation; disposable local factory rehearsal. Persistent wallet/Safe/publication/validator/Sepolia/production integration remains pending.",
+      "pullRequests": [
+        25
+      ]
     },
     {
       "id": "NFT-23",
@@ -177,7 +187,17 @@
     {
       "id": "NFT-25",
       "title": "Batch mint pipeline",
-      "origin": "original"
+      "origin": "original",
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/MINT_RECONCILIATION.md",
+        "docs/PR25_ACCEPTANCE.md"
+      ],
+      "scope": "Direct-EOA unsigned batch planning, simulation and immutable receipt reconciliation; disposable local factory rehearsal. Persistent wallet/Safe/publication/validator/Sepolia/production integration remains pending.",
+      "pullRequests": [
+        25
+      ]
     },
     {
       "id": "NFT-26",

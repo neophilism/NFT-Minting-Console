@@ -36,6 +36,16 @@ validate legal terms, sign transactions or create orders. Media digests and IPFS
 locations are user-supplied claims, not verified asset retrieval. PDF bytes are
 hashed but never rendered. See [scope and reproduction](docs/PUBLICATION_PREPARATION.md).
 
+## Disposable mint rehearsal and receipt verification
+
+`npm run mint:rehearse` deploys two independent fixture collections through the
+actual local factory, mints 24 synthetic tokens and verifies their exact events
+and immutable fields. It refuses public/forked networks and non-fixture accounts.
+The reusable public-data module prepares deterministic unsigned batches,
+simulates them and reconciles receipts without a signer or transaction broadcast.
+This is not the user-facing mint workflow, a public upload or an OpenSea listing.
+See [mint component and rehearsal boundaries](docs/MINT_RECONCILIATION.md).
+
 ## Start here for development or handoff
 
 1. [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md)
