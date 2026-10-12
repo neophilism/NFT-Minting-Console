@@ -12,21 +12,43 @@ jobs:
   browser:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres@sha256:885953109528ad3dfc90362b1a6f50a78620b5315be19f187753d267e484dc5b
+        env:
+          POSTGRES_PASSWORD: disposable-browser-ci-only
+          POSTGRES_DB: nft_console_ci
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nft_console_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: safe-fndn/safe-smart-account
+          ref: bf943f80fec5ac647159d26161446ac5d716a294
+          path: vendor/safe
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Compile and verify the pinned actual Safe
+        run: npm run test:safe
       - run: npm run build:ui
       - run: npm run typecheck:ui
       - run: npm run test:ui:model
       - name: Install the pinned Playwright browser
         run: npx --no-install playwright install --with-deps chromium
       - name: Desktop, mobile, wallet and accessibility acceptance
+        env:
+          NFT_TEST_DISPOSABLE_DATABASE: 'yes'
+          TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:disposable-browser-ci-only@127.0.0.1:${{ job.services.postgres.ports[5432] }}/nft_console_ci
         run: npm run test:ui:browser
       - name: Retain synthetic test evidence
         if: always()
