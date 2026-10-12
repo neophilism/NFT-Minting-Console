@@ -97,7 +97,14 @@ test('readiness is software evidence, not fabricated wallet inventory', async t 
   assert.equal(body.mintingEvidence, 'not-verified');
   assert.equal(body.listingEvidence, 'not-verified');
   assert.equal(Object.hasOwn(body, 'minted'), false);
-  assert.equal(body.blockers.length, 7);
+  assert.equal(body.blockers.length, 6);
+  assert.equal(body.authentication, 'software-integration-accepted');
+  const milestones = body.blockers.flatMap(group => group.milestones);
+  assert.ok(!milestones.includes('NFT-09'));
+  assert.ok(!milestones.includes('NFT-15'));
+  assert.ok(milestones.includes('NFT-10'));
+  assert.ok(milestones.includes('NFT-26'));
+  assert.equal(body.productionReady, false);
 });
 test('OpenSea URL is explicitly link-only and token identifiers are bounded', async t => {
   const h = await fixture(t), headers = await h.login();

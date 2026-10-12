@@ -31,7 +31,7 @@
     "test:safe": "node scripts/run-safe-integration.mjs",
     "build:ui": "vite build",
     "typecheck:ui": "tsc --project tsconfig.ui.json && tsc --project tsconfig.ui-tests.json",
-    "test:ui:model": "node --experimental-strip-types --test test-ui/model.test.ts",
+    "test:ui:model": "node --experimental-strip-types --test test-ui/*.test.ts",
     "test:ui:browser": "playwright test -c playwright.config.ts",
     "test:ui": "npm run test:ui:model && npm run test:ui:browser"
   },

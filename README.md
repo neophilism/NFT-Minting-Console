@@ -21,13 +21,28 @@ artwork or terms. Existing record IDs and workflow stages can be listed when the
 database is configured; private content is not unlocked by this build. Legacy
 local/Sepolia deployment rehearsal remains at `/legacy/`, separately gated.
 
+## Local rights and metadata preparation
+
+The collection setup screen includes an owner-only, local preparation panel.
+Review a UTF-8 text/Markdown or PDF rights file (up to 8 MiB), preserve its exact
+SHA-256, explicitly select collection-wide or token-specific scope, and prepare
+an allowlisted public metadata JSON file. A separate button downloads that exact
+JSON. Replacing the rights file or editing any field invalidates the preview and
+review acknowledgment. Sign-out, navigation and reload clear page state.
+
+Use test or already-public documents while private-workspace acceptance is
+pending. This panel does not encrypt, save drafts, upload, retrieve IPFS content,
+validate legal terms, sign transactions or create orders. Media digests and IPFS
+locations are user-supplied claims, not verified asset retrieval. PDF bytes are
+hashed but never rendered. See [scope and reproduction](docs/PUBLICATION_PREPARATION.md).
+
 ## Start here for development or handoff
 
 1. [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md)
    and [canonical registry](registry/roadmap.json).
 2. [Recovered Decisions](docs/HANDOFF_CONTEXT.md) and the dated [historical handoff audit](docs/HANDOFF_STATUS.md).
 3. [Durable authorization](docs/PR09_DURABLE_STORAGE.md), [native PostgreSQL and actual Safe acceptance](docs/PR09_RUNTIME_ACCEPTANCE.md)
-   and [React/browser acceptance](docs/PR15_UI_ACCEPTANCE.md). These supersede earlier execution blockers, not the full product plan.
+   and [React/browser acceptance](docs/PR15_UI_ACCEPTANCE.md) and [combined browser/Safe/PostgreSQL acceptance](docs/PR09_BROWSER_ACCEPTANCE.md). These supersede earlier execution blockers, not the full product plan.
 4. [Frozen original source/rights](reference/androids-of-the-vine/), [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md),
    [real-validator assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md) and [Release Data Model](docs/RELEASE_DATA_MODEL.md).
 5. [E2EESA applicability and closed crypto gate](docs/E2EESA_APPLICABILITY.md),
