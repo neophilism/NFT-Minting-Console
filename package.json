@@ -37,7 +37,9 @@
     "express": "4.22.3",
     "form-data": "4.0.6",
     "multer": "2.4.0",
-    "pg": "8.23.1"
+    "pg": "8.23.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@eslint/js": "9.37.0",
@@ -53,6 +55,13 @@
     "globals": "16.4.0",
     "hardhat": "2.26.5",
     "typescript": "5.9.3",
-    "@electric-sql/pglite": "0.5.8"
+    "@electric-sql/pglite": "0.5.8",
+    "vite": "8.3.4",
+    "@vitejs/plugin-react": "6.1.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript-eslint": "8.71.2",
+    "@playwright/test": "1.64.0",
+    "@axe-core/playwright": "4.13.0"
   }
 }
