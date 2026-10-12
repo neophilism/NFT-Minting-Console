@@ -1,0 +1,9 @@
+/* Measured contrast corrections apply after the responsive design layer.
+   Keep helper text readable instead of exempting it from accessibility tests. */
+.overview-cards small { color: #566651; font-size: 11px; }
+.workspace-footer { color: #53644d; font-size: 11px; }
+.field input::placeholder { color: #617259; }
+.field > label { font-size: 12px; font-weight: 600; }
+@media (max-width: 600px) {
+  .workspace-footer { font-size: 10px; }
+}

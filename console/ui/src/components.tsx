@@ -24,8 +24,44 @@ export function Notice({ children, error = false }: { children: ReactNode; error
 }
 export function Modal({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
   const ref = useRef<HTMLDialogElement>(null), id = useId();
-  useEffect(() => { ref.current?.showModal(); }, []);
-  return <dialog className="modal" ref={ref} onClose={close} aria-labelledby={id}>
+  const closeRef = useRef(close);
+  closeRef.current = close;
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const onClose = () => {
+      // Strict Mode's setup/cleanup/setup can leave a queued close event from
+      // the previous setup. It is not a user close if the dialog is open again.
+      if (dialog.open) return;
+      if (opener?.isConnected) opener.focus();
+      closeRef.current();
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const targets = [...dialog.querySelectorAll<HTMLElement>(
+        'button, a[href], input, select, textarea, [tabindex]'
+      )].filter(element => element.tabIndex >= 0 && !element.matches(':disabled') &&
+        !element.closest('[inert]') && element.getClientRects().length > 0 &&
+        getComputedStyle(element).visibility !== 'hidden');
+      if (!targets.length) return; // The visible close button normally guarantees one.
+      const index = targets.indexOf(document.activeElement as HTMLElement);
+      const next = index < 0 ? (event.shiftKey ? targets.length - 1 : 0) :
+        (index + (event.shiftKey ? -1 : 1) + targets.length) % targets.length;
+      event.preventDefault();
+      targets[next]?.focus();
+    };
+    dialog.addEventListener('close', onClose);
+    dialog.addEventListener('keydown', onKeyDown);
+    dialog.showModal();
+    return () => {
+      dialog.removeEventListener('close', onClose);
+      dialog.removeEventListener('keydown', onKeyDown);
+      dialog.close();
+      if (opener?.isConnected) opener.focus();
+    };
+  }, []);
+  return <dialog className="modal" ref={ref} aria-labelledby={id}>
     <div className="modal-heading"><h2 id={id}>{title}</h2><button className="icon-button" aria-label="Close dialog" onClick={() => ref.current?.close()}><Icon name="close"/></button></div>
     {children}
   </dialog>;
