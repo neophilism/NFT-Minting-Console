@@ -8,7 +8,9 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2022",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "console/**/*.ts",
@@ -17,5 +19,11 @@
     "hardhat.config.cjs",
     "test/**/*.cjs"
   ],
-  "exclude": ["artifacts", "cache", "node_modules"]
+  "exclude": [
+    "artifacts",
+    "cache",
+    "node_modules",
+    "console/ui",
+    "console/dist"
+  ]
 }

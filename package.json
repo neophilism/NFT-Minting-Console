@@ -8,8 +8,8 @@
   },
   "packageManager": "npm@10.9.3",
   "scripts": {
-    "build": "npm run compile && npm run check",
-    "ci": "npm run compile && npm run lint && npm run typecheck && npm test && npm run test:data && npm run test:auth && npm run security:scan && npm run build",
+    "build": "npm run compile && npm run check && npm run build:ui",
+    "ci": "npm run compile && npm run lint && npm run typecheck && npm test && npm run test:data && npm run test:auth && npm run test:ui:model && npm run security:scan && npm run build",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:integration": "npm run compile && node scripts/run-validator-integration.mjs",
@@ -17,7 +17,7 @@
     "check": "node --check console/server.mjs && node --check console/public/app.js && node --check console/auth/core.mjs && node --check console/auth/http.mjs && node --check console/auth/wallet.mjs && node --check console/auth/postgres.mjs && node --check console/auth/rotation.mjs && node --check console/data/pool.mjs && node --check console/data/releases.mjs && node --check console/data/http.mjs && node --check console/data/persistence.mjs",
     "lint": "eslint .",
     "security:scan": "npm audit --audit-level=high --omit=dev",
-    "typecheck": "tsc --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json && npm run typecheck:ui",
     "deploy:rehearse": "hardhat run scripts/rehearse-deployments.cjs",
     "test:data": "node --test test-data/*.test.mjs",
     "test:auth": "node --test test-auth/*.test.mjs",
@@ -28,7 +28,12 @@
     "auth:policy": "node scripts/rotate-auth-policy.mjs",
     "security:profiles": "python3 scripts/check_security_profiles.py",
     "test:security-profiles": "python3 -m unittest discover -s test-security -v",
-    "test:safe": "node scripts/run-safe-integration.mjs"
+    "test:safe": "node scripts/run-safe-integration.mjs",
+    "build:ui": "vite build",
+    "typecheck:ui": "tsc --project tsconfig.ui.json && tsc --project tsconfig.ui-tests.json",
+    "test:ui:model": "node --experimental-strip-types --test test-ui/model.test.ts",
+    "test:ui:browser": "playwright test -c playwright.config.ts",
+    "test:ui": "npm run test:ui:model && npm run test:ui:browser"
   },
   "dependencies": {
     "axios": "1.20.0",

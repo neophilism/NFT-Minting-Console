@@ -1,7 +1,7 @@
 name: CI reproduction bundle
 
 on:
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read

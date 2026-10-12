@@ -13,7 +13,7 @@ import {installReleaseRoutes} from './data/http.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const chainRegistry=JSON.parse(fs.readFileSync(path.join(root,'config/chains.json'),'utf8'));
 const blockedFeatures=Object.freeze([
-  {id:'auth-durability',milestones:['NFT-09'],description:'Durable authentication and release permissions are implemented; full integration, CI and actual Safe acceptance remain open.'},
+  {id:'auth-durability',milestones:['NFT-09'],description:'Durable authentication, native database integration and actual Safe verification pass; final browser-provider acceptance is tracked separately.'},
   {id:'private-workspace',milestones:['NFT-10','NFT-11','NFT-12'],description:'Reviewed client encryption, recovery and ciphertext object storage are not implemented.'},
   {id:'explicit-publication',milestones:['NFT-13','NFT-19','NFT-20'],description:'Exact-byte rights review and explicit public publication are not implemented.'},
   {id:'release-experience',milestones:['NFT-14','NFT-15','NFT-16','NFT-17','NFT-18'],description:'The approved multi-release user experience and rights workflow are unfinished.'},
@@ -77,7 +77,11 @@ export function createApp({env=process.env,authService}={}) {
     res.json({url:`https://opensea.io/assets/${profile.slug}/${address}/${id}`,status:'link-only',listingVerified:false});
   });
   app.use('/api',(_req,res)=>res.status(404).json({error:'API route not found.'}));
-  app.use(express.static(path.join(root,'console/public')));app.use('/vendor',express.static(path.join(root,'node_modules/ethers/dist')));
+  app.use('/legacy',express.static(path.join(root,'console/public')));
+  app.use('/vendor',express.static(path.join(root,'node_modules/ethers/dist')));
+  const uiDir=path.join(root,'console/dist');
+  app.use(express.static(uiDir));
+  app.get('/',(_req,res)=>res.status(503).type('text/plain').send('The console interface build is missing. Run npm run build before starting the app. No signing or publishing is available.'));
   app.use((error,_req,res,_next)=>{void _next;const status=error.type==='entity.too.large'?413:error.type==='entity.parse.failed'?400:500;res.status(status).json({error:status===413?'Request body is too large.':'Request could not be processed.'});});
   app.locals.ready=ready;
   app.locals.close=async()=>{provider?.destroy();await persistence?.close();};
