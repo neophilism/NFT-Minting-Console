@@ -34,5 +34,5 @@ jobs:
         with:
           name: ui-evidence-${{ github.run_id }}
           path: test-results/
-          retention-days: 1
+          retention-days: 30
           if-no-files-found: error

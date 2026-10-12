@@ -10,7 +10,7 @@ test('dialog cycles Tab and Shift+Tab and restores its opener', async ({ page })
     };
   });
   await page.goto('/');
-  const opener = page.getByRole('button', { name: 'Connect wallet', exact: true }).first();
+  const opener = page.locator('.topbar').getByRole('button', { name: 'Connect wallet', exact: true });
   await opener.click();
   const close = page.getByRole('button', { name: 'Close dialog', exact: true });
   const wallet = page.getByRole('button', { name: 'Browser wallet', exact: true });
@@ -25,7 +25,7 @@ test('dialog cycles Tab and Shift+Tab and restores its opener', async ({ page })
 });
 test('a dialog with no wallet never loses its only actionable focus target', async ({ page }) => {
   await page.goto('/');
-  const opener = page.getByRole('button', { name: 'Connect wallet', exact: true }).first();
+  const opener = page.locator('.empty-state').getByRole('button', { name: 'Connect wallet', exact: true });
   await opener.click();
   await expect(page.getByText('No wallet was detected.', { exact: false })).toBeVisible();
   const close = page.getByRole('button', { name: 'Close dialog', exact: true });

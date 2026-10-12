@@ -48,7 +48,7 @@ async function installWallet(page: Page, options: { wallet?: string; chain?: str
   }, { wallet: options.wallet || OWNER, chain: options.chain || '0x7a69', mode: options.mode || 'approve', name: options.name || '' });
 }
 async function openWallet(page: Page) {
-  await page.getByRole('button', { name: 'Connect wallet', exact: true }).first().click();
+  await page.locator('.topbar').getByRole('button', { name: 'Connect wallet', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
 }
 async function login(page: Page) {
@@ -226,7 +226,7 @@ test('extension names are text, and extension icon URLs are never requested', as
 });
 test('modal keyboard focus stays contained and Escape restores focus', async ({ page }) => {
   await installWallet(page); await page.goto('/');
-  const opener = page.getByRole('button', { name: 'Connect wallet', exact: true }).first(); await opener.click();
+  const opener = page.locator('.topbar').getByRole('button', { name: 'Connect wallet', exact: true }); await opener.click();
   for (let i = 0; i < 7; i++) { await page.keyboard.press('Tab'); expect(await page.evaluate(() => Boolean(document.activeElement?.closest('dialog')))).toBe(true); }
   await page.keyboard.press('Escape'); await expect(page.getByRole('dialog')).not.toBeVisible(); await expect(opener).toBeFocused();
 });
@@ -248,11 +248,11 @@ test('navigation is usable on the current viewport', async ({ page }, testInfo) 
 test('automated accessibility checks cover each public and signed-in screen', async ({ page }) => {
   await installWallet(page); await page.goto('/');
   let results = await new AxeBuilder({ page }).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
-  expect(results.violations).toEqual([]); await login(page);
+  expect.soft(results.violations).toEqual([]); await login(page);
   for (const route of ['create','readiness','settings']) {
     await navigate(page, route); await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     if (route === 'readiness') await expect(page.locator('.gate')).toHaveCount(7);
     results = await new AxeBuilder({ page }).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
-    expect(results.violations).toEqual([]);
+    expect.soft(results.violations).toEqual([]);
   }
 });
