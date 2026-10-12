@@ -34,6 +34,8 @@ jobs:
         run: npm test
       - name: Verify migrations and release isolation
         run: npm run test:data
+      - name: Verify wallet authentication, HTTP and browser controls
+        run: npm run test:auth
       - name: Audit production dependencies
         run: npm run security:scan
       - name: Build application

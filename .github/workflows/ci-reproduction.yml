@@ -1,0 +1,50 @@
+name: CI reproduction bundle
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reproduction-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install the exact dependency graph
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Compile the checked-out source
+        run: npm run compile
+      - name: Package only tracked source and reproducible tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/nft-reproduction/tools"
+          git archive --format=tar HEAD > "$RUNNER_TEMP/nft-reproduction/source.tar"
+          tar -czf "$RUNNER_TEMP/nft-reproduction/dependencies.tgz" node_modules artifacts cache
+          cp "$(command -v node)" "$RUNNER_TEMP/nft-reproduction/tools/node"
+          git rev-parse HEAD > "$RUNNER_TEMP/nft-reproduction/COMMIT"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/nft-reproduction/TREE"
+          sha256sum package-lock.json > "$RUNNER_TEMP/nft-reproduction/LOCKFILE_SHA256"
+          cd "$RUNNER_TEMP/nft-reproduction"
+          sha256sum source.tar dependencies.tgz tools/node > SHA256SUMS
+          # Never archive .git, HOME, npm credentials, environment dumps,
+          # browser state, provider secrets or a whole runner workspace.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: nft-reproduction-${{ github.run_id }}
+          path: ${{ runner.temp }}/nft-reproduction/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
