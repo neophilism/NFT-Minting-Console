@@ -4,198 +4,43 @@
   "version": 1,
   "planVerified": true,
   "plannedPrCount": 36,
-  "sourceFiles": [
-    "docs/DEVELOPMENT_PLAN.md"
-  ],
+  "sourceFiles": ["docs/DEVELOPMENT_PLAN.md"],
   "milestones": [
-    {
-      "id": "NFT-01",
-      "title": "Repository baseline and project charter",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-02",
-      "title": "CI reliability and reproducibility",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-03",
-      "title": "Audit parity: original custom contract vs current generic fork",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-04",
-      "title": "Generic collection contract stabilization",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-05",
-      "title": "Real Limit Break validator integration & adversarial suite",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-06",
-      "title": "Deployment factory artifacts and deployment contracts",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-07",
-      "title": "Release schema, ownership and data migrations",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-08",
-      "title": "E2EESA applicability, profile lock, threat model and privacy inventory",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-09",
-      "title": "Authenticated admin login, RBAC and wallet/Safe identity",
-      "origin": "original",
-      "pullRequests": [
-        18
-      ],
-      "implementationStatus": "partial",
-      "acceptanceStatus": "blocked",
-      "evidenceFiles": [
-        "docs/PR09_DURABLE_STORAGE.md",
-        "docs/evidence/pr09b-results.json"
-      ]
-    },
-    {
-      "id": "NFT-10",
-      "title": "Client-side draft E2EE and per-file chunking",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-11",
-      "title": "Recovery, devices, key management and encrypted sharing",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-12",
-      "title": "Private encrypted object storage and retention",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-13",
-      "title": "Publishing boundary and public-media preflight",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-14",
-      "title": "Compliance and collector-personal-data handling",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-15",
-      "title": "Premium UI design system and responsive shell",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-16",
-      "title": "Multi-release dashboard and saved settings",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-17",
-      "title": "Collection builder: all collection inputs",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-18",
-      "title": "Drag/drop media and bulk assignment UI",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-19",
-      "title": "Rights/document editor and policy templates",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-20",
-      "title": "Review/publish wizard and irreversible actions screen",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-21",
-      "title": "Automated validator policy provisioning",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-22",
-      "title": "Local + Sepolia end-to-end rehearsal orchestration",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-23",
-      "title": "Safe/EOA wallet signing and transaction queue",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-24",
-      "title": "Canonical deployment wizard",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-25",
-      "title": "Batch mint pipeline",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-26",
-      "title": "OpenSea listing integration: approvals/signatures/posting",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-27",
-      "title": "Independent listing and royalty verification",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-28",
-      "title": "Single “Mint & List” guided operation",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-29",
-      "title": "Existing collection minting, edition inventory and re-listing",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-30",
-      "title": "Threat-driven audit and contract verification",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-31",
-      "title": "Build integrity and E2EESA scoped conformance evidence",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-32",
-      "title": "Render/Neon/storage/IPFS deployment and secrets setup",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-33",
-      "title": "Disposable mainnet OpenSea rehearsal",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-34",
-      "title": "Production launch and staged rollout",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-35",
-      "title": "Engine Room telemetry and status integration",
-      "origin": "original"
-    },
-    {
-      "id": "NFT-36",
-      "title": "Final UX, accessibility, documentation and handoff",
-      "origin": "original"
-    }
+    {"id":"NFT-01","title":"Repository baseline and project charter","origin":"original"},
+    {"id":"NFT-02","title":"CI reliability and reproducibility","origin":"original"},
+    {"id":"NFT-03","title":"Audit parity: original custom contract vs current generic fork","origin":"original"},
+    {"id":"NFT-04","title":"Generic collection contract stabilization","origin":"original"},
+    {"id":"NFT-05","title":"Real Limit Break validator integration & adversarial suite","origin":"original"},
+    {"id":"NFT-06","title":"Deployment factory artifacts and deployment contracts","origin":"original"},
+    {"id":"NFT-07","title":"Release schema, ownership and data migrations","origin":"original"},
+    {"id":"NFT-08","title":"E2EESA applicability, profile lock, threat model and privacy inventory","origin":"original"},
+    {"id":"NFT-09","title":"Authenticated admin login, RBAC and wallet/Safe identity","origin":"original","pullRequests":[18,20],"implementationStatus":"partial","acceptanceStatus":"pending","runtimeAcceptance":"passed","remainingAcceptance":["Browser wallet-provider integration and full user sign-in walkthrough"],"evidenceFiles":["docs/PR09_DURABLE_STORAGE.md","docs/evidence/pr09b-results.json","docs/PR09_RUNTIME_ACCEPTANCE.md"]},
+    {"id":"NFT-10","title":"Client-side draft E2EE and per-file chunking","origin":"original"},
+    {"id":"NFT-11","title":"Recovery, devices, key management and encrypted sharing","origin":"original"},
+    {"id":"NFT-12","title":"Private encrypted object storage and retention","origin":"original"},
+    {"id":"NFT-13","title":"Publishing boundary and public-media preflight","origin":"original"},
+    {"id":"NFT-14","title":"Compliance and collector-personal-data handling","origin":"original"},
+    {"id":"NFT-15","title":"Premium UI design system and responsive shell","origin":"original"},
+    {"id":"NFT-16","title":"Multi-release dashboard and saved settings","origin":"original"},
+    {"id":"NFT-17","title":"Collection builder: all collection inputs","origin":"original"},
+    {"id":"NFT-18","title":"Drag/drop media and bulk assignment UI","origin":"original"},
+    {"id":"NFT-19","title":"Rights/document editor and policy templates","origin":"original"},
+    {"id":"NFT-20","title":"Review/publish wizard and irreversible actions screen","origin":"original"},
+    {"id":"NFT-21","title":"Automated validator policy provisioning","origin":"original"},
+    {"id":"NFT-22","title":"Local + Sepolia end-to-end rehearsal orchestration","origin":"original"},
+    {"id":"NFT-23","title":"Safe/EOA wallet signing and transaction queue","origin":"original"},
+    {"id":"NFT-24","title":"Canonical deployment wizard","origin":"original"},
+    {"id":"NFT-25","title":"Batch mint pipeline","origin":"original"},
+    {"id":"NFT-26","title":"OpenSea listing integration: approvals/signatures/posting","origin":"original"},
+    {"id":"NFT-27","title":"Independent listing and royalty verification","origin":"original"},
+    {"id":"NFT-28","title":"Single “Mint & List” guided operation","origin":"original"},
+    {"id":"NFT-29","title":"Existing collection minting, edition inventory and re-listing","origin":"original"},
+    {"id":"NFT-30","title":"Threat-driven audit and contract verification","origin":"original"},
+    {"id":"NFT-31","title":"Build integrity and E2EESA scoped conformance evidence","origin":"original"},
+    {"id":"NFT-32","title":"Render/Neon/storage/IPFS deployment and secrets setup","origin":"original"},
+    {"id":"NFT-33","title":"Disposable mainnet OpenSea rehearsal","origin":"original"},
+    {"id":"NFT-34","title":"Production launch and staged rollout","origin":"original"},
+    {"id":"NFT-35","title":"Engine Room telemetry and status integration","origin":"original"},
+    {"id":"NFT-36","title":"Final UX, accessibility, documentation and handoff","origin":"original"}
   ]
 }
