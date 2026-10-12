@@ -5,50 +5,42 @@ on:
 permissions:
   contents: read
 jobs:
-  resolve:
-    if: github.head_ref == 'codex/nft15-react-console'
+  import-reviewed-lock:
+    if: github.head_ref == 'codex/nft15-react-console' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'neophilism'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
-          node-version-file: .nvmrc
-          cache: npm
-      - name: Resolve once, pin exactly, and return for review
+          artifact-ids: '11773602296'
+          run-id: '38308720763'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/reviewed-ui-toolchain
+          merge-multiple: true
+      - name: Verify exact reviewed bytes and commit only package files
         shell: bash
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          node --input-type=module <<'JS'
-          import fs from 'node:fs';
-          import {execFileSync} from 'node:child_process';
-          const manifest=JSON.parse(fs.readFileSync('package.json','utf8'));
-          const versions={};
-          for(const [section,names] of Object.entries({dependencies:['react','react-dom'],devDependencies:['vite','@vitejs/plugin-react','@types/react','@types/react-dom','typescript-eslint','@playwright/test','@axe-core/playwright']})) {
-            for(const name of names) {
-              const version=JSON.parse(execFileSync('npm',['view',name+'@latest','version','--json'],{encoding:'utf8'}));
-              if(typeof version!=='string'||!/^\d+\.\d+\.\d+$/.test(version))throw new Error('Expected stable exact version: '+name);
-              manifest[section][name]=version; versions[name]=version;
-            }
-          }
-          if(versions.react!==versions['react-dom']||!versions.react.startsWith('19.'))throw new Error('Review unexpected React release before proceeding.');
-          fs.writeFileSync('package.json',JSON.stringify(manifest,null,2)+'\n');
-          fs.writeFileSync('ui-versions.json',JSON.stringify(versions,null,2)+'\n');
-          JS
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          npm ci --ignore-scripts --no-audit --no-fund
-          npm audit --omit=dev --audit-level=high
-          mkdir -p "$RUNNER_TEMP/ui-toolchain"
-          cp package.json package-lock.json ui-versions.json "$RUNNER_TEMP/ui-toolchain/"
-          tar -czf "$RUNNER_TEMP/ui-toolchain/dependencies.tgz" node_modules
-          cd "$RUNNER_TEMP/ui-toolchain"
-          sha256sum package.json package-lock.json ui-versions.json dependencies.tgz > SHA256SUMS
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: ui-toolchain-${{ github.run_id }}
-          path: ${{ runner.temp }}/ui-toolchain/
-          retention-days: 1
-          if-no-files-found: error
-          compression-level: 0
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          cd "$RUNNER_TEMP/reviewed-ui-toolchain"
+          echo 'e0cc69588c023d1f316290e3be61db6e503a99b3fb5810dd57629b05d4d32d97  package.json' | sha256sum -c -
+          echo '6bcc917b7e7cff9317347ebf8b3deb839b1efe6c941fa73cc2f6adb649a5b676  package-lock.json' | sha256sum -c -
+          echo '0bfbca7e38ae7cc098b9a2518afb9bd1640214a54047c4e5026bce652dfcf285  ui-versions.json' | sha256sum -c -
+          cp package.json package-lock.json "$GITHUB_WORKSPACE/"
+          cd "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- package.json package-lock.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'build(ui): pin the reviewed React and browser-test dependency graph'
+          # Non-forced push rejects a moved feature branch. Never target main,
+          # merge a PR, change checks, or re-resolve latest dependencies here.
+          git push origin HEAD:refs/heads/codex/nft15-react-console
