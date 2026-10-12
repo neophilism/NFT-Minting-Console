@@ -98,6 +98,7 @@ test('rights preparation exports exact public bytes without upload or a transact
   });
   await preparePublicMetadata(page);
   await expect(page.getByRole('heading', { name: 'Metadata prepared locally' })).toBeFocused();
+  await page.keyboard.press('Tab'); await expect(page.getByTestId('public-json')).toBeFocused();
   const json = await page.getByTestId('public-json').textContent();
   expect(JSON.parse(json!).properties).toMatchObject({ rights_sha256: rightsDigest, rights_scope: 'token' });
   expect(JSON.parse(json!).properties.collector_email).toBeUndefined();
