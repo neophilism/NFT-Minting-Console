@@ -2,6 +2,9 @@ name: CI reproduction bundle
 
 on:
   workflow_dispatch:
+  push:
+    branches: [work/nft14-publication-boundary-20261012]
+    paths: [.github/workflows/ci-reproduction.yml]
 
 permissions:
   contents: read
