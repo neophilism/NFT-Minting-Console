@@ -9,7 +9,7 @@
   "packageManager": "npm@10.9.3",
   "scripts": {
     "build": "npm run compile && npm run check && npm run build:ui",
-    "ci": "npm run compile && npm run lint && npm run typecheck && npm test && npm run test:data && npm run test:auth && npm run test:ui:model && npm run security:scan && npm run build",
+    "ci": "npm run compile && npm run lint && npm run typecheck && npm test && npm run mint:rehearse && npm run test:data && npm run test:auth && npm run test:ui:model && npm run security:scan && npm run build",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:integration": "npm run compile && node scripts/run-validator-integration.mjs",
@@ -33,7 +33,8 @@
     "typecheck:ui": "tsc --project tsconfig.ui.json && tsc --project tsconfig.ui-tests.json",
     "test:ui:model": "node --experimental-strip-types --test test-ui/*.test.ts",
     "test:ui:browser": "playwright test -c playwright.config.ts",
-    "test:ui": "npm run test:ui:model && npm run test:ui:browser"
+    "test:ui": "npm run test:ui:model && npm run test:ui:browser",
+    "mint:rehearse": "hardhat run scripts/rehearse-mints.cjs"
   },
   "dependencies": {
     "axios": "1.20.0",

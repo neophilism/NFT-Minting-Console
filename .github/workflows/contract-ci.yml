@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version-file: .nvmrc
@@ -32,6 +34,15 @@ jobs:
         run: npm run typecheck
       - name: Run unit tests
         run: npm test
+      - name: Rehearse two disposable factory-to-mint releases
+        run: npm run mint:rehearse
+      - name: Retain synthetic mint receipts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: mint-rehearsal-${{ github.run_id }}
+          path: artifacts/rehearsal/mint-report.json
+          if-no-files-found: error
+          retention-days: 7
       - name: Verify migrations and release isolation
         run: npm run test:data
       - name: Verify wallet authentication, HTTP and browser controls
@@ -48,6 +59,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: limitbreakinc/creator-token-transfer-validator
@@ -78,6 +91,8 @@ jobs:
       PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: neophilism/End-To-End-Everywhere-Security-Architecture-Standard
