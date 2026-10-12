@@ -66,3 +66,7 @@ application's Hardhat collection artifact against the real validator. GitHub
 Actions runs both suites. See [security assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md)
 for evidence and limits. Passing these tests does not establish live OpenSea
 compatibility, royalty settlement, external audit approval, or production readiness.
+
+## End-to-End Everywhere progress
+
+The canonical [security/e2eesa-status.json](security/e2eesa-status.json) records standard implementation, complete testing and independent expert review separately. Engine Room reads it automatically from GitHub. All initial stages are pending; existing profile locks and approved decisions remain authoritative. Read [adoption and independent-account instructions](docs/E2EESA_ADOPTION.md), and run `python3 scripts/validate_e2eesa_status.py`. Record validation does not establish product security or certification.
