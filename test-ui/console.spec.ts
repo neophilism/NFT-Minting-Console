@@ -81,6 +81,7 @@ test('workspace is responsive and does not invent collections or listings', asyn
   await expect(page.getByText('No active orders verified', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Connect to your workspace' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.evaluate(() => { window.scrollTo(0, 0); });
   await page.screenshot({ path: `test-results/${testInfo.project.name}-workspace.png`, fullPage: true });
 });
 test('real EOA signature completes the browser, HTTP and local-EVM login path', async ({ page }) => {
@@ -170,6 +171,7 @@ test('local planning validates exact values and never posts private fields', asy
   expect(writes).toEqual([]);
   expect(await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length }))).toEqual({ local: 0, session: 0 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.evaluate(() => { window.scrollTo(0, 0); });
   await page.screenshot({ path: `test-results/${testInfo.project.name}-setup-preview.png`, fullPage: true });
 });
 test('validation errors are announced and link to the invalid inputs', async ({ page }) => {

@@ -1,93 +1,95 @@
 # NFT Console
 
-General-purpose collection setup, release preparation, minting and listing console
-using this project's custom ERC-721C-compatible collection family. It is not an
-AOTV-only product.
+A general-purpose workspace for independent NFT collections, using this
+project's custom ERC-721C-compatible collection family. Not an AOTV-only product.
 
-> **DEVELOPMENT ONLY. NOT READY TO MINT OR SELL REAL NFTS.**
-> PR #18 now includes durable authentication, database release permissions and
-> an opaque-envelope release API. Client encryption/recovery, complete public
-> publication, mint verification and real OpenSea listings remain unfinished.
-> See [current implementation and evidence](docs/PR09_DURABLE_STORAGE.md).
+> **DEVELOPMENT / REHEARSAL ONLY.** Wallet authentication, durable release
+> authorization and the responsive React interface are implemented and tested.
+> Private client encryption, public publication, complete minting and real
+> OpenSea orders are unfinished. Production startup and those actions remain
+> disabled. No NFT URL is presented as a verified listing.
 
-## Handoff and source of truth
+## Current user interface
 
-Start with the [Product Charter](docs/PRODUCT_CHARTER.md),
-[36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md),
-[canonical registry](registry/roadmap.json), and
-[Recovered Product Decisions](docs/HANDOFF_CONTEXT.md).
-[Handoff Status](docs/HANDOFF_STATUS.md) is the original historical audit;
-[PR09_AUTH_STATUS](docs/PR09_AUTH_STATUS.md) records the earlier memory-only
-increment. The [durable-storage update](docs/PR09_DURABLE_STORAGE.md) is current.
+The default page is a bundled TypeScript/React application with collection
+navigation, wallet connection, release-record inventory, an in-memory collection
+setup preview, release readiness and settings. Desktop/mobile keyboard and
+accessibility checks are in CI. See [UI acceptance evidence](docs/PR15_UI_ACCEPTANCE.md).
 
-Preserve the [frozen contract/rights reference](reference/androids-of-the-vine/),
-[Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md),
-[real-validator assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md),
-[release data model](docs/RELEASE_DATA_MODEL.md),
-[E2EESA applicability](docs/E2EESA_APPLICABILITY.md),
-[Threat Model](docs/THREAT_MODEL.md), and [Privacy Inventory](docs/PRIVACY_INVENTORY.md).
-The [separate implementation review](docs/PR09_DURABLE_REVIEW.md) is an assistant
-self-review, not independent certification.
+The setup preview does **not** save or upload fields. Do not enter confidential
+artwork or terms. Existing record IDs and workflow stages can be listed when the
+database is configured; private content is not unlocked by this build. Legacy
+local/Sepolia deployment rehearsal remains at `/legacy/`, separately gated.
 
-## Invariants and intended workflow
+## Start here for development or handoff
 
-Each release chooses its own name, supply, owner/minter, royalty settings,
-artwork, metadata and exact rights bytes. Deploy once per collection, then mint
-additional works under that address. Preserve immutable token/media/rights fields
-and the absence of validator-wide automatic approvals or seizure paths.
+1. [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md)
+   and [canonical registry](registry/roadmap.json).
+2. [Recovered Decisions](docs/HANDOFF_CONTEXT.md) and the dated [historical handoff audit](docs/HANDOFF_STATUS.md).
+3. [Durable authorization](docs/PR09_DURABLE_STORAGE.md), [native PostgreSQL and actual Safe acceptance](docs/PR09_RUNTIME_ACCEPTANCE.md)
+   and [React/browser acceptance](docs/PR15_UI_ACCEPTANCE.md). These supersede earlier execution blockers, not the full product plan.
+4. [Frozen original source/rights](reference/androids-of-the-vine/), [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md),
+   [real-validator assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md) and [Release Data Model](docs/RELEASE_DATA_MODEL.md).
+5. [E2EESA applicability and closed crypto gate](docs/E2EESA_APPLICABILITY.md),
+   [Threat Model](docs/THREAT_MODEL.md), [Privacy Inventory](docs/PRIVACY_INVENTORY.md)
+   and [scoped security progress](security/e2eesa-status.json).
 
-The target workflow is encrypted private drafting, explicit publication of
-selected plaintext, wallet-signed deployment and policy setup, verified minting,
-then separately signed and independently verified marketplace orders. **A token
-URL is not a listing; a passing unit test is not an audit or real-sale rehearsal.**
-Wallet signatures authenticate separately from draft encryption. No seed or
-private signing key is collected or held by this console.
+## Product invariants
 
-The development UI remains memory-only and does not post its plaintext form to
-the new opaque API. Existing historical plaintext browser drafts are not deleted
-automatically; back them up before clearing site data. Public deployment receipts
-and stable release identifiers are retained. Only authorized non-mainnet rehearsal
-deployment is available; production publishing, minting and listing stay blocked.
+Every collection selects its own name, symbol, supply, owner/minter, royalty
+recipient/rate, artwork and exact rights bytes. Deploy once per collection; mint
+later works at that same address. Never restore validator-wide automatic approval
+or a seizure path. Public IPFS content is not private encrypted storage.
 
-## Development and verification
+The intended workflow is encrypted drafting, explicit public publication,
+wallet-signed deployment and validator setup, verified minting, then a separately
+signed and independently verified marketplace order. A URL is not an order; a
+unit-test pass is not an audit or mainnet rehearsal. No wallet signing keys or
+seed phrases are collected. Authentication does not authorize asset transfers.
 
-Use Node **22.20.0**, npm **10.9.3**, and the unchanged lockfile:
+## Build and run locally
+
+Use **Node 22.20.0 / npm 10.9.3** and the committed lockfile:
 
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund
-npm run ci
+npm run build
+npm start
 ```
 
-Existing compile, lint, typecheck, contract, data, dependency-audit, build and
-security gates remain. `npm run test:auth` now includes PostgreSQL store and
-release integration tests. `npm run test:auth:controls` runs the isolated control
-suite; passing it alone does not accept the product.
+Use [console/.env.example](console/.env.example) to configure a repository-root
+`.env` or injected backend environment. Default origin is `http://localhost:3000`,
+network Sepolia `11155111`, and bind address loopback. Set an exact `PUBLIC_ORIGIN`,
+a matching `RPC_URL`, and public `ADMIN_WALLETS` addresses; optional editor/viewer
+allowlists cannot overlap with conflicting roles. Never put private keys in this
+configuration. Missing UI builds return 503 rather than falling back to a prototype.
 
-With Foundry **v1.3.6**, run the real-validator suite against the exact source:
+For durable storage, follow [restricted-role provisioning and migrations](docs/PR09_DURABLE_STORAGE.md).
+Runtime database credentials must not be migration-owner credentials. A configured
+database failure cannot fall back to memory. Without a configured database,
+authentication is development-memory only and inventory is unavailable.
+
+`NODE_ENV=production` intentionally refuses startup until the production gates
+are accepted. Do not use development mode as a substitute production deployment.
+The Vite dev server uses port 5173; when developing through its proxy, set the
+backend's exact `PUBLIC_ORIGIN=http://localhost:5173` for that development session.
+
+## Verification
 
 ```sh
-git clone https://github.com/limitbreakinc/creator-token-transfer-validator.git vendor/creator-token-transfer-validator
-git -C vendor/creator-token-transfer-validator checkout 59adb8b36ab0256c7430b017b1c9f8b4841d6e1e
-git -C vendor/creator-token-transfer-validator submodule update --init --recursive
-npm run test:integration
+npm run ci
+npm run test:ui:model
+npx --no-install playwright install --with-deps chromium
+npm run test:ui:browser
 ```
 
-## Configuration
+CI additionally runs the pinned real transfer validator, actual Safe 1.4.1 and
+native PostgreSQL/multi-instance HTTP suites. See the linked acceptance documents
+for exact pins, commands, executed results and limits. Test wallets use public
+local-only fixtures, never user wallets or funds. Browser evidence is synthetic;
+manual wallet-product and production rehearsals remain distinct checks.
 
-Use [console/.env.example](console/.env.example) as a reference for a root `.env`
-or backend secret-manager configuration. Set the exact `PUBLIC_ORIGIN`, chain,
-matching RPC and authorized wallet roles. Default startup binds loopback only.
-
-Optional `DATABASE_URL` enables durable storage with a dedicated restricted
-runtime login. [Provisioning, migrations and policy rotation](docs/PR09_DURABLE_STORAGE.md)
-use a separate operations environment. The application refuses migration-owner
-credentials and never falls back to memory when configured storage fails.
-`NODE_ENV=production` still refuses launch until release acceptance.
-
-## Security status
-
-[security/e2eesa-status.json](security/e2eesa-status.json) records implementation,
-complete testing and independent review separately. New auth tests do not mark
-those stages accepted. Follow [adoption guidance](docs/E2EESA_ADOPTION.md) and
-run `python3 scripts/validate_e2eesa_status.py`; status-record integrity is not
-security certification. Public IPFS assets are never described as E2EE.
+The source-owned E2EESA status separates implementation, complete testing and
+independent expert review. Read [adoption instructions](docs/E2EESA_ADOPTION.md)
+and run `python3 scripts/validate_e2eesa_status.py`. Record integrity does not
+certify security. The pre-crypto independent review gate has not been waived.
