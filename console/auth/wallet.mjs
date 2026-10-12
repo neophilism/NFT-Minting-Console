@@ -4,6 +4,14 @@ import { AuthError } from './core.mjs';
 const ERC1271_ABI = ['function isValidSignature(bytes32 hash, bytes signature) view returns (bytes4)'];
 const MAGIC = '0x1626ba7e';
 
+// Some EIP-1193 providers (including Hardhat's EDR adapter) propagate raw
+// revert bytes without ethers' CALL_EXCEPTION code. This only classifies a
+// denial: it must never turn an exception into a valid signature or EOA fallback.
+export function isSignatureRevert(error) {
+  return error?.code === 'CALL_EXCEPTION' || error?.code === 'BAD_DATA' ||
+    (typeof error?.data === 'string' && /^0x(?:[0-9a-fA-F]{2})*$/.test(error.data));
+}
+
 // Read-only verification: never submits a transaction, deploys a wallet, invokes
 // a counterfactual-wallet factory, or falls back from failed contract validation
 // to an individual Safe owner's EOA signature.
@@ -24,7 +32,7 @@ export function createWalletVerifier(provider) {
       const result = await contract.isValidSignature.staticCall(hashMessage(message), signature, { blockTag });
       return { valid: result.toLowerCase() === MAGIC, kind: 'contract' };
     } catch (error) {
-      if (error.code === 'CALL_EXCEPTION' || error.code === 'BAD_DATA') return { valid: false, kind: 'contract' };
+      if (isSignatureRevert(error)) return { valid: false, kind: 'contract' };
       throw error; // The service converts infrastructure errors to a redacted 503.
     }
   };
