@@ -7,3 +7,7 @@
 .review-checkbox input { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 4px; }
 .publication-disclosure p { line-height: 1.6; }
 .rights-summary dd, .prepared-metadata dd { overflow-wrap: anywhere; }
+/* Keep the offscreen skip link clipped during tall-region capture; keyboard focus still reveals it. */
+.skip-link:not(:focus) { clip-path: inset(50%); }
+.rights-workbench select { width: 100%; min-height: 45px; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: inherit; }
+.rights-workbench select:focus-visible, .rights-workbench textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }

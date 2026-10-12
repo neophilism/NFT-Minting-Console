@@ -97,9 +97,13 @@
       "implementationStatus": "partial",
       "acceptanceStatus": "pending",
       "evidenceFiles": [
-        "docs/PUBLICATION_PREPARATION.md"
+        "docs/PUBLICATION_PREPARATION.md",
+        "docs/PR24_ACCEPTANCE.md"
       ],
-      "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance"
+      "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance",
+      "pullRequests": [
+        24
+      ]
     },
     {
       "id": "NFT-15",
@@ -137,9 +141,13 @@
       "implementationStatus": "partial",
       "acceptanceStatus": "pending",
       "evidenceFiles": [
-        "docs/PUBLICATION_PREPARATION.md"
+        "docs/PUBLICATION_PREPARATION.md",
+        "docs/PR24_ACCEPTANCE.md"
       ],
-      "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance"
+      "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance",
+      "pullRequests": [
+        24
+      ]
     },
     {
       "id": "NFT-20",
