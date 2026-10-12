@@ -25,7 +25,6 @@ jobs:
           --health-cmd "pg_isready -U postgres -d nft_console_ci"
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
-      TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:disposable-ci-only@127.0.0.1:${{ job.services.postgres.ports[5432] }}/nft_console_ci
       NFT_TEST_DISPOSABLE_DATABASE: 'yes'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -37,8 +36,12 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Native concurrent driver and migration acceptance
+        env:
+          TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:disposable-ci-only@127.0.0.1:${{ job.services.postgres.ports[5432] }}/nft_console_ci
         run: npm run test:auth:postgres
       - name: Restricted runtime roles and multi-instance HTTP acceptance
+        env:
+          TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:disposable-ci-only@127.0.0.1:${{ job.services.postgres.ports[5432] }}/nft_console_ci
         run: node --test test-native/*.native.mjs
   real-safe:
     runs-on: ubuntu-24.04
