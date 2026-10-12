@@ -1,58 +1,66 @@
 # NFT Console
 
-**Start here for independent handoff:**
+General-purpose NFT release, minting and listing console using this project's custom
+ERC-721C-compatible collection family. This is **not** an AOTV-only product.
 
-1. [Product Charter](docs/PRODUCT_CHARTER.md) - generic product identity, release/token model, supported networks, lifecycle, and source-of-truth rules.
-2. [36-PR Development Plan](docs/DEVELOPMENT_PLAN.md) - authoritative roadmap, dependencies and acceptance gates.
-3. [Recovered Product Decisions & Requirements](docs/HANDOFF_CONTEXT.md) - original custom contract rationale, royalties, NFT licensing and Galinsky Collectors Circle decisions, and E2EESA requirements.
-4. [Handoff Completeness & Current Blockers](docs/HANDOFF_STATUS.md) - source provenance, original test matrix, known CI defects and missing implementation work.
-5. [Frozen original contract/rights/metadata reference](reference/androids-of-the-vine/) - byte-identical example source, **not** the generic production contract.
-6. [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md) - PR-03 executable diff, preserved invariants, threat findings, and corrective test matrix.
-7. [Release Data Model](docs/RELEASE_DATA_MODEL.md) - PR-07 normalized ownership, migrations, immutable evidence and isolation rules.
-8. [E2EESA Applicability](docs/E2EESA_APPLICABILITY.md) - pinned candidate profiles, scope, claim limits, and independent-review gate.
-9. [Threat Model](docs/THREAT_MODEL.md) and [Privacy Inventory](docs/PRIVACY_INVENTORY.md) - attacker capabilities, trust boundaries, and sensitive-data handling.
+> **DEVELOPMENT ONLY - NOT READY TO MINT OR SELL REAL NFTS.**
+> The current PR-09a increment hardens wallet authentication and closes the unsafe prototype
+> public-upload path. Private encrypted drafts, complete mint preflight and actual OpenSea
+> listing are unfinished. Production startup, public publication and minting are blocked.
+> See [current implementation and launch status](docs/PR09_AUTH_STATUS.md).
 
-> **PROTOTYPE ONLY - NOT SAFE FOR PRIVATE ARTWORK OR MAINNET DEPLOYMENT.** The present upload route sends plaintext directly to public IPFS, lacks the required E2EE draft boundary, and has no completed OpenSea listing integration. The generic contract has not passed an external audit or live marketplace integration. See [Handoff Status](docs/HANDOFF_STATUS.md) before running it.
+## Start here for independent handoff
 
-General-purpose NFT release, minting and listing console using the custom ERC-721C-compatible contract pattern developed for this project.
+1. [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md),
+   and canonical [roadmap registry](registry/roadmap.json).
+2. [Recovered Product Decisions](docs/HANDOFF_CONTEXT.md), [historical handoff audit](docs/HANDOFF_STATUS.md),
+   and [current PR-09 status](docs/PR09_AUTH_STATUS.md). The October 10 audit is a historical snapshot,
+   not the current next-step instruction.
+3. [Frozen original source and rights](reference/androids-of-the-vine/),
+   [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md), and
+   [Real-validator security assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md).
+4. [Release Data Model](docs/RELEASE_DATA_MODEL.md) - ownership, migrations, immutable evidence
+   and PostgreSQL isolation requirements.
+5. [E2EESA applicability](docs/E2EESA_APPLICABILITY.md), [Threat Model](docs/THREAT_MODEL.md),
+   [Privacy Inventory](docs/PRIVACY_INVENTORY.md), and
+   [separate PR-09a self-review](docs/PR09_SECURITY_SELF_REVIEW.md).
 
-**Not specific to Androids Of The Vine.** Every release must choose its own collection name, token symbol, maximum supply, creator royalty rate/recipient, owner/minter wallets, media files, metadata, optional preview images and rights terms. The smart contract records per-token media and rights SHA-256 hashes immutably and intentionally omits `AutomaticValidatorTransferApproval`.
+## Product invariants and intended workflow
 
-## Desired workflow
+Every release selects its own name, symbol, supply, owner/minter, royalty recipient/rate,
+artwork, display images, metadata and exact rights bytes. Deploy once per collection, then
+mint additional works under the existing address. Media/rights hashes and minted token
+fields are immutable. Never add validator-wide automatic operator approval or a seizure path.
 
-1. **Create release**: enter collection details and roles, choose network and configure marketplace compatibility.
-2. **Add works**: drop one or more image/video/audio/other files, review titles, descriptions and per-work display images. Define the rights text for this release; do not use any project-specific rights unless explicitly chosen.
-3. **Prepare**: validate file counts, hash and pin media/rights/metadata to IPFS, check exact supply and unused token IDs.
-4. **Deploy once per collection** with wallet signing, then configure validator policy.
-5. **Mint batch** of works with a wallet signature, verify chain receipts and show precise NFT links.
-6. **List on OpenSea** with required wallet approvals/signatures, verify listing state. Never assume minting automatically creates a listing.
+The intended workflow is an encrypted private workspace, explicit publication of selected
+plaintext to public IPFS, wallet-signed collection deployment and validator provisioning,
+verified minting, then separately signed and independently verified OpenSea listings.
+**An NFT URL is not a listing. A passed unit test is not a mainnet rehearsal or an audit.**
+Wallet signatures authenticate separately from draft encryption keys. This console never
+custodies wallet seeds or signing keys; it cannot sign transactions for a user.
 
-## Safety and delivery gates
-
-- GitHub CI must compile and run contract unit and real-validator integration tests before deployment.
-- E2EESA inputs and selected profiles are candidate requirements only; independent review is required before cryptography implementation.
-- The backend must require an authorized admin wallet before it spends IPFS pinning resources; never expose Pinata/OpenSea keys or wallet private keys to browsers.
-- Contract deployment and minting always require signed on-chain transactions by an authorized wallet; this console never holds signing keys.
-- Do not advertise automatic marketplace listing until it is tested end to end on a disposable mainnet collection with real OpenSea orders and royalty settlement.
-- Prefer one collection deployment per release, many NFTs minted under that collection. Initial pricing is an off-chain OpenSea listing decision, not a contract sale price.
+The current development UI only permits authorized-owner rehearsal deployment on a configured
+non-mainnet factory. Its fields are memory-only, not encrypted saved drafts. Do not enter
+confidential artwork. Existing historical plaintext browser drafts are not automatically
+deleted; back them up before clearing site data. Public deployment receipts and stable
+release identifiers are retained, including migration from earlier v2 identifiers.
 
 ## Deterministic development
 
-Use Node.js 22.20.0 and npm 10.9.3. Install exactly the committed dependency
-graph and run every local CI gate with:
+Use **Node.js 22.20.0 and npm 10.9.3**, with the committed lockfile:
 
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund
 npm run ci
 ```
 
-`npm run ci` compiles Solidity, lints and type-checks the JavaScript sources,
-runs the contract unit tests, audits production dependencies at high severity,
-and performs the application build check. GitHub Actions runs the same gates as
-separate fail-closed steps so a failed compile or incomplete job cannot appear
-green.
+CI keeps compilation, lint, typecheck, contract tests, migration/isolation tests, dependency
+audit, build, real-validator integration and E2EESA checks. It now also runs `npm run test:auth`
+for protocol, middleware, browser-control and real HTTP tests. Hardhat includes actual
+ethers/EOA and ERC-1271 adapter tests. Those fixtures do not establish real Safe acceptance.
+For exact executed versus unexecuted evidence, read the current status document above.
 
-PR-05 adds a separate real-validator suite. With Foundry v1.3.6 installed:
+With Foundry **v1.3.6**, the real-validator suite requires its exact source checkout:
 
 ```sh
 git clone https://github.com/limitbreakinc/creator-token-transfer-validator.git vendor/creator-token-transfer-validator
@@ -61,12 +69,24 @@ git -C vendor/creator-token-transfer-validator submodule update --init --recursi
 npm run test:integration
 ```
 
-The command checks the exact source and submodule revisions and exercises the
-application's Hardhat collection artifact against the real validator. GitHub
-Actions runs both suites. See [security assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md)
-for evidence and limits. Passing these tests does not establish live OpenSea
-compatibility, royalty settlement, external audit approval, or production readiness.
+## Local authentication setup
+
+Use [console/.env.example](console/.env.example) as a reference. Put local development
+configuration in the repository-root `.env` (dotenv's default location), never commit it.
+Choose exact `PUBLIC_ORIGIN` (default `http://localhost:3000`), `CHAIN_ID` (default Sepolia
+11155111), and a chain-matching `RPC_URL`. Configure `ADMIN_WALLETS`, optionally
+`EDITOR_WALLETS` and `VIEWER_WALLETS`; a wallet cannot have conflicting console roles.
+Start with `npm start` after compiling. Default binding is loopback only.
+
+RPC credentials and future Pinata/OpenSea/database secrets belong only in backend secret
+managers. Never provide private keys to the console. `NODE_ENV=production` refuses startup
+until the durable authorization and launch requirements are implemented and accepted;
+development mode is not an alternative production deployment.
 
 ## End-to-End Everywhere progress
 
-The canonical [security/e2eesa-status.json](security/e2eesa-status.json) records standard implementation, complete testing and independent expert review separately. Engine Room reads it automatically from GitHub. All initial stages are pending; existing profile locks and approved decisions remain authoritative. Read [adoption and independent-account instructions](docs/E2EESA_ADOPTION.md), and run `python3 scripts/validate_e2eesa_status.py`. Record validation does not establish product security or certification.
+The source-owned [security/e2eesa-status.json](security/e2eesa-status.json) records implementation,
+complete testing and independent expert review separately. Engine Room reads it from GitHub.
+These new authentication tests do not mark those stages complete. Read
+[adoption and independent-account instructions](docs/E2EESA_ADOPTION.md), and run
+`python3 scripts/validate_e2eesa_status.py`. Record integrity does not certify product security.

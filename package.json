@@ -2,51 +2,35 @@
   "name": "nft-console",
   "version": "0.1.0",
   "private": true,
-  "engines": {
-    "node": "22.20.0",
-    "npm": "10.9.3"
-  },
+  "engines": { "node": "22.20.0", "npm": "10.9.3" },
   "packageManager": "npm@10.9.3",
   "scripts": {
     "build": "npm run compile && npm run check",
-    "ci": "npm run compile && npm run lint && npm run typecheck && npm test && npm run test:data && npm run security:scan && npm run build",
+    "ci": "npm run compile && npm run lint && npm run typecheck && npm test && npm run test:data && npm run test:auth && npm run security:scan && npm run build",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:integration": "npm run compile && node scripts/run-validator-integration.mjs",
     "start": "node console/server.mjs",
-    "check": "node --check console/server.mjs && node --check console/public/app.js",
+    "check": "node --check console/server.mjs && node --check console/public/app.js && node --check console/auth/core.mjs && node --check console/auth/http.mjs && node --check console/auth/wallet.mjs",
     "lint": "eslint .",
     "security:scan": "npm audit --audit-level=high --omit=dev",
     "typecheck": "tsc --project tsconfig.json",
     "deploy:rehearse": "hardhat run scripts/rehearse-deployments.cjs",
     "test:data": "node --test test-data/*.test.mjs",
+    "test:auth": "node --test test-auth/*.test.mjs",
     "db:migrate": "node scripts/migrate.mjs",
     "security:profiles": "python3 scripts/check_security_profiles.py",
     "test:security-profiles": "python3 -m unittest discover -s test-security -v"
   },
   "dependencies": {
-    "axios": "1.20.0",
-    "dotenv": "16.6.1",
-    "ethers": "6.17.0",
-    "express": "4.22.3",
-    "form-data": "4.0.6",
-    "multer": "2.4.0",
-    "pg": "8.23.1"
+    "axios": "1.20.0", "dotenv": "16.6.1", "ethers": "6.17.0", "express": "4.22.3",
+    "form-data": "4.0.6", "multer": "2.4.0", "pg": "8.23.1"
   },
   "devDependencies": {
-    "@eslint/js": "9.37.0",
-    "@limitbreak/creator-token-standards": "5.0.0",
-    "@nomicfoundation/hardhat-chai-matchers": "2.0.9",
-    "@nomicfoundation/hardhat-ethers": "3.1.0",
-    "@openzeppelin/contracts": "4.8.3",
-    "@types/express": "5.0.3",
-    "@types/multer": "2.0.0",
-    "@types/node": "22.18.10",
-    "chai": "4.5.0",
-    "eslint": "9.37.0",
-    "globals": "16.4.0",
-    "hardhat": "2.26.5",
-    "typescript": "5.9.3",
-    "@electric-sql/pglite": "0.5.8"
+    "@eslint/js": "9.37.0", "@limitbreak/creator-token-standards": "5.0.0",
+    "@nomicfoundation/hardhat-chai-matchers": "2.0.9", "@nomicfoundation/hardhat-ethers": "3.1.0",
+    "@openzeppelin/contracts": "4.8.3", "@types/express": "5.0.3", "@types/multer": "2.0.0",
+    "@types/node": "22.18.10", "chai": "4.5.0", "eslint": "9.37.0", "globals": "16.4.0",
+    "hardhat": "2.26.5", "typescript": "5.9.3", "@electric-sql/pglite": "0.5.8"
   }
 }

@@ -1,68 +1,136 @@
-import "dotenv/config";
-import express from "express";
-import multer from "multer";
-import axios from "axios";
-import FormData from "form-data";
-import crypto from "node:crypto";
-import os from "node:os";
-import path from "node:path";
-import fs from "node:fs";
-import fsp from "node:fs/promises";
-import {fileURLToPath} from "node:url";
-import {ethers} from "ethers";
-import {FACTORY_VERSION,reconcileDeployment} from "./deployment.mjs";
-const app=express();
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
-const publicDir=path.join(root,"console/public");
-const chainRegistry=JSON.parse(fs.readFileSync(path.join(root,"config/chains.json"),"utf8"));
-const targetChainId=Number(process.env.CHAIN_ID||1);
-const chainProfile=chainRegistry.chains[String(targetChainId)];
-if(!chainProfile)throw Error(`Unsupported CHAIN_ID ${targetChainId}`);
-const configuredFactory=process.env.DEPLOYMENT_FACTORY_ADDRESS||"";
-const deploymentFactory=ethers.isAddress(configuredFactory)?ethers.getAddress(configuredFactory):null;
-const upload=multer({dest:path.join(os.tmpdir(),"nft-console-uploads"),limits:{fileSize:1024*1024*1024,files:12}});
-const pending=new Map(),sessions=new Map();
-app.disable("x-powered-by");app.use(express.json({limit:"1mb"}));
-app.use((_req,res,next)=>{res.setHeader("Cache-Control","no-store");res.setHeader("X-Content-Type-Options","nosniff");res.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data: blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");next();});
-app.use(express.static(publicDir));app.use("/vendor",express.static(path.join(root,"node_modules/ethers/dist")));
-const allowed=new Set((process.env.ADMIN_WALLETS||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean));
-const nonce=()=>crypto.randomBytes(24).toString("hex");
-const cookie=(req,name)=>req.headers.cookie?.split(";").map(x=>x.trim()).find(x=>x.startsWith(name+"="))?.slice(name.length+1);
-function trustedOrigin(req){const origin=req.get("origin");return !origin||origin===`${req.protocol}://${req.get("host")}`||origin===(process.env.PUBLIC_ORIGIN||"");}
-function required(req,res,next){const token=cookie(req,"nft_session"),s=sessions.get(token);if(!s||s.expires<Date.now())return res.status(401).json({error:"Connect an authorized wallet and sign in."});if(!trustedOrigin(req))return res.status(403).json({error:"Invalid request origin"});if(req.get("X-CSRF-Token")!==s.csrf)return res.status(403).json({error:"Invalid session token"});req.admin=s.wallet;next();}
-app.get("/api/config",(_req,res)=>res.json({chainId:targetChainId,chainSlug:process.env.CHAIN_SLUG||chainProfile.slug,chainName:chainProfile.name,production:chainProfile.production,deploymentFactory,pinningReady:Boolean(process.env.PINATA_JWT),loginConfigured:allowed.size>0,validator:process.env.TRANSFER_VALIDATOR_ADDRESS||chainProfile.validator,signedZone:process.env.OPENSEA_SIGNED_ZONE||chainProfile.signedZone}));
-app.get("/api/health",(_req,res)=>res.json({ok:true}));
-app.post("/api/auth/challenge",(req,res)=>{const wallet=String(req.body?.wallet||"").toLowerCase();if(!ethers.isAddress(wallet)||!allowed.has(wallet))return res.status(403).json({error:"Wallet is not on the admin allowlist"});const value=nonce();const message=`NFT Console sign-in
-Wallet: ${wallet}
-Nonce: ${value}
-Host: ${req.get("host")}`;pending.set(wallet,{message,expires:Date.now()+5*60_000});res.json({message});});
-app.post("/api/auth/verify",(req,res)=>{const wallet=String(req.body?.wallet||"").toLowerCase(),v=pending.get(wallet);pending.delete(wallet);if(!v||v.expires<Date.now()||!allowed.has(wallet))return res.status(401).json({error:"Sign-in challenge expired"});try{if(ethers.verifyMessage(v.message,String(req.body?.signature||"")).toLowerCase()!==wallet)throw Error("Invalid signature");}catch{return res.status(401).json({error:"Invalid signature"});}const token=nonce(),csrf=nonce();sessions.set(token,{wallet,csrf,expires:Date.now()+8*3600_000});res.cookie("nft_session",token,{httpOnly:true,sameSite:"strict",secure:process.env.NODE_ENV==="production",maxAge:8*3600_000,path:"/"});res.json({wallet,csrf});});
-app.get("/api/artifact",(_req,res)=>{try{const collection=JSON.parse(fs.readFileSync(path.join(root,"artifacts/contracts/NFTCollection.sol/NFTCollection.json"),"utf8"));const factory=JSON.parse(fs.readFileSync(path.join(root,"artifacts/contracts/NFTCollectionFactory.sol/NFTCollectionFactory.json"),"utf8"));res.json({collection:{abi:collection.abi,bytecode:collection.bytecode,creationCodeId:ethers.keccak256(collection.bytecode)},factory:{abi:factory.abi,bytecode:factory.bytecode,address:deploymentFactory,version:FACTORY_VERSION}});}catch{res.status(503).json({error:"Contract build missing; run npm run compile"});}});
-app.get("/api/deployment/:releaseId",async(req,res)=>{try{if(!deploymentFactory)throw Error("DEPLOYMENT_FACTORY_ADDRESS not configured");if(!process.env.RPC_URL)throw Error("RPC_URL not configured");const provider=new ethers.JsonRpcProvider(process.env.RPC_URL);res.json(await reconcileDeployment(provider,{factory:deploymentFactory,chainId:targetChainId,releaseId:String(req.params.releaseId),requester:String(req.query.requester||"")}));}catch(e){res.status(400).json({error:e.message});}});
-const shaFile=async p=>await new Promise((resolve,reject)=>{const h=crypto.createHash("sha256"),s=fs.createReadStream(p);s.on("data",c=>h.update(c));s.on("end",()=>resolve(h.digest("hex")));s.on("error",reject);});
-const shaText=s=>crypto.createHash("sha256").update(s).digest("hex");
-async function pin(filePath,name){if(!process.env.PINATA_JWT)throw Error("PINATA_JWT not configured");const form=new FormData();form.append("file",fs.createReadStream(filePath),{filename:name});form.append("pinataOptions",JSON.stringify({cidVersion:1}));const r=await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS",form,{headers:{...form.getHeaders(),Authorization:`Bearer ${process.env.PINATA_JWT}`},maxBodyLength:Infinity,timeout:600000});if(!r.data?.IpfsHash)throw Error("Pinata did not return CID");return "ipfs://"+r.data.IpfsHash;}
-async function pinJSON(value,name){const r=await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS",{pinataOptions:{cidVersion:1},pinataMetadata:{name},pinataContent:value},{headers:{Authorization:`Bearer ${process.env.PINATA_JWT}`},timeout:60000});if(!r.data?.IpfsHash)throw Error("Pinata did not return CID");return "ipfs://"+r.data.IpfsHash;}
-function sanitize(s,max=300){return String(s||"").replace(/[\u0000-\u001f]/g,"").trim().slice(0,max);}
-function validInt(s,min,max){const n=Number(s);if(!Number.isSafeInteger(n)||n<min||n>max)throw Error("Invalid token ID or supply");return n;}
-app.post("/api/prepare",required,upload.fields([{name:"media",maxCount:10},{name:"poster",maxCount:10}]),async(req,res)=>{const files=[...Object.values(req.files||{}).flat()],temps=files.map(f=>f.path);try{
-const name=sanitize(req.body.collection,120),symbol=sanitize(req.body.symbol,32),description=sanitize(req.body.description,4000);
-const supply=validInt(req.body.supply,1,1000000),startingId=validInt(req.body.startingId,1,supply);
-const count=validInt(req.body.editions,1,10);if(!name||!symbol)throw Error("Collection name and symbol required");
-const media=req.files?.media||[],posters=req.files?.poster||[];if(media.length<1)throw Error("Add at least one media file");if(media.length>10)throw Error("Maximum 10 media files per preparation");if(media.length!==1&&media.length!==count)throw Error("Use one media file for all editions, or upload one file per edition");
-if(startingId+count-1>supply)throw Error("Token IDs exceed maximum supply");
-const rights=sanitize(req.body.rightsText,100000);if(!rights)throw Error("Upload or enter explicit rights text; no rights are assumed");
-const rightsPath=path.join(os.tmpdir(),`nft-rights-${nonce()}.txt`);await fsp.writeFile(rightsPath,rights);temps.push(rightsPath);
-const rightsHash=shaText(rights),rightsURI=await pin(rightsPath,"rights.txt");
-const mediaCache=new Map(),posterCache=new Map(),works=[];
-for(let i=0;i<count;i++){const m=media.length===1?media[0]:media[i],tokenId=startingId+i,title=sanitize(req.body.title||m.originalname,160)+(count>1?` #${i+1}`:"");if(!title)throw Error("Every work needs a title");
-if(!mediaCache.has(m.path))mediaCache.set(m.path,{sha:await shaFile(m.path),uri:await pin(m.path,m.originalname)});const data=mediaCache.get(m.path);
-const poster=posters.length===1?posters[0]:posters[i];let imageURI;if(poster){if(!poster.mimetype.startsWith("image/"))throw Error("Display image must be an image file");if(!posterCache.has(poster.path))posterCache.set(poster.path,await pin(poster.path,poster.originalname));imageURI=posterCache.get(poster.path);}else if(m.mimetype.startsWith("image/")){imageURI=data.uri;}else throw Error("Video/audio/other files require an uploaded display image");
-const metadata={name:title,description,image:imageURI,attributes:[{trait_type:"Collection",value:name},{trait_type:"Token ID",value:tokenId}],properties:{media_sha256:data.sha,rights_uri:rightsURI,rights_sha256:rightsHash}};if(!m.mimetype.startsWith("image/"))metadata.animation_url=data.uri;
-const metadataURI=await pinJSON(metadata,`${symbol}-${tokenId}.json`);
-works.push({tokenId,title,metadataURI,mediaHash:"0x"+data.sha,rightsURI,rightsHash:"0x"+rightsHash,metadata});}
-res.json({collection:name,symbol,supply,rightsURI,rightsSHA256:rightsHash,works});
-}catch(e){res.status(400).json({error:e.message});}finally{await Promise.allSettled(temps.map(p=>fsp.rm(p,{force:true})));}});
-app.get("/api/preflight",async(req,res)=>{try{const addr=String(req.query.address||""),ids=String(req.query.ids||"").split(",").map(Number);if(!ethers.isAddress(addr)||!ids.length||ids.some(x=>!Number.isSafeInteger(x)||x<=0))throw Error("Invalid contract or IDs");if(!process.env.RPC_URL)throw Error("RPC_URL not configured");const provider=new ethers.JsonRpcProvider(process.env.RPC_URL),code=await provider.getCode(addr);if(code==="0x")throw Error("No collection code found");const abi=["function SERIES_SIZE() view returns(uint256)","function totalMinted() view returns(uint256)","function mintingClosed() view returns(bool)","function getTransferValidator() view returns(address)","function ownerOf(uint256) view returns(address)","function MINTER() view returns(address)","function CREATOR_ROYALTY_BPS() view returns(uint96)"];const c=new ethers.Contract(addr,abi,provider);const size=Number(await c.SERIES_SIZE());const vacant=[];for(const id of ids){if(id>size){vacant.push(false);continue;}try{await c.ownerOf(id);vacant.push(false);}catch{vacant.push(true);}}const chain=Number((await provider.getNetwork()).chainId);res.json({ok:vacant.every(Boolean)&&!(await c.mintingClosed())&&chain===Number(process.env.CHAIN_ID||1),vacant,supply:size,chainId:chain,minter:await c.MINTER(),royaltyBps:Number(await c.CREATOR_ROYALTY_BPS()),validator:await c.getTransferValidator()});}catch(e){res.status(400).json({error:e.message});}});
-app.get("/api/opensea-url",(req,res)=>{const addr=String(req.query.contract||""),id=String(req.query.id||"");if(!ethers.isAddress(addr)||!/^[1-9][0-9]*$/.test(id))return res.status(400).json({error:"Invalid NFT"});res.json({url:`https://opensea.io/assets/${process.env.CHAIN_SLUG||"ethereum"}/${addr}/${id}`});});
-app.listen(Number(process.env.PORT||3000),()=>console.log("NFT Console server listening"));
+import 'dotenv/config';
+import express from 'express';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { ethers } from 'ethers';
+import { FACTORY_VERSION, reconcileDeployment } from './deployment.mjs';
+import { AuthError, createAuthService, rolesFromEnvironment } from './auth/core.mjs';
+import { installAuthRoutes } from './auth/http.mjs';
+import { createWalletVerifier } from './auth/wallet.mjs';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const chainRegistry = JSON.parse(fs.readFileSync(path.join(root, 'config/chains.json'), 'utf8'));
+const blockedFeatures = Object.freeze([
+  { id: 'auth-durability', milestones: ['NFT-09'], description: 'Durable multi-instance authentication and database RBAC acceptance remain open.' },
+  { id: 'private-workspace', milestones: ['NFT-10', 'NFT-11', 'NFT-12'], description: 'Reviewed client encryption, recovery and ciphertext storage are not implemented.' },
+  { id: 'explicit-publication', milestones: ['NFT-13', 'NFT-19', 'NFT-20'], description: 'Exact-byte rights review and explicit public publication are not implemented.' },
+  { id: 'release-experience', milestones: ['NFT-14', 'NFT-15', 'NFT-16', 'NFT-17', 'NFT-18'], description: 'The approved multi-release user experience and rights workflow are unfinished.' },
+  { id: 'verified-chain-workflow', milestones: ['NFT-21', 'NFT-22', 'NFT-23', 'NFT-24', 'NFT-25'], description: 'Validator provisioning, wallet flows and complete mint read-back require implementation and rehearsal.' },
+  { id: 'marketplace', milestones: ['NFT-26', 'NFT-27', 'NFT-28', 'NFT-29'], description: 'Order signing, posting, independent active-listing and royalty verification are not implemented.' },
+  { id: 'production-evidence', milestones: ['NFT-30', 'NFT-31', 'NFT-32', 'NFT-33', 'NFT-34', 'NFT-35', 'NFT-36'], description: 'Audits, deployed infrastructure, real-sale rehearsal and final acceptance are not complete.' },
+]);
+const closed = (res, code, error) => res.status(409).json({ code, error, productionReady: false });
+
+export function createApp({ env = process.env, authService } = {}) {
+  const app = express();
+  const production = env.NODE_ENV === 'production';
+  if (production) throw new Error('Production startup is blocked until the durable authentication, publication and release gates are accepted.');
+  const port = Number(env.PORT || 3000);
+  if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('Invalid PORT.');
+  const chainId = Number(env.CHAIN_ID || 11155111);
+  const profile = chainRegistry.chains[String(chainId)];
+  if (!profile) throw new Error('Unsupported CHAIN_ID.');
+  const origin = env.PUBLIC_ORIGIN || `http://localhost:${port}`;
+  const roles = rolesFromEnvironment(env);
+  const factoryValue = env.DEPLOYMENT_FACTORY_ADDRESS || '';
+  if (factoryValue && !ethers.isAddress(factoryValue)) throw new Error('Invalid DEPLOYMENT_FACTORY_ADDRESS.');
+  const factoryAddress = factoryValue ? ethers.getAddress(factoryValue) : null;
+  let provider;
+  if (env.RPC_URL) {
+    const request = new ethers.FetchRequest(env.RPC_URL);
+    request.timeout = 8000;
+    provider = new ethers.JsonRpcProvider(request, undefined, { batchMaxCount: 1, cacheTimeout: -1 });
+  }
+  const auth = authService || createAuthService({
+    origin, chainId, production, roles: () => roles,
+    checksumAddress: ethers.getAddress,
+    verifyWallet: provider ? createWalletVerifier(provider) : async () => { throw new AuthError(503, 'unavailable'); },
+    audit: record => console.info(JSON.stringify(record)),
+  });
+  if (auth.origin !== origin || auth.chainId !== chainId) throw new Error('Authentication realm does not match the server configuration.');
+  app.disable('x-powered-by');
+  app.set('trust proxy', false);
+  app.use((_req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    if (auth.origin.startsWith('https:')) res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+    next();
+  });
+  app.use(express.json({ limit: '64kb', strict: true }));
+  const requireAction = installAuthRoutes(app, auth, { production });
+  app.get('/api/config', (_req, res) => res.json({
+    chainId, chainSlug: profile.slug, chainName: profile.name, production: profile.production,
+    deploymentFactory: factoryAddress, pinningReady: false,
+    pinningConfigured: Boolean(env.PINATA_JWT), loginConfigured: roles.size > 0 && Boolean(provider),
+    validator: env.TRANSFER_VALIDATOR_ADDRESS || profile.validator,
+    signedZone: env.OPENSEA_SIGNED_ZONE || profile.signedZone,
+    productionReady: false, authStore: 'development-memory',
+    capabilities: { privateDrafts: false, publish: false, mint: false, list: false,
+      deploy: chainId !== 1 && Boolean(factoryAddress) },
+  }));
+  app.get('/api/health', (_req, res) => res.json({ ok: true, productionReady: false }));
+  app.get('/api/launch-readiness', requireAction('read'), (_req, res) => res.json({
+    productionReady: false, mintingEvidence: 'not-verified', listingEvidence: 'not-verified', blockers: blockedFeatures,
+    authentication: 'implemented-partial-unaccepted',
+    note: 'These are software gates, not a live wallet inventory or security certification.',
+  }));
+  app.get('/api/artifact', requireAction('deploy'), (_req, res) => {
+    if (chainId === 1) return closed(res, 'mainnet_gated', 'Mainnet deployment is disabled until the reviewed production gates pass.');
+    try {
+      const collection = JSON.parse(fs.readFileSync(path.join(root, 'artifacts/contracts/NFTCollection.sol/NFTCollection.json'), 'utf8'));
+      const factory = JSON.parse(fs.readFileSync(path.join(root, 'artifacts/contracts/NFTCollectionFactory.sol/NFTCollectionFactory.json'), 'utf8'));
+      res.json({ collection: { abi: collection.abi, bytecode: collection.bytecode,
+        creationCodeId: ethers.keccak256(collection.bytecode) },
+      factory: { abi: factory.abi, bytecode: factory.bytecode, address: factoryAddress, version: FACTORY_VERSION } });
+    } catch { res.status(503).json({ error: 'Contract build missing. Run the pinned compile gate.', code: 'build_required' }); }
+  });
+  app.get('/api/deployment/:releaseId', requireAction('read'), async (req, res) => {
+    try {
+      if (!/^0x[0-9a-fA-F]{64}$/.test(req.params.releaseId)) return res.status(400).json({ error: 'Invalid release identifier.' });
+      if (req.query.requester && String(req.query.requester).toLowerCase() !== req.actor.wallet) {
+        return res.status(403).json({ error: 'Deployment lookup is bound to the signed-in wallet.' });
+      }
+      if (!factoryAddress || !provider) return res.status(503).json({ error: 'Rehearsal factory or RPC is not configured.' });
+      res.json(await reconcileDeployment(provider, { factory: factoryAddress, chainId,
+        releaseId: req.params.releaseId, requester: req.actor.wallet }));
+    } catch { res.status(503).json({ error: 'Deployment could not be verified. No transaction was sent.' }); }
+  });
+  // No multer, temporary plaintext files, pinning calls or raw artwork parsing.
+  // Authentication runs before these fail-closed legacy endpoints.
+  app.post('/api/prepare', requireAction('publish'), (_req, res) => closed(res, 'publication_gated',
+    'Public upload is disabled until the private workspace and explicit publication review are accepted. No artwork was pinned.'));
+  app.get('/api/preflight', requireAction('read'), (_req, res) => closed(res, 'mint_preflight_gated',
+    'Complete validator-policy, bytecode, exact-token and rights preflight is not accepted. Do not mint from this prototype.'));
+  app.get('/api/opensea-url', requireAction('read'), (req, res) => {
+    const address = String(req.query.contract || ''), id = String(req.query.id || '');
+    if (!ethers.isAddress(address) || !/^[1-9][0-9]{0,77}$/.test(id) || BigInt(id) > (1n << 256n) - 1n) {
+      return res.status(400).json({ error: 'Invalid NFT identifier.' });
+    }
+    res.json({ url: `https://opensea.io/assets/${profile.slug}/${address}/${id}`,
+      status: 'link-only', listingVerified: false });
+  });
+  app.use('/api', (_req, res) => res.status(404).json({ error: 'API route not found.' }));
+  app.use(express.static(path.join(root, 'console/public')));
+  app.use('/vendor', express.static(path.join(root, 'node_modules/ethers/dist')));
+  app.use((error, _req, res, _next) => {
+    void _next; // Express recognizes error handlers by all four arguments.
+    const status = error.type === 'entity.too.large' ? 413 : error.type === 'entity.parse.failed' ? 400 : 500;
+    res.status(status).json({ error: status === 413 ? 'Request body is too large.' : 'Request could not be processed.' });
+  });
+  app.locals.close = () => provider?.destroy();
+  return app;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  const app = createApp();
+  const server = app.listen(Number(process.env.PORT || 3000), process.env.HOST || '127.0.0.1', () => {
+    console.info('NFT Console development server listening; production publication and minting are gated.');
+  });
+  const stop = () => server.close(() => { app.locals.close(); process.exit(0); });
+  process.once('SIGTERM', stop);
+  process.once('SIGINT', stop);
+}
