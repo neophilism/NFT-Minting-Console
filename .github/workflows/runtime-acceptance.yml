@@ -1,0 +1,65 @@
+name: Native runtime acceptance
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: native-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        # Docker official postgres:18 linux/amd64; content-addressed, not floating.
+        image: postgres@sha256:885953109528ad3dfc90362b1a6f50a78620b5315be19f187753d267e484dc5b
+        env:
+          POSTGRES_PASSWORD: disposable-ci-only
+          POSTGRES_DB: nft_console_ci
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nft_console_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      NFT_TEST_DISPOSABLE_DATABASE: 'yes'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Native concurrent driver and migration acceptance
+        env:
+          TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:disposable-ci-only@127.0.0.1:${{ job.services.postgres.ports[5432] }}/nft_console_ci
+        run: npm run test:auth:postgres
+      - name: Restricted runtime roles and multi-instance HTTP acceptance
+        env:
+          TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:disposable-ci-only@127.0.0.1:${{ job.services.postgres.ports[5432] }}/nft_console_ci
+        run: node --test test-native/*.native.mjs
+  real-safe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: safe-fndn/safe-smart-account
+          ref: bf943f80fec5ac647159d26161446ac5d716a294
+          path: vendor/safe
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Compile pinned actual Safe and exercise threshold signatures
+        run: npm run test:safe

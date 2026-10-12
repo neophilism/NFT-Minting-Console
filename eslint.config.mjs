@@ -3,7 +3,7 @@ import globals from "globals";
 
 export default [
   {
-    ignores: ["artifacts/**", "cache/**", "cache-foundry/**", "out-foundry/**", "vendor/**", "node_modules/**", "reference/**"],
+    ignores: ["artifacts/**", "artifacts-safe/**", "cache-safe/**", "cache/**", "cache-foundry/**", "out-foundry/**", "vendor/**", "node_modules/**", "reference/**"],
   },
   js.configs.recommended,
   {
@@ -11,7 +11,7 @@ export default [
     languageOptions: { globals: globals.browser },
   },
   {
-    files: ["console/**/*.mjs", "scripts/**/*.mjs", "test-data/**/*.mjs", "test-auth/**/*.mjs"],
+    files: ["console/**/*.mjs", "scripts/**/*.mjs", "test-data/**/*.mjs", "test-auth/**/*.mjs", "test-native/**/*.mjs"],
     languageOptions: { globals: globals.node },
     rules: { "no-control-regex": "off" },
   },
