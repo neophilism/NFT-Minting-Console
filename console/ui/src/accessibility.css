@@ -5,6 +5,7 @@
 .field input::placeholder { color: #617259; }
 .wizard-strip > span:not(.active),
 .wizard-strip > span:not(.active) > b { color: #52644a; }
+.readiness-seal, .gate-number { color: #4a643d; }
 .field > label { font-size: 12px; font-weight: 600; }
 @media (max-width: 600px) {
   .workspace-footer { font-size: 10px; }
