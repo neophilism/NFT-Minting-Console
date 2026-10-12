@@ -51,7 +51,16 @@
     {
       "id": "NFT-09",
       "title": "Authenticated admin login, RBAC and wallet/Safe identity",
-      "origin": "original"
+      "origin": "original",
+      "pullRequests": [
+        18
+      ],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "blocked",
+      "evidenceFiles": [
+        "docs/PR09_DURABLE_STORAGE.md",
+        "docs/evidence/pr09b-results.json"
+      ]
     },
     {
       "id": "NFT-10",

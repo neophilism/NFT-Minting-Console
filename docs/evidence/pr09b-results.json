@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "milestone": "NFT-09",
+  "pullRequest": 18,
+  "date": "2026-10-12",
+  "local": {
+    "command": "node --test test-auth/durable-controls.test.mjs",
+    "node": "22.16.0",
+    "pinnedRuntime": false,
+    "passed": 86,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "Dependency-free SQL/HTTP control models, input validation and negative tests; not real driver/browser tests.",
+    "tapSha256": "77d1da30259f483c8532f20906e44a4091891ef7821caf628cf6a48d12858fcf"
+  },
+  "neon": {
+    "projectId": "dark-math-52213387",
+    "branchId": "br-cool-queen-b400hn78",
+    "productionParentId": "br-late-forest-b4z0hjsa",
+    "productionModified": false,
+    "passedSqlAssertions": 20,
+    "method": "Neon.run_sql_transaction",
+    "script": "test-auth/postgres-acceptance.sql",
+    "scriptSha256": "61379e27c004574621095f4d9636398024c0f9430d4ef6b513988f095f6247b8",
+    "fixtureDisposition": "Synthetic account/release/permission rows rolled back by a caught PZ001 subtransaction.",
+    "limits": "SQL role/policy checks on the isolated branch; not JavaScript migration-runner or pg-driver evidence."
+  },
+  "fullCiAccepted": false,
+  "mainnetReady": false,
+  "independentExpertReview": false
+}
