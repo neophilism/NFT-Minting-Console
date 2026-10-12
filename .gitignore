@@ -13,3 +13,5 @@ cache-foundry/
 __pycache__/
 *.pyc
 data/*.sqlite*
+artifacts-safe/
+cache-safe/
