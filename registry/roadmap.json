@@ -54,20 +54,21 @@
       "origin": "original",
       "pullRequests": [
         18,
-        20
+        20,
+        22
       ],
-      "implementationStatus": "partial",
-      "acceptanceStatus": "pending",
+      "implementationStatus": "complete",
+      "acceptanceStatus": "passed",
       "evidenceFiles": [
         "docs/PR09_DURABLE_STORAGE.md",
         "docs/evidence/pr09b-results.json",
-        "docs/PR09_RUNTIME_ACCEPTANCE.md"
+        "docs/PR09_RUNTIME_ACCEPTANCE.md",
+        "docs/PR09_BROWSER_ACCEPTANCE.md"
       ],
       "runtimeAcceptance": "passed",
-      "remainingAcceptance": [
-        "Contract-wallet browser integration; wallet-product rehearsals remain separate production evidence"
-      ],
-      "browserAcceptance": "EOA browser protocol passed; contract-wallet browser integration pending"
+      "remainingAcceptance": [],
+      "browserAcceptance": "passed: real EOA/Safe signatures through browser, HTTP and restricted PostgreSQL",
+      "scope": "Software integration accepted; external wallet-product and production rehearsals remain separate release gates"
     },
     {
       "id": "NFT-10",
@@ -92,7 +93,13 @@
     {
       "id": "NFT-14",
       "title": "Compliance and collector-personal-data handling",
-      "origin": "original"
+      "origin": "original",
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/PUBLICATION_PREPARATION.md"
+      ],
+      "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance"
     },
     {
       "id": "NFT-15",
@@ -126,7 +133,13 @@
     {
       "id": "NFT-19",
       "title": "Rights/document editor and policy templates",
-      "origin": "original"
+      "origin": "original",
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/PUBLICATION_PREPARATION.md"
+      ],
+      "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance"
     },
     {
       "id": "NFT-20",

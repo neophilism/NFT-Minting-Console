@@ -253,7 +253,7 @@ test('automated accessibility checks cover each public and signed-in screen', as
   expect.soft(results.violations).toEqual([]); await login(page);
   for (const route of ['create','readiness','settings']) {
     await navigate(page, route); await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    if (route === 'readiness') await expect(page.locator('.gate')).toHaveCount(7);
+    if (route === 'readiness') await expect(page.locator('.gate')).toHaveCount(6);
     results = await new AxeBuilder({ page }).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
     expect.soft(results.violations).toEqual([]);
   }

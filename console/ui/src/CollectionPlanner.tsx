@@ -3,9 +3,15 @@ import type { FormEvent } from 'react';
 import { emptyPlan, validatePlan } from './model';
 import type { Configuration, Plan, Session } from './model';
 import { Icon, Notice, SignInPrompt } from './components';
+import { RightsWorkbench } from './RightsWorkbench';
 
 const labels: Record<keyof Plan, string> = { name: 'Collection name', symbol: 'Token symbol', supply: 'Maximum supply', royalty: 'Creator royalty (%)', price: 'Initial listing price (ETH)', owner: 'OWNER wallet', minter: 'MINTER wallet', recipient: 'Royalty recipient' };
-export function CollectionPlanner({ current, config, connect }: { current: Session | null; config: Configuration; connect: () => void }) {
+type PlannerProps = { current: Session | null; config: Configuration; connect: () => void };
+export function CollectionPlanner(props: PlannerProps) {
+  const identity = `${props.current?.wallet || 'signed-out'}:${props.current?.chainId || 0}:${props.current?.csrf || ''}`;
+  return <PlannerContent key={identity} {...props}/>;
+}
+function PlannerContent({ current, config, connect }: PlannerProps) {
   const [plan, setPlan] = useState<Plan>(() => ({ ...emptyPlan(), owner: current?.wallet || '', minter: current?.wallet || '', recipient: current?.wallet || '' }));
   const [errors, setErrors] = useState<Partial<Record<keyof Plan, string>>>({}), [preview, setPreview] = useState(false);
   const errorRef = useRef<HTMLDivElement>(null), previewRef = useRef<HTMLHeadingElement>(null);
@@ -26,7 +32,7 @@ export function CollectionPlanner({ current, config, connect }: { current: Sessi
     <div className="wizard-strip" aria-label="Release workflow"><span className="active"><b>01</b> Collection setup</span><span><b>02</b> Add your works <Icon name="lock"/></span><span><b>03</b> Review &amp; publish <Icon name="lock"/></span></div>
     {preview ? <section className="panel setup-preview"><div className="section-heading"><div><span className="eyebrow">LOCAL PREVIEW</span><h2 tabIndex={-1} ref={previewRef}>Review {plan.name.trim()}</h2></div><span className="badge">Nothing saved</span></div>
       <dl className="preview-grid">{(Object.keys(labels) as (keyof Plan)[]).map(name => <div key={name}><dt>{labels[name]}</dt><dd className={['owner','minter','recipient'].includes(name) ? 'mono' : ''}>{plan[name]}</dd></div>)}<div><dt>Target network</dt><dd>{config.chainName}</dd></div></dl>
-      <Notice>This validates form inputs only, not contract safety, gas cost, ownership or marketplace compatibility. No rights agreement or media file has been prepared.</Notice>
+      <Notice>This validates form inputs only, not contract safety, gas cost, ownership or marketplace compatibility. This summary does not publish rights or media, mint tokens, or create marketplace orders.</Notice>
       <div className="form-actions"><button className="button secondary" onClick={() => setPreview(false)}>Back to editing</button><button className="button primary" disabled><Icon name="lock"/>Save private release</button></div><p className="muted">Saving requires the accepted client-encryption workflow. Refreshing or leaving this screen discards the preview.</p>
     </section> : <form onSubmit={submit} className="panel planner" noValidate>
       <div className="section-heading"><div><span className="eyebrow">01 / COLLECTION IDENTITY</span><h2>Make it your collection</h2><p className="muted">Each release has its own name, supply, roles and rights.</p></div><span className="badge">{config.chainName}</span></div>
@@ -36,5 +42,6 @@ export function CollectionPlanner({ current, config, connect }: { current: Sessi
       <div className="form-grid wallet-fields">{field('owner','Maintains the collection transfer policy.','0x...')}{field('minter','Mints NFTs to itself; never gives the server a signing key.','0x...')}{field('recipient','Receives the configured creator royalty.','0x...')}</div>
       <div className="form-actions"><p><Icon name="lock"/>No upload, signature or transaction at this step.</p><button className="button primary" type="submit">Review setup <Icon name="arrow"/></button></div>
     </form>}
+    <RightsWorkbench key={`${current.wallet}:${current.chainId}:${current.csrf}`}/>
   </>;
 }
