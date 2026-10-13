@@ -82,13 +82,35 @@ async function fillPublicPreparation(page: Page) {
   await page.getByLabel('Public rights URI', { exact: true }).fill(publicUri + '/rights.md');
   await page.getByLabel('Media SHA-256', { exact: true }).fill('a'.repeat(64));
   await page.getByLabel('Public description', { exact: true }).fill('Public description fixture');
-  await page.getByRole('checkbox').check();
+  await page.locator('.rights-workbench').getByRole('checkbox').check();
 }
 async function preparePublicMetadata(page: Page) {
   await fillPublicPreparation(page);
   await page.getByRole('button', { name: 'Prepare metadata preview', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Metadata prepared locally' })).toBeVisible();
 }
+
+test('optional two-project companion generates forty token-specific drafts without publishing',async({page})=>{
+  await installWallet(page);await login(page);await navigate(page,'create');
+  const check=page.getByTestId('companion-enable');
+  await expect(check).not.toBeChecked();
+  await expect(page.getByText('Off by default. No project information package', {exact:false})).toBeVisible();
+  await expect(page.getByLabel('Forty projects, one title per line (in your preferred order)')).not.toBeVisible();
+  await check.check();
+  await page.getByRole('button',{name:'Preview token-specific Schedule A drafts'}).click();
+  await expect(page.getByText('40 token(s) selected.',{exact:false})).toBeVisible();
+  const schedule=page.getByRole('region',{name:'Token-specific Schedule A draft'});
+  await expect(schedule).toContainText('Project 1: Unsealed Records Music Playlist');
+  await expect(schedule).toContainText('Project 2: Live Debate Engine');
+  await page.getByTestId('companion-token-ids').fill('1, 4');
+  await page.getByRole('button',{name:'Preview token-specific Schedule A drafts'}).click();
+  await expect(page.getByText('Partial allocation:',{exact:false})).toBeVisible();
+  await expect(schedule).toContainText('Token #001');
+  await check.uncheck();
+  await expect(schedule).not.toBeVisible();
+  expect(await page.evaluate(()=>({local:localStorage.length,session:sessionStorage.length}))).toEqual({local:0,session:0});
+});
+
 test('rights preparation exports exact public bytes without upload or a transaction', async ({ page }, testInfo) => {
   await installWallet(page); await login(page);
   const writes: string[] = [], external: string[] = [];
@@ -122,15 +144,15 @@ test('editing or replacing reviewed rights invalidates the public metadata snaps
   await installWallet(page); await login(page); await preparePublicMetadata(page);
   await page.getByLabel('Public token name', { exact: true }).fill('Changed name');
   await expect(page.getByRole('heading', { name: 'Metadata prepared locally' })).not.toBeVisible();
-  await expect(page.getByRole('checkbox')).not.toBeChecked();
+  await expect(page.locator('.rights-workbench').getByRole('checkbox')).not.toBeChecked();
   await expect(page.getByRole('button', { name: 'Prepare metadata preview', exact: true })).toBeDisabled();
-  await page.getByRole('checkbox').check();
+  await page.locator('.rights-workbench').getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Prepare metadata preview', exact: true }).click();
   await expect(page.getByTestId('public-json')).toContainText('Changed name');
   const bytes = Buffer.from('Replaced rights\n');
   await page.getByLabel('Rights document', { exact: true }).setInputFiles({ name: 'new.txt', mimeType: 'text/plain', buffer: bytes });
   await expect(page.getByTestId('rights-digest')).toHaveText(createHash('sha256').update(bytes).digest('hex'));
-  await expect(page.getByRole('checkbox')).not.toBeChecked();
+  await expect(page.locator('.rights-workbench').getByRole('checkbox')).not.toBeChecked();
   await expect(page.getByTestId('public-json')).not.toBeVisible();
 });
 test('bad rights types are rejected and PDF bytes are hashed but never rendered', async ({ page }) => {
@@ -139,7 +161,7 @@ test('bad rights types are rejected and PDF bytes are hashed but never rendered'
   await input.setInputFiles({ name: 'wrong.pdf', mimeType: 'application/pdf', buffer: Buffer.from('not a pdf') });
   await expect(page.getByRole('alert')).toContainText('does not have a PDF header');
   await expect(page.getByTestId('rights-digest')).not.toBeVisible();
-  await expect(page.getByRole('checkbox')).toBeDisabled();
+  await expect(page.locator('.rights-workbench').getByRole('checkbox')).toBeDisabled();
   const pdf = Buffer.from('%PDF-1.7\nSynthetic non-rendered header fixture.');
   await input.setInputFiles({ name: 'fixture.pdf', mimeType: 'application/pdf', buffer: pdf });
   await expect(page.getByTestId('rights-digest')).toHaveText(createHash('sha256').update(pdf).digest('hex'));

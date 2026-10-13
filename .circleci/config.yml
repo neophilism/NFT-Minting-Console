@@ -92,6 +92,91 @@ jobs:
           name: Integrity-only E2EESA status record, not certification
           command: python3 scripts/validate_e2eesa_status.py
 
+  native-postgres:
+    docker:
+      - image: cimg/node:22.20.0
+      - image: 'postgres@sha256:885953109528ad3dfc90362b1a6f50a78620b5315be19f187753d267e484dc5b'
+        environment:
+          POSTGRES_PASSWORD: disposable-ci-only
+          POSTGRES_DB: nft_console_ci
+    resource_class: large
+    environment:
+      NFT_TEST_DISPOSABLE_DATABASE: 'yes'
+      TEST_DATABASE_URL_UNPOOLED: 'postgresql://postgres:disposable-ci-only@127.0.0.1:5432/nft_console_ci'
+    steps:
+      - checkout
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run:
+          name: Wait for fresh disposable PostgreSQL
+          command: node scripts/wait-for-disposable-postgres.mjs
+      - run:
+          name: Native PostgreSQL migration and concurrent-driver acceptance
+          command: npm run test:auth:postgres
+      - run:
+          name: Two-instance HTTP, RBAC and permission-isolation acceptance
+          command: node --test test-native/*.native.mjs
+
+  real-safe:
+    docker:
+      - image: cimg/node:22.20.0
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Checkout reviewed Safe 1.4.1 source
+          command: |
+            mkdir -p vendor
+            git clone https://github.com/safe-fndn/safe-smart-account.git vendor/safe
+            git -C vendor/safe checkout --detach bf943f80fec5ac647159d26161446ac5d716a294
+            test "$(git -C vendor/safe rev-parse HEAD)" = bf943f80fec5ac647159d26161446ac5d716a294
+            test -z "$(git -C vendor/safe status --porcelain)"
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run:
+          name: Actual Safe 2-of-3 and negative wallet-authority integration
+          command: npm run test:safe
+
+  browser:
+    docker:
+      - image: cimg/node:22.20.0-browsers
+      - image: 'postgres@sha256:885953109528ad3dfc90362b1a6f50a78620b5315be19f187753d267e484dc5b'
+        environment:
+          POSTGRES_PASSWORD: disposable-browser-ci-only
+          POSTGRES_DB: nft_console_ci
+    resource_class: large
+    environment:
+      NFT_TEST_DISPOSABLE_DATABASE: 'yes'
+      TEST_DATABASE_URL_UNPOOLED: 'postgresql://postgres:disposable-browser-ci-only@127.0.0.1:5432/nft_console_ci'
+    steps:
+      - checkout
+      - run:
+          name: Checkout actual pinned Safe for browser authentication fixtures
+          command: |
+            mkdir -p vendor
+            git clone https://github.com/safe-fndn/safe-smart-account.git vendor/safe
+            git -C vendor/safe checkout --detach bf943f80fec5ac647159d26161446ac5d716a294
+            test "$(git -C vendor/safe rev-parse HEAD)" = bf943f80fec5ac647159d26161446ac5d716a294
+            test -z "$(git -C vendor/safe status --porcelain)"
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run:
+          name: Compile and exercise the actual pinned Safe
+          command: npm run test:safe
+      - run: npm run compile
+      - run: npm run build:ui
+      - run: npm run typecheck:ui
+      - run: npm run test:ui:model
+      - run:
+          name: Install Playwright Chromium and system dependencies
+          command: npx --no-install playwright install --with-deps chromium
+      - run:
+          name: Wait for fresh disposable PostgreSQL
+          command: node scripts/wait-for-disposable-postgres.mjs
+      - run:
+          name: Desktop/mobile/wallet/accessibility browser acceptance
+          command: npm run test:ui:browser
+      - store_artifacts:
+          path: test-results
+          destination: synthetic-browser-evidence
+
 workflows:
   all-required-checks:
     jobs:
@@ -99,3 +184,6 @@ workflows:
       - real-validator-adversarial
       - scoped-security-profile
       - security-status-record
+      - native-postgres
+      - real-safe
+      - browser

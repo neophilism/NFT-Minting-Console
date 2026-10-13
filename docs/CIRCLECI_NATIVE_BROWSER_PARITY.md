@@ -1,0 +1,9 @@
+# CircleCI native/browser parity — 2026-10-13
+
+**Scope: CI-only coverage.** GitHub Actions jobs began failing before checkout or any job steps, while CircleCI reliably executes core unit/compile/lint/validator/security checks. This change **adds** native PostgreSQL, actual Safe and desktop/mobile/browser acceptance to CircleCI. It does not alter or remove any GitHub Actions job, disable production safety gates or claim that a green CI run proves mainnet readiness.
+
+The new CircleCI `native-postgres` job runs real restricted-role driver/migrations and two-instance HTTP tests against a disposable, separately isolated PostgreSQL 18 service pinned to the same digest used in `.github/workflows/runtime-acceptance.yml`. The `real-safe` job verifies the pinned upstream Safe 1.4.1 source and performs the native threshold-signature/negative-authority contract integration. The `browser` job runs its own isolated disposable database and Safe source, then compiles contracts, builds the React UI, installs Chromium and runs all Playwright browser tests (wallet recovery, accessibility, desktop/mobile).
+
+The `scripts/wait-for-disposable-postgres.mjs` gate accepts **only** a specific loopback host, disposable database name and public test-only password, and refuses production/provider credentials or database mismatch. It times out rather than skipping a job. Secrets, wallets and real user media are not involved.
+
+**Acceptance:** all seven CircleCI jobs must complete successfully on the PR's exact head: existing `contracts-and-console`, `real-validator-adversarial`, `scoped-security-profile`, `security-status-record` plus new `native-postgres`, `real-safe`, `browser`. Failures require correction before merging. Keep the original GitHub workflows intact and independently restore their runner/account issue. Any finding here is CI evidence, not E2EESA independent review or approval to mint/list on mainnet.
