@@ -22,7 +22,7 @@ test('Section 4 investment priority was replaced; Section 5 and the artwork lice
   assert.match(draft,/optional on each NFT/i);
   assert.equal(section(original,'## 5. Collector-Only Allocation','## 6. Authentication'),section(draft,'## 5. Collector-Only Allocation','## 6. Authentication'));
   assert.equal(section(original,'## 1. Non-Exclusive Commercial License','## 2. Transfer'),section(draft,'## 1. Non-Exclusive Commercial License','## 2. Transfer'));
-  assert.match(draft,/## 11\. No Future Managerial Undertaking[\s\S]*one-time delivery/);
+  assert.match(draft,/## 11\. No Future Managerial Undertaking[\s\S]*one-time fixed Companion Portfolio benefit/);
 });
 test('Schedule A has exactly two provisional, non-investment entries with no withdrawn codebase',async()=>{
   const schedule=md(await read(p+'SCHEDULE_A_TEMPLATE.md'));

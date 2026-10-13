@@ -66,7 +66,7 @@ test('fixed files require valid checksums and explicit licenses and delivery met
   const list=projects();
   list[0].materials=[{name:'introduction.mp4',sha256:'a'.repeat(64),delivery:'fixed archived file',license:'personal viewing only'}];
   const p=planCompanionCollection({enabled:true,projects:list});
-  assert.match(renderCompanionSchedule(p,1),/introduction\\.mp4/);
+  assert.ok(renderCompanionSchedule(p,1).includes('introduction\\.mp4'));
   assert.match(renderCompanionSchedule(p,1),/a{64}/);
   list[0].materials[0].sha256='MISSING';
   assert.throws(()=>planCompanionCollection({enabled:true,projects:list}));
@@ -78,5 +78,5 @@ test('provisional repository catalog is disabled by default, not silently an off
   assert.equal(c.projects[0].title,'Unsealed Records Music Playlist');
   assert.equal(c.projects[1].title,'Live Debate Engine');
   assert.ok(c.projects.slice(2).every(x=>x.title.startsWith('TO_BE_SELECTED_')));
-  assert.equal(planCompanionCollection(c).assignments.length,0);
+  assert.equal(planCompanionCollection({enabled:c.enabled,projects:c.projects}).assignments.length,0);
 });
