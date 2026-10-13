@@ -10,8 +10,21 @@ else {
     const rights=await readFile(rightsFile),meta=JSON.parse(await readFile(metadataFile,'utf8'));
     const text=rights.toString('utf8');
     if(rights.length<1000||/WORKING DRAFT|NOT FOR SALE OR MINTING|TO BE COMPLETED|PENDING|REPLACE_WITH|INCOMPLETE_DRAFT|Priority Investment Consideration/i.test(text))fatal('Rights are not complete and legally signed off.');
-    if(!/## 4\. Fixed Creator.s Companion Portfolio/.test(text)||!/## 5\. Collector-Only Allocation/.test(text)||
-       !/Schedule A\b/.test(text)||!/Unsealed Records Music Playlist/.test(text))fatal('The complete signed-off Schedule A must be included within the rights artifact.');
+    if(!/## 4\. Optional Fixed Creator.s Companion Portfolio/.test(text)||!/## 5\. Collector-Only Allocation/.test(text))fatal('Expected optional fixed portfolio terms and separate collector terms.');
+    const tokenMatch=text.match(/^\*\*Series token ID:\*\*\s*(\d+)\s*$/m);
+    const tokenId=tokenMatch?Number(tokenMatch[1]):null;
+    if(!Number.isInteger(tokenId)||tokenId<1||tokenId>40)fatal('Exact AOTV token ID must appear in rights.');
+    const scheduleMatch=text.match(/^# Schedule A — Androids Of The Vine, Token #(\d{3})\s*$/m);
+    const optedOut=/^\*\*Companion Portfolio:\*\* Not included for this token\.\s*$/m.test(text);
+    if(Boolean(scheduleMatch)===optedOut)fatal('Choose exactly one: a final token-specific Schedule A or an explicit no-portfolio statement.');
+    if(scheduleMatch) {
+      const matches=[...text.matchAll(/^## Project (\d+): (.+)$/gm)];
+      if(Number(scheduleMatch[1])!==tokenId || matches.length!==2 ||
+         matches[0]?.[1]!=='1'||matches[1]?.[1]!=='2'||matches[0]?.[2]===matches[1]?.[2])
+        fatal('Each opted-in token needs its own complete, distinct two-project Schedule A.');
+    }
+    const metadataId=meta.attributes?.find(a=>a?.trait_type==='Series Token ID')?.value;
+    if(metadataId!==undefined&&Number(metadataId)!==tokenId)fatal('Metadata and final rights disagree about token ID.');
     const digest=createHash('sha256').update(rights).digest('hex');
     if(digest===archived)fatal('The historical investor-priority document is not the revised rights artifact.');
     if(meta.release_status==='DO_NOT_MINT_OR_PUBLISH'||meta.properties?.companion_portfolio_schedule_status==='INCOMPLETE_DRAFT')fatal('Metadata remains a non-publishable template.');
