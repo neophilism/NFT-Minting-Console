@@ -19,6 +19,7 @@ jobs:
       - run:
           name: Real synthetic two-release mint rehearsals
           command: npm run mint:rehearse
+      - run: npm run test:crypto
       - run: npm run test:data
       - run: npm run test:auth
       - run: npm run test:ui:model
@@ -170,6 +171,7 @@ jobs:
       - run:
           name: Wait for fresh disposable PostgreSQL
           command: node scripts/wait-for-disposable-postgres.mjs
+      - run: npm run test:crypto:browser
       - run:
           name: Desktop/mobile/wallet/accessibility browser acceptance
           command: npm run test:ui:browser
