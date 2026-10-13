@@ -102,15 +102,15 @@ export class OpenSeaReadOnlyClient {
     }
   }
   /** API observation only; caller must separately verify Seaport on-chain state. */
-  getOrder({chain='ethereum',protocol,hash,signal}={}) {
+  async getOrder({chain='ethereum',protocol,hash,signal}={}) {
     if(chain!=='ethereum')reject('UNSUPPORTED_CHAIN');
     return this.#get('/orders/chain/ethereum/protocol/'+address(protocol)+'/'+orderHash(hash),signal);
   }
-  getNFT({chain='ethereum',collection,id,signal}={}) {
+  async getNFT({chain='ethereum',collection,id,signal}={}) {
     if(chain!=='ethereum')reject('UNSUPPORTED_CHAIN');
     return this.#get('/chain/ethereum/contract/'+address(collection)+'/nfts/'+tokenId(id),signal);
   }
-  getCollection({name,signal}={}) {
+  async getCollection({name,signal}={}) {
     return this.#get('/collections/'+slug(name),signal);
   }
 }
