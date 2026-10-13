@@ -1,9 +1,13 @@
 {
-  "schemaVersion": 1,
   "repository": "neophilism/NFT-Minting-Console",
-  "roadmapVersion": 1,
+  "title": "NFT Minting Console",
   "planVerified": true,
   "plannedPrCount": 36,
+  "sourceFiles": [
+    "docs/DEVELOPMENT_PLAN.md"
+  ],
+  "schemaVersion": 1,
+  "roadmapVersion": 1,
   "observedAt": "2026-10-11T17:41:07.695Z",
   "units": [
     {
@@ -13,7 +17,10 @@
       "prs": [
         1
       ],
-      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-02",
@@ -22,7 +29,12 @@
       "prs": [
         2
       ],
-      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
+      "dependsOn": [
+        "NFT-01"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-03",
@@ -31,7 +43,13 @@
       "prs": [
         3
       ],
-      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
+      "dependsOn": [
+        "NFT-01",
+        "NFT-02"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-04",
@@ -40,7 +58,12 @@
       "prs": [
         5
       ],
-      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
+      "dependsOn": [
+        "NFT-03"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-05",
@@ -50,7 +73,12 @@
         6,
         9
       ],
-      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
+      "dependsOn": [
+        "NFT-04"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-06",
@@ -60,7 +88,13 @@
         10,
         16
       ],
-      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
+      "dependsOn": [
+        "NFT-04",
+        "NFT-05"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-07",
@@ -69,7 +103,12 @@
       "prs": [
         12
       ],
-      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
+      "dependsOn": [
+        "NFT-01"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-08",
@@ -79,175 +118,566 @@
         13,
         15
       ],
-      "mappingEvidence": "Merged PR title explicitly names NFT plan work package"
+      "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
+      "dependsOn": [
+        "NFT-01",
+        "NFT-02",
+        "NFT-03"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-09",
       "title": "Authenticated admin login, RBAC and wallet/Safe identity",
       "origin": "original",
-      "prs": []
+      "prs": [
+        18,
+        20,
+        22
+      ],
+      "implementationStatus": "complete",
+      "acceptanceStatus": "passed",
+      "evidenceFiles": [
+        "docs/PR09_DURABLE_STORAGE.md",
+        "docs/evidence/pr09b-results.json",
+        "docs/PR09_RUNTIME_ACCEPTANCE.md",
+        "docs/PR09_BROWSER_ACCEPTANCE.md"
+      ],
+      "runtimeAcceptance": "passed",
+      "remainingAcceptance": [],
+      "browserAcceptance": "passed: real EOA/Safe signatures through browser, HTTP and restricted PostgreSQL",
+      "scope": "Software integration accepted; external wallet-product and production rehearsals remain separate release gates",
+      "dependsOn": [
+        "NFT-07",
+        "NFT-08"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-10",
       "title": "Client-side draft E2EE and per-file chunking",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-08",
+        "NFT-09"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/CLIENT_ATTACHMENT_CRYPTO.md",
+        "console/crypto/attachments.mjs",
+        "test-crypto/attachments.test.mjs",
+        "test-crypto/attachments.browser.mjs"
+      ],
+      "scope": "Client-only chunked attachment AEAD and streaming hashes. Authenticated parent-message key distribution, device authorization, recovery, encrypted workspace/storage integration and complete acceptance remain pending.",
+      "contributingPrs": [
+        35
+      ]
     },
     {
       "id": "NFT-11",
       "title": "Recovery, devices, key management and encrypted sharing",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-10"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-12",
       "title": "Private encrypted object storage and retention",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-09",
+        "NFT-10",
+        "NFT-11"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-13",
       "title": "Publishing boundary and public-media preflight",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-10",
+        "NFT-11",
+        "NFT-12"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "publicReadbackScope": "Streaming exact-byte verification against independently reviewed public-file commitments; UI/publishing integration and full milestone acceptance remain pending.",
+      "evidenceFiles": [
+        "docs/PUBLIC_FILE_VERIFICATION.md"
+      ],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "contributingPrs": [
+        37
+      ]
     },
     {
       "id": "NFT-14",
       "title": "Compliance and collector-personal-data handling",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/PUBLICATION_PREPARATION.md",
+        "docs/PR24_ACCEPTANCE.md",
+        "releases/androids-of-the-vine/token-001/README.md",
+        "releases/androids-of-the-vine/token-001/RIGHTS_AGREEMENT_V2_DRAFT.md",
+        "releases/androids-of-the-vine/token-001/SCHEDULE_A_TEMPLATE.md",
+        "docs/AOTV_COMPANION_ALLOCATION.md",
+        "console/companion/portfolio.mjs",
+        "console/ui/src/CompanionPlanner.tsx",
+        "test-rights/companion.test.mjs"
+      ],
+      "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance",
+      "rightsRevisionScope": "Optional token-specific two-project creator portfolios; balanced 40/40 example when all tokens opted in; local draft generator and browser preview only. Historical rights preserved; legal approval, per-token final contents, E2EE and IPFS publication pending.",
+      "dependsOn": [
+        "NFT-07",
+        "NFT-08"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        24,
+        28
+      ]
     },
     {
       "id": "NFT-15",
       "title": "Premium UI design system and responsive shell",
       "origin": "original",
-      "prs": []
+      "prs": [
+        21
+      ],
+      "implementationStatus": "complete",
+      "acceptanceStatus": "passed",
+      "evidenceFiles": [
+        "docs/PR15_UI_ACCEPTANCE.md"
+      ],
+      "scope": "Responsive shell, wallet UI and memory-only setup preview; not private drafting, minting or listing",
+      "dependsOn": [
+        "NFT-01",
+        "NFT-07"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-16",
       "title": "Multi-release dashboard and saved settings",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-07",
+        "NFT-09",
+        "NFT-10",
+        "NFT-15"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-17",
       "title": "Collection builder: all collection inputs",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-04",
+        "NFT-16"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-18",
       "title": "Drag/drop media and bulk assignment UI",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-12",
+        "NFT-15",
+        "NFT-17"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-19",
       "title": "Rights/document editor and policy templates",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/PUBLICATION_PREPARATION.md",
+        "docs/PR24_ACCEPTANCE.md",
+        "releases/androids-of-the-vine/token-001/README.md",
+        "releases/androids-of-the-vine/token-001/RIGHTS_AGREEMENT_V2_DRAFT.md",
+        "releases/androids-of-the-vine/token-001/SCHEDULE_A_TEMPLATE.md",
+        "docs/AOTV_COMPANION_ALLOCATION.md",
+        "console/companion/portfolio.mjs",
+        "console/ui/src/CompanionPlanner.tsx",
+        "test-rights/companion.test.mjs",
+        "docs/PUBLIC_FILE_VERIFICATION.md"
+      ],
+      "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance",
+      "rightsRevisionScope": "Optional token-specific two-project creator portfolios; balanced 40/40 example when all tokens opted in; local draft generator and browser preview only. Historical rights preserved; legal approval, per-token final contents, E2EE and IPFS publication pending.",
+      "dependsOn": [
+        "NFT-13",
+        "NFT-14",
+        "NFT-17",
+        "NFT-18"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "publicReadbackScope": "Streaming exact-byte verification against independently reviewed public-file commitments; UI/publishing integration and full milestone acceptance remain pending.",
+      "contributingPrs": [
+        24,
+        28,
+        37
+      ]
     },
     {
       "id": "NFT-20",
       "title": "Review/publish wizard and irreversible actions screen",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-13",
+        "NFT-17",
+        "NFT-18",
+        "NFT-19"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "publicReadbackScope": "Streaming exact-byte verification against independently reviewed public-file commitments; UI/publishing integration and full milestone acceptance remain pending.",
+      "evidenceFiles": [
+        "docs/PUBLIC_FILE_VERIFICATION.md"
+      ],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "contributingPrs": [
+        37
+      ]
     },
     {
       "id": "NFT-21",
       "title": "Automated validator policy provisioning",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-05",
+        "NFT-06",
+        "NFT-09",
+        "NFT-20"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-22",
       "title": "Local + Sepolia end-to-end rehearsal orchestration",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/MINT_RECONCILIATION.md",
+        "docs/PR25_ACCEPTANCE.md",
+        "docs/MINT_WALLET_UI.md"
+      ],
+      "scope": "Direct-EOA unsigned batch planning, simulation and immutable receipt reconciliation; disposable local factory rehearsal. Persistent wallet/Safe/publication/validator/Sepolia/production integration remains pending.",
+      "walletUiScope": "Direct-EOA local fee review and one-request mint with durable browser/HTTP/PostgreSQL receipt recovery; production/Safe/publication/validator/marketplace acceptance remains pending.",
+      "dependsOn": [
+        "NFT-20",
+        "NFT-21"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        25,
+        27
+      ]
     },
     {
       "id": "NFT-23",
       "title": "Safe/EOA wallet signing and transaction queue",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/MINT_JOURNAL.md",
+        "docs/MINT_WALLET_UI.md"
+      ],
+      "journalScope": "Wallet/chain-scoped durable reservations and public transaction reconciliation; production wallet, Safe, publication and validator integration remain separate.",
+      "walletUiScope": "Direct-EOA local fee review and one-request mint with durable browser/HTTP/PostgreSQL receipt recovery; production/Safe/publication/validator/marketplace acceptance remains pending.",
+      "dependsOn": [
+        "NFT-09",
+        "NFT-21",
+        "NFT-22"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        26,
+        27
+      ]
     },
     {
       "id": "NFT-24",
       "title": "Canonical deployment wizard",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-06",
+        "NFT-20",
+        "NFT-21",
+        "NFT-22",
+        "NFT-23"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-25",
       "title": "Batch mint pipeline",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/MINT_RECONCILIATION.md",
+        "docs/PR25_ACCEPTANCE.md",
+        "docs/MINT_JOURNAL.md",
+        "docs/MINT_WALLET_UI.md",
+        "docs/PUBLIC_FILE_VERIFICATION.md"
+      ],
+      "scope": "Direct-EOA unsigned batch planning, simulation and immutable receipt reconciliation; disposable local factory rehearsal. Persistent wallet/Safe/publication/validator/Sepolia/production integration remains pending.",
+      "journalScope": "Wallet/chain-scoped durable reservations and public transaction reconciliation; production wallet, Safe, publication and validator integration remain separate.",
+      "walletUiScope": "Direct-EOA local fee review and one-request mint with durable browser/HTTP/PostgreSQL receipt recovery; production/Safe/publication/validator/marketplace acceptance remains pending.",
+      "dependsOn": [
+        "NFT-19",
+        "NFT-20",
+        "NFT-21",
+        "NFT-22",
+        "NFT-23",
+        "NFT-24"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "publicReadbackScope": "Streaming exact-byte verification against independently reviewed public-file commitments; UI/publishing integration and full milestone acceptance remain pending.",
+      "contributingPrs": [
+        25,
+        26,
+        27,
+        37
+      ]
     },
     {
       "id": "NFT-26",
       "title": "OpenSea listing integration: approvals/signatures/posting",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-05",
+        "NFT-21",
+        "NFT-23",
+        "NFT-25"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        32,
+        38,
+        39
+      ],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "console/marketplace/read-only.mjs",
+        "console/marketplace/post-listing.mjs",
+        "console/marketplace/seaport-order.mjs",
+        "docs/OPENSEA_SUBMISSION.md",
+        "docs/SEAPORT_ORDER_SIGNING.md"
+      ],
+      "scope": "Read-only OpenSea inspection, bounded signed-order submission transport and standalone Seaport 1.6 EOA signing/review components are implemented and tested. Complete authenticated wallet UI, approvals, deployment, durable submission, chain verification and sale are still pending."
     },
     {
       "id": "NFT-27",
       "title": "Independent listing and royalty verification",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-26"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        32
+      ]
     },
     {
       "id": "NFT-28",
       "title": "Single “Mint & List” guided operation",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-24",
+        "NFT-25",
+        "NFT-26",
+        "NFT-27"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-29",
       "title": "Existing collection minting, edition inventory and re-listing",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-16",
+        "NFT-25",
+        "NFT-26",
+        "NFT-27",
+        "NFT-28"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-30",
       "title": "Threat-driven audit and contract verification",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-05",
+        "NFT-08",
+        "NFT-09",
+        "NFT-10",
+        "NFT-11",
+        "NFT-12",
+        "NFT-13",
+        "NFT-21",
+        "NFT-22",
+        "NFT-23",
+        "NFT-24",
+        "NFT-25",
+        "NFT-26",
+        "NFT-27",
+        "NFT-28",
+        "NFT-29"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-31",
       "title": "Build integrity and E2EESA scoped conformance evidence",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-02",
+        "NFT-08",
+        "NFT-10",
+        "NFT-11",
+        "NFT-12",
+        "NFT-13",
+        "NFT-30"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-32",
       "title": "Render/Neon/storage/IPFS deployment and secrets setup",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-09",
+        "NFT-10",
+        "NFT-11",
+        "NFT-12",
+        "NFT-13",
+        "NFT-23",
+        "NFT-24",
+        "NFT-25",
+        "NFT-31"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-33",
       "title": "Disposable mainnet OpenSea rehearsal",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-27",
+        "NFT-30",
+        "NFT-31",
+        "NFT-32"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-34",
       "title": "Production launch and staged rollout",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-33"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-35",
       "title": "Engine Room telemetry and status integration",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-02",
+        "NFT-24",
+        "NFT-32",
+        "NFT-33",
+        "NFT-34"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "NFT-36",
       "title": "Final UX, accessibility, documentation and handoff",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [
+        "NFT-29",
+        "NFT-30",
+        "NFT-31",
+        "NFT-32",
+        "NFT-33",
+        "NFT-34",
+        "NFT-35"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     }
   ],
   "pullRequests": [

@@ -57,6 +57,8 @@ jobs:
         run: npm run test:marketplace:transport
       - name: Verify published-file readback and integrity
         run: npm run test:publication
+      - name: Verify canonical Boardroom and Engine Room PR registry
+        run: npm run test:registry
       - name: Audit production dependencies
         run: npm run security:scan
       - name: Build application

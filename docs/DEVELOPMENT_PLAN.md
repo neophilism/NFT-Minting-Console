@@ -1,6 +1,6 @@
 > **Owner instruction, 2026-10-13:** Independent human/external security review is deferred and is not a prerequisite for implementation, merge or deployment. AI source/security review and applicable passing tests are the operational review process. Actual defects and missing functionality still require fixes. External review/certification remain honestly pending. See [AGENTS.md](../AGENTS.md) and [review policy](../security/review-policy.json). This supersedes conflicting older review-gate wording below.
 
-> **Canonical PR work registry:** [`registry/roadmap.json`](../registry/roadmap.json). The detailed plan below is retained; agents must update PR counts and mappings in the registry file.
+> **Canonical PR work registry:** [`registry/prs.json`](../registry/prs.json). The detailed plan below is retained; agents must update PR counts and mappings in the registry file.
 
 # NFT Console — Complete Development & Handoff Plan
 
@@ -130,7 +130,7 @@ All numbered PRs below are planned **work packages**, not already-created pull r
 
 ### Production safety, launch and handoff
 
-**PR-30 — Threat-driven audit and contract verification.** Independent review of contract changes vs original audited version, property/fuzz tests, real validator, adversarial roles, signing, upload/publishing boundary, client ciphertext, marketplace phishing/approval attacks. **Depends:** 05,08–13,21–29. **Acceptance:** no unresolved critical/high severity findings; signed findings and remediation evidence.
+**PR-30 — Threat-driven audit and contract verification.** AI-assisted source/security review of contract changes vs original audited version (independent human review deferred, not a launch prerequisite), property/fuzz tests, real validator, adversarial roles, signing, upload/publishing boundary, client ciphertext, marketplace phishing/approval attacks. **Depends:** 05,08–13,21–29. **Acceptance:** no unresolved critical/high severity findings; signed findings and remediation evidence.
 
 **PR-31 — Build integrity and E2EESA scoped conformance evidence.** Lockfile/SBOM/provenance, secret scan, signed artifacts, browser release integrity/trust-boundary statement, upstream exact-source requirement mapping, evidence bundle; do not claim certification based solely on tests. **Depends:** 02,08,10–13,30. **Acceptance:** reproducible release, explicit verified vs unverified controls, valid scoped evidence.
 

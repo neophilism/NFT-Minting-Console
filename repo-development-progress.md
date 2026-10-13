@@ -1,6 +1,6 @@
 # NFT Console development progress
 
-Source of truth: docs/DEVELOPMENT_PLAN.md and registry/roadmap.json.
+Source of truth: docs/DEVELOPMENT_PLAN.md and registry/prs.json.
 
 ## Starting point for this session
 
