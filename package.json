@@ -38,7 +38,9 @@
     "test:rights:aotv": "node --test test-rights/*.test.mjs",
     "rights:aotv:preflight": "node scripts/check-aotv-rights-release.mjs",
     "companion:aotv:generate": "node scripts/generate-aotv-schedules.mjs",
-    "test:marketplace:transport": "node --test test-marketplace/*.test.mjs"
+    "test:marketplace:transport": "node --test test-marketplace/*.test.mjs",
+    "public:verify": "node scripts/verify-public-files.mjs",
+    "test:publication": "node --test test-publication/*.test.mjs"
   },
   "dependencies": {
     "axios": "1.20.0",

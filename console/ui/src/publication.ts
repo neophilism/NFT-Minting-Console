@@ -3,8 +3,8 @@ export const MAX_RIGHTS_BYTES = 8 * 1024 * 1024;
 export const MAX_METADATA_BYTES = 128 * 1024;
 const encoder = new TextEncoder();
 const HASH = /^[0-9a-f]{64}$/;
-const base58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-const base32 = 'abcdefghijklmnopqrstuvwxyz234567';
+import { publicIpfsUri } from '../../publication/ipfs-uri.mjs';
+export { publicIpfsUri, supportedCid } from '../../publication/ipfs-uri.mjs';
 
 export interface RightsDocument {
   readonly name: string;
@@ -63,39 +63,6 @@ function text(value: unknown, maximum: number, field: string, multiline = false,
 function hash(value: unknown, field: string): string {
   if (typeof value !== 'string' || !HASH.test(value)) invalid(field);
   return value;
-}
-/** Deliberately bounded CID support: CIDv0, or lowercase base32 CIDv1 raw/dag-pb, SHA-256. */
-export function supportedCid(cid: string): boolean {
-  if (/^Qm[1-9A-HJ-NP-Za-km-z]{44}$/.test(cid)) {
-    let number = 0n;
-    for (const char of cid) number = number * 58n + BigInt(base58.indexOf(char));
-    const hex = number.toString(16);
-    return hex.length === 68 && hex.startsWith('1220');
-  }
-  if (!/^b[a-z2-7]{58}$/.test(cid)) return false;
-  const bytes: number[] = [];
-  let buffer = 0, bits = 0;
-  for (const char of cid.slice(1)) {
-    buffer = (buffer << 5) | base32.indexOf(char); bits += 5;
-    if (bits >= 8) { bits -= 8; bytes.push((buffer >>> bits) & 255); buffer &= (1 << bits) - 1; }
-  }
-  return buffer === 0 && bytes.length === 36 && bytes[0] === 1 &&
-    (bytes[1] === 0x55 || bytes[1] === 0x70) && bytes[2] === 0x12 && bytes[3] === 32;
-}
-/** Syntax only. Does not fetch, authenticate a gateway, or prove that a CID contains a file. */
-export function publicIpfsUri(value: unknown, field = 'the public IPFS URI'): string {
-  const uri = text(value, 2048, field);
-  if (!uri.startsWith('ipfs://') || /[?#\\\s]/u.test(uri)) invalid(field);
-  const [cid = '', ...path] = uri.slice(7).split('/');
-  if (!supportedCid(cid)) invalid(field);
-  for (const segment of path) {
-    if (!segment || !/^(?:[a-zA-Z0-9._~-]|%[0-9a-fA-F]{2})+$/.test(segment)) invalid(field);
-    let decoded: string;
-    try { decoded = decodeURIComponent(segment); } catch { invalid(field); }
-    if (decoded === '.' || decoded === '..' || /[/\\?#%]/.test(decoded)) invalid(field);
-    text(decoded, 255, field);
-  }
-  return uri;
 }
 export async function sha256Exact(bytes: Uint8Array): Promise<string> {
   // Own the bytes across the asynchronous digest so callers cannot change the input in flight.
