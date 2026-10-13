@@ -62,10 +62,11 @@ test('user aborted request never sends a GET',async()=>{
   await assert.rejects(client.getOrder({protocol:addr,hash,signal:controller.signal}),errorCode('CANCELLED'));
 });
 test('unsafe large numeric JSON never silently rounds order counters',async()=>{
-  const raw='{"counter":90071992547409933333333333333333333,"status":"ACTIVE"}';
+  const counter='90071992547409933333333333333333333';
+  const raw='{"counter":'+counter+',"status":"ACTIVE"}';
   const client=new OpenSeaReadOnlyClient({apiKey:key,fetchImpl:async()=>reply(raw)});
   const observation=await client.getOrder({protocol:addr,hash});
-  assert.equal(observation.apiResponse.counter,'90071992547409933333333333333333');
+  assert.equal(observation.apiResponse.counter,counter);
   assert.equal(observation.listingVerified,false);
 });
 test('no write, approve, listing sign or POST APIs are exposed',()=>{
