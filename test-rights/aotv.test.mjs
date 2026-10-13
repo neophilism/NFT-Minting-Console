@@ -28,7 +28,7 @@ test('Schedule A explicitly leaves three proposed entries incomplete without pri
   for(const title of ['Unsealed Records Music Playlist','Music Analyzer','Live Debate Engine'])assert.ok(schedule.includes(title));
   assert.match(schedule,/WORKING TEMPLATE/);assert.match(schedule,/private repository; identification only/);
   assert.match(schedule,/TO BE COMPLETED/);assert.match(schedule,/SHA-256/);
-  assert.match(schedule,/No additional commercial\/IP rights/);
+  assert.match(schedule,/no additional commercial\/IP rights/i);
 });
 test('pending metadata never reuses the historical rights digest or claims ready-to-mint status',async()=>{
   const old=JSON.parse(md(await read('reference/androids-of-the-vine/token-001.metadata.template.json')));
