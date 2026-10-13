@@ -97,7 +97,13 @@
     {
       "id": "NFT-13",
       "title": "Publishing boundary and public-media preflight",
-      "origin": "original"
+      "origin": "original",
+      "publicReadbackScope": "Streaming exact-byte verification against independently reviewed public-file commitments; UI/publishing integration and full milestone acceptance remain pending.",
+      "evidenceFiles": [
+        "docs/PUBLIC_FILE_VERIFICATION.md"
+      ],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending"
     },
     {
       "id": "NFT-14",
@@ -167,19 +173,27 @@
         "docs/AOTV_COMPANION_ALLOCATION.md",
         "console/companion/portfolio.mjs",
         "console/ui/src/CompanionPlanner.tsx",
-        "test-rights/companion.test.mjs"
+        "test-rights/companion.test.mjs",
+        "docs/PUBLIC_FILE_VERIFICATION.md"
       ],
       "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance",
       "pullRequests": [
         24,
         28
       ],
-      "rightsRevisionScope": "Optional token-specific two-project creator portfolios; balanced 40/40 example when all tokens opted in; local draft generator and browser preview only. Historical rights preserved; legal approval, per-token final contents, E2EE and IPFS publication pending."
+      "rightsRevisionScope": "Optional token-specific two-project creator portfolios; balanced 40/40 example when all tokens opted in; local draft generator and browser preview only. Historical rights preserved; legal approval, per-token final contents, E2EE and IPFS publication pending.",
+      "publicReadbackScope": "Streaming exact-byte verification against independently reviewed public-file commitments; UI/publishing integration and full milestone acceptance remain pending."
     },
     {
       "id": "NFT-20",
       "title": "Review/publish wizard and irreversible actions screen",
-      "origin": "original"
+      "origin": "original",
+      "publicReadbackScope": "Streaming exact-byte verification against independently reviewed public-file commitments; UI/publishing integration and full milestone acceptance remain pending.",
+      "evidenceFiles": [
+        "docs/PUBLIC_FILE_VERIFICATION.md"
+      ],
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending"
     },
     {
       "id": "NFT-21",
@@ -236,7 +250,8 @@
         "docs/MINT_RECONCILIATION.md",
         "docs/PR25_ACCEPTANCE.md",
         "docs/MINT_JOURNAL.md",
-        "docs/MINT_WALLET_UI.md"
+        "docs/MINT_WALLET_UI.md",
+        "docs/PUBLIC_FILE_VERIFICATION.md"
       ],
       "scope": "Direct-EOA unsigned batch planning, simulation and immutable receipt reconciliation; disposable local factory rehearsal. Persistent wallet/Safe/publication/validator/Sepolia/production integration remains pending.",
       "pullRequests": [
@@ -245,7 +260,8 @@
         27
       ],
       "journalScope": "Wallet/chain-scoped durable reservations and public transaction reconciliation; production wallet, Safe, publication and validator integration remain separate.",
-      "walletUiScope": "Direct-EOA local fee review and one-request mint with durable browser/HTTP/PostgreSQL receipt recovery; production/Safe/publication/validator/marketplace acceptance remains pending."
+      "walletUiScope": "Direct-EOA local fee review and one-request mint with durable browser/HTTP/PostgreSQL receipt recovery; production/Safe/publication/validator/marketplace acceptance remains pending.",
+      "publicReadbackScope": "Streaming exact-byte verification against independently reviewed public-file commitments; UI/publishing integration and full milestone acceptance remain pending."
     },
     {
       "id": "NFT-26",
@@ -259,7 +275,7 @@
     },
     {
       "id": "NFT-28",
-      "title": "Single \u201cMint & List\u201d guided operation",
+      "title": "Single “Mint & List” guided operation",
       "origin": "original"
     },
     {
