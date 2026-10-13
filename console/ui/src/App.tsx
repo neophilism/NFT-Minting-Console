@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { api } from './api';
 import { useAuthentication, useWallets } from './auth';
 import { configuration, routeFromHash, shortAddress } from './model';
@@ -8,6 +8,7 @@ import { ReleaseInventory } from './ReleaseInventory';
 import { CollectionPlanner } from './CollectionPlanner';
 import { ReleaseReadiness } from './ReleaseReadiness';
 import { Settings } from './Settings';
+const MintTransactions = lazy(() => import('./MintTransactions').then(module => ({ default: module.MintTransactions })));
 
 export default function App() {
   const [route, setRoute] = useState<Route>(() => routeFromHash(location.hash));
@@ -32,7 +33,7 @@ export default function App() {
     <aside className="sidebar"><a href="#/releases" className="brand"><span className="brand-mark">N</span><span>NFT<span className="brand-light"> CONSOLE</span></span></a><span className="sidebar-label">CREATOR WORKSPACE</span><Navigation route={route}/><div className="sidebar-bottom"><Icon name="lock"/><strong>Your keys stay in your wallet.</strong><p>Sign in to manage your releases.<br/>Never share a private key.</p><span className="sidebar-build">DEVELOPMENT BUILD</span></div></aside>
     <div className="workspace"><header className="topbar"><div className="topbar-left"><button className="icon-button mobile-menu" aria-label="Open navigation" onClick={() => setMenuOpen(true)}><Icon name="menu"/></button><span className="breadcrumb">Workspace <span>/</span> {page.label}</span></div><div className="topbar-actions"><span className="network-badge"><span className="status-dot"/>{config?.chainName || 'Connecting'}</span><button className="button wallet-button" onClick={openWallet} disabled={!config || auth.restoring}><Icon name="wallet"/>{current ? shortAddress(current.wallet) : auth.restoring ? 'Restoring session' : 'Connect wallet'}</button></div></header>
       <main id="main-content" className="main-content" tabIndex={-1}>
-        <div className="page-heading"><div><span className="eyebrow">{route === 'releases' ? 'YOUR CREATIVE WORKSPACE' : 'NFT CONSOLE'}</span><h1 ref={heading} tabIndex={-1}>{route === 'releases' ? 'Every collection starts here.' : page.label}</h1><p>{route === 'releases' ? 'One workspace. Independent collections. Deliberate releases.' : route === 'create' ? 'Give your next release a considered beginning.' : route === 'readiness' ? 'A clear view of what is verified, and what is still needed.' : 'Network, access and the boundaries of this build.'}</p></div>{route === 'releases' && <a href="#/create" className="button primary"><Icon name="plus"/>Create release</a>}</div>
+        <div className="page-heading"><div><span className="eyebrow">{route === 'releases' ? 'YOUR CREATIVE WORKSPACE' : 'NFT CONSOLE'}</span><h1 ref={heading} tabIndex={-1}>{route === 'releases' ? 'Every collection starts here.' : page.label}</h1><p>{route === 'releases' ? 'One workspace. Independent collections. Deliberate releases.' : route === 'create' ? 'Give your next release a considered beginning.' : route === 'readiness' ? 'A clear view of what is verified, and what is still needed.' : route === 'transactions' ? 'Review wallet requests, recover interruptions and verify recorded receipts.' : 'Network, access and the boundaries of this build.'}</p></div>{route === 'releases' && <a href="#/create" className="button primary"><Icon name="plus"/>Create release</a>}</div>
         {configError && <Notice error>{configError} <button className="text-button" onClick={() => setConfigVersion(v => v + 1)}>Retry configuration</button></Notice>}
         {auth.error && !walletOpen && <Notice error>{auth.error} {auth.retryLogout && <button className="text-button" onClick={() => void auth.logout()}>Retry sign-out</button>}</Notice>}
         {!config && !configError && <p className="loading" role="status">Connecting to the console...</p>}
@@ -42,6 +43,7 @@ export default function App() {
             <ReleaseInventory current={current} config={config} connect={openWallet} expired={auth.expire}/></>}
           {route === 'create' && <CollectionPlanner current={current} config={config} connect={openWallet}/>}
           {route === 'readiness' && <ReleaseReadiness current={current} connect={openWallet} expired={auth.expire}/>}
+          {route === 'transactions' && <Suspense fallback={<p role="status">Loading transaction tools...</p>}><MintTransactions current={current} config={config} connect={openWallet} expired={auth.expire} walletProvider={auth.walletProvider}/></Suspense>}
           {route === 'settings' && <Settings config={config} current={current}/>}
         </>}
       </main><footer className="workspace-footer"><span>NFT Console <span className="footer-divider">/</span> Independent collections. Explicit decisions.</span><span>No signing keys stored.</span></footer>

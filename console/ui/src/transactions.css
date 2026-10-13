@@ -1,0 +1,13 @@
+.transaction-workspace { display: grid; gap: 24px; }
+.transaction-workspace .panel { min-width: 0; }
+.transaction-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 0; border-top: 1px solid var(--line); }
+.transaction-row > div { min-width: 0; }
+.transaction-row p, .transaction-row small, .transaction-detail dd, .recovery-hash p, .mint-rehearsal dd { overflow-wrap: anywhere; }
+.transaction-row .button { flex-shrink: 0; }
+.transaction-detail .field, .mint-rehearsal .field, .mint-confirmation, .mint-rehearsal .review-checkbox { margin-top: 24px; }
+.mint-rehearsal select { width: 100%; min-height: 45px; padding: 10px; font: inherit; border: 1px solid var(--line); background: var(--paper); color: inherit; border-radius: 8px; }
+.transaction-workspace .review-checkbox { display:flex; gap:12px; align-items:flex-start; margin-bottom:20px; line-height:1.6; }
+.transaction-workspace .review-checkbox input { width:18px; height:18px; flex:0 0 auto; margin-top:4px; }
+.transaction-workspace .public-json { white-space:pre-wrap; overflow-wrap:anywhere; max-height:320px; overflow:auto; padding:16px; border:1px solid var(--line); font-size:.8rem; }
+.transaction-workspace .field .button { margin-top:16px; align-self:flex-start; }
+@media (max-width: 700px) { .transaction-row { align-items:stretch; flex-direction:column; } .transaction-workspace .section-heading { flex-wrap:wrap; gap:16px; } }
