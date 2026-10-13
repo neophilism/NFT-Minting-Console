@@ -9,13 +9,14 @@
 **Delivery:** Final copies or fixed recordings/snapshots defined below; no obligation to keep a third-party site online.  
 **License:** Read/listen/view/inspect and retain copies for personal enjoyment to the extent granted by the Creator/rightsholders. Existing applicable third-party/open-source licenses remain controlling; no additional commercial/IP rights are implied.
 
-## Proposed initial entries (all details provisional)
+## Proposed initial entries — two examples (all details provisional)
+
+The only proposed entries at this stage are the Unsealed Records playlist and a fixed Live Debate Engine source snapshot. The Creator may replace or revise this provisional inventory before approval.
 
 | Item | Description and exact deliverable | Source / reference only | Final version, checksum, delivery and licenses |
 | --- | --- | --- | --- |
 | **1. Unsealed Records Music Playlist** | A fixed playlist and any specifically selected introduction video, track list, accompanying recordings, or liner notes. The Creator must decide exactly which files and whether access is by delivered copies or a frozen list of links; streaming availability is not promised. | Unsealed Records; source/link **TO BE PROVIDED**. | **TO BE COMPLETED:** playlist/track list and order; snapshot date; each actual audio/video/file version and SHA-256 where delivered; size/format; delivery method; label/master/composition licenses or rights clearance. |
-| **2. Music Analyzer — source-code snapshot** | A read-only, sanitized snapshot of the native music-analysis application and selected explanatory documentation as they exist at one specified commit. Not a software service or a commitment to finish the application. | [Music Analyzer](https://github.com/neophilism/Music-Analyzer) — **private repository; identification only, no collector access granted**. | **TO BE COMPLETED:** exact commit; exported archive SHA-256, files included, size, download/delivery method, license/third-party notices, secret/license review. Never share credentials, internal secrets, private datasets, copyrighted model weights or unreleased customer data. |
-| **3. Live Debate Engine — source-code snapshot** | A read-only snapshot and optional recorded walkthrough of the developing structured-debate software at one specified version. No right to operate the platform or demand future milestones. | [Live Debate Engine](https://github.com/neophilism/Live-Debate-Engine) — public repository; its live `main` branch is **not** the fixed deliverable. | **TO BE COMPLETED:** exact commit; archive/recording SHA-256, files included, size, delivery method and existing license/third-party notices. Do not include credentials, environment files, private records or production access. |
+| **2. Live Debate Engine — source-code snapshot** | A read-only snapshot and optional recorded walkthrough of the developing structured-debate software at one specified version. No right to operate the platform or demand future milestones. | [Live Debate Engine](https://github.com/neophilism/Live-Debate-Engine) — public repository; its live `main` branch is **not** the fixed deliverable. | **TO BE COMPLETED:** exact commit; archive/recording SHA-256, files included, size, delivery method and existing license/third-party notices. Do not include credentials, environment files, private records or production access. |
 
 ## Inventory completion record
 

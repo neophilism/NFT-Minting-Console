@@ -2,9 +2,9 @@
 
 **Status: WORKING DRAFT. NOT FOR PUBLIC SALE, PUBLICATION, OR MINT.**
 
-## Decisions documented 2026-10-12
+## Decisions documented 2026-10-12 and Schedule A examples revised 2026-10-13
 
-The Creator replaced the former **Priority Investment Consideration** concept for Token #1 with **one-time delivery of a fixed Creator's Companion Portfolio**. The contents are creative, cultural and technical materials, not fundraising presentations: an Unsealed Records playlist and provisional code snapshots of Music Analyzer and Live Debate Engine are examples only. Do not promise early access to investment opportunities, first consideration, meetings, allocations, future projects, software milestones or continual releases under Section 4.
+The Creator replaced the former **Priority Investment Consideration** concept for Token #1 with **one-time delivery of a fixed Creator's Companion Portfolio**. The contents are creative, cultural and technical materials, not fundraising presentations: an Unsealed Records playlist and a provisional fixed snapshot of Live Debate Engine are the only two current examples. Do not promise early access to investment opportunities, first consideration, meetings, allocations, future projects, software milestones or continual releases under Section 4.
 
 The preceding `reference/androids-of-the-vine/` agreement and metadata are **preserved byte-for-byte as historical materials**. Their rights hash (`0ddcfae9f5fc2d2e059ed12e7a33ea5815e00a64e70930485602bc73f3f374c9`) belongs only to that historical agreement. Do **not** use that rights document, hash, or archived metadata as the current legal offering without explicit reconsideration.
 
@@ -18,7 +18,7 @@ Benefits in Sections 3–5 are **personal to the Original Purchaser**, not an au
 
 ### Before a go-live decision
 
-1. Creator approves final Schedule A contents. For the private Music Analyzer repository, export only an independently reviewed, sanitized, fixed snapshot; never give the buyer private GitHub access or release secret/config data. Pin a commit, a specific exported archive and its SHA-256. For public Live Debate Engine, likewise pin a particular reviewed snapshot, not a changing branch.
+1. Creator approves final Schedule A contents. For the public Live Debate Engine repository, prepare a reviewed, fixed source snapshot at an exact commit, rather than promising access to an evolving branch. Include only the selected distributable files; scan for secrets, personal records, third-party license restrictions and unlicensed materials. Record the exported archive's SHA-256 and the actual delivery method.
 2. Obtain all necessary rights to redistribute/listen to Unsealed Records recordings, code and videos; identify **exact files**, SHA-256, delivery methods and personal-use licenses. Live links should be supplementary only where retention of finished content was promised.
 3. Confirm that every deliverable **already exists at sale**. No pledge to keep code, services, platforms, streaming playlists or repositories alive or updated. Remove all template placeholders.
 4. Review the **entire** offering with qualified securities and IP counsel, including Section 5's continuing collector allocation, Token #1 promotional copy, artwork commercial license, website, and purchaser jurisdictions. Wording cannot guarantee non-security classification.
