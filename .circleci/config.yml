@@ -1,0 +1,100 @@
+version: 2.1
+
+# Full port of existing contract-ci.yml including actual on-chain validator,
+# pinned Foundry toolchain and E2EESA security profile negative fixtures.
+jobs:
+  contracts-and-console:
+    docker:
+      - image: cimg/node:22.20.0
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies locked in git
+          command: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run compile
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run:
+          name: Real synthetic two-release mint rehearsals
+          command: npm run mint:rehearse
+      - run: npm run test:data
+      - run: npm run test:auth
+      - run: npm run test:ui:model
+      - run: npm run test:rights:aotv
+      - run: npm run security:scan
+      - run: npm run build
+      - store_artifacts:
+          path: artifacts/rehearsal/mint-report.json
+          destination: mint-report.json
+
+  real-validator-adversarial:
+    docker:
+      - image: cimg/node:22.20.0
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Checkout exact external validator revision, including submodules
+          command: |
+            mkdir -p vendor
+            git clone https://github.com/limitbreakinc/creator-token-transfer-validator.git vendor/creator-token-transfer-validator
+            git -C vendor/creator-token-transfer-validator checkout --detach 59adb8b36ab0256c7430b017b1c9f8b4841d6e1e
+            git -C vendor/creator-token-transfer-validator submodule update --init --recursive
+            test "$(git -C vendor/creator-token-transfer-validator rev-parse HEAD)" = 59adb8b36ab0256c7430b017b1c9f8b4841d6e1e
+      - run:
+          name: Install checked Foundry 1.3.6 Linux binary
+          command: |
+            curl --fail --location --retry 3 --output /tmp/foundry-v1.3.6.tar.gz https://github.com/foundry-rs/foundry/releases/download/v1.3.6/foundry_v1.3.6_linux_amd64.tar.gz
+            echo "01248d7ce267f5b7958bc9b331d068c6c2d8eeb182e58f0b556d7295f398e2ce  /tmp/foundry-v1.3.6.tar.gz" | sha256sum -c -
+            mkdir -p "$HOME/.local/bin"
+            tar -xzf /tmp/foundry-v1.3.6.tar.gz -C "$HOME/.local/bin" forge cast anvil chisel
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+      - run:
+          name: Install exact application dependencies
+          command: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run compile
+      - run:
+          name: Actual pinned validator adversarial integration
+          command: npm run test:integration
+
+  scoped-security-profile:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Checkout pinned security standard
+          command: |
+            mkdir -p vendor
+            git clone https://github.com/neophilism/End-To-End-Everywhere-Security-Architecture-Standard.git vendor/e2eesa
+            git -C vendor/e2eesa checkout --detach 2883c792a766ae6ca860abb6fbe8b1654ba9d7de
+            test "$(git -C vendor/e2eesa rev-parse HEAD)" = 2883c792a766ae6ca860abb6fbe8b1654ba9d7de
+      - run:
+          name: Check exact scoped security configuration report
+          command: |
+            python3 scripts/check_security_profiles.py --output /tmp/e2eesa-configuration-report.json
+            cmp security/configuration-report.json /tmp/e2eesa-configuration-report.json
+      - run:
+          name: Reject invalid scope, dependencies, crosswalks and evidence claims
+          command: python3 -m unittest discover -s test-security -v
+
+  security-status-record:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Integrity-only E2EESA status record, not certification
+          command: python3 scripts/validate_e2eesa_status.py
+
+workflows:
+  all-required-checks:
+    jobs:
+      - contracts-and-console
+      - real-validator-adversarial
+      - scoped-security-profile
+      - security-status-record
