@@ -64,6 +64,17 @@ supports public test-manifest import, explicit simulation disclosure, fee review
 a single wallet request and durable receipt recovery. It does not enable mainnet
 or Sepolia signing. See [wallet UI boundaries and reproduction](docs/MINT_WALLET_UI.md).
 
+## Token #1 rights revision (not finalized)
+
+For **Androids Of The Vine Token #1**, the Creator's current instruction replaces
+historical investor-priority language with a one-time, defined **Creator's Companion
+Portfolio** (music, software snapshots and video). The original rights/metadata
+remain byte-exact historical references; the [new full working rights agreement,
+provisional Schedule A and unusable pending metadata](releases/androids-of-the-vine/token-001/README.md)
+are **not yet ready to publish or mint**. Do not reuse the historical rights
+hash or assert the new bundle is finalized. The future collector-NFT allocation
+in Section 5 has not been changed and remains a distinct legal-review issue.
+
 ## Start here for development or handoff
 
 1. [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md)

@@ -13,7 +13,7 @@ export default [
     languageOptions: { globals: globals.browser },
   },
   {
-    files: ["console/**/*.mjs", "scripts/**/*.mjs", "test-data/**/*.mjs", "test-auth/**/*.mjs", "test-native/**/*.mjs", "test-ui/**/*.mjs"],
+    files: ["console/**/*.mjs", "scripts/**/*.mjs", "test-data/**/*.mjs", "test-auth/**/*.mjs", "test-native/**/*.mjs", "test-ui/**/*.mjs", "test-rights/**/*.mjs"],
     languageOptions: { globals: globals.node },
     rules: { "no-control-regex": "off" },
   },

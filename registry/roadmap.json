@@ -98,12 +98,17 @@
       "acceptanceStatus": "pending",
       "evidenceFiles": [
         "docs/PUBLICATION_PREPARATION.md",
-        "docs/PR24_ACCEPTANCE.md"
+        "docs/PR24_ACCEPTANCE.md",
+        "releases/androids-of-the-vine/token-001/README.md",
+        "releases/androids-of-the-vine/token-001/RIGHTS_AGREEMENT_V2_DRAFT.md",
+        "releases/androids-of-the-vine/token-001/SCHEDULE_A_TEMPLATE.md"
       ],
       "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance",
       "pullRequests": [
-        24
-      ]
+        24,
+        28
+      ],
+      "rightsRevisionScope": "Token #1 rights-only prospective companion-portfolio replacement. Archived legal bytes unchanged; Schedule A and final signoff pending. Does not complete compliance, collection builder, media/rights editor or production publication."
     },
     {
       "id": "NFT-15",
@@ -142,12 +147,17 @@
       "acceptanceStatus": "pending",
       "evidenceFiles": [
         "docs/PUBLICATION_PREPARATION.md",
-        "docs/PR24_ACCEPTANCE.md"
+        "docs/PR24_ACCEPTANCE.md",
+        "releases/androids-of-the-vine/token-001/README.md",
+        "releases/androids-of-the-vine/token-001/RIGHTS_AGREEMENT_V2_DRAFT.md",
+        "releases/androids-of-the-vine/token-001/SCHEDULE_A_TEMPLATE.md"
       ],
       "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance",
       "pullRequests": [
-        24
-      ]
+        24,
+        28
+      ],
+      "rightsRevisionScope": "Token #1 rights-only prospective companion-portfolio replacement. Archived legal bytes unchanged; Schedule A and final signoff pending. Does not complete compliance, collection builder, media/rights editor or production publication."
     },
     {
       "id": "NFT-20",
@@ -232,7 +242,7 @@
     },
     {
       "id": "NFT-28",
-      "title": "Single \u201cMint & List\u201d guided operation",
+      "title": "Single “Mint & List” guided operation",
       "origin": "original"
     },
     {
