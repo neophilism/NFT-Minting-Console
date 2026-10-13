@@ -78,6 +78,14 @@ are **not ready to publish or mint**. Do not reuse the historical rights hash
 or assert a template is an approved offering. The separate future NFT collector
 allocation in Section 5 is unchanged and remains a legal-review issue.
 
+## Owner security-review instruction
+
+Independent human/external review is deferred and does not block development,
+merge or deployment. The implementing agent performs substantive source/security
+review and applicable tests, fixes actual defects and records evidence. This does
+not mark external review complete or claim certification. See [AGENTS.md](AGENTS.md)
+and [review policy](security/review-policy.json).
+
 ## Start here for development or handoff
 
 1. [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md)
@@ -87,7 +95,7 @@ allocation in Section 5 is unchanged and remains a legal-review issue.
    and [React/browser acceptance](docs/PR15_UI_ACCEPTANCE.md) and [combined browser/Safe/PostgreSQL acceptance](docs/PR09_BROWSER_ACCEPTANCE.md). These supersede earlier execution blockers, not the full product plan.
 4. [Frozen original source/rights](reference/androids-of-the-vine/), [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md),
    [real-validator assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md) and [Release Data Model](docs/RELEASE_DATA_MODEL.md).
-5. [E2EESA applicability and closed crypto gate](docs/E2EESA_APPLICABILITY.md),
+5. [E2EESA applicability and owner-authorized AI review process](docs/E2EESA_APPLICABILITY.md),
    [Threat Model](docs/THREAT_MODEL.md), [Privacy Inventory](docs/PRIVACY_INVENTORY.md)
    and [scoped security progress](security/e2eesa-status.json).
 
@@ -149,4 +157,4 @@ manual wallet-product and production rehearsals remain distinct checks.
 The source-owned E2EESA status separates implementation, complete testing and
 independent expert review. Read [adoption instructions](docs/E2EESA_ADOPTION.md)
 and run `python3 scripts/validate_e2eesa_status.py`. Record integrity does not
-certify security. The pre-crypto independent review gate has not been waived.
+certify security. The owner superseded the pre-crypto external-review prerequisite on October 13, 2026.

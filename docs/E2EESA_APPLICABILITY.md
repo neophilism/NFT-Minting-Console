@@ -1,9 +1,11 @@
+> **Owner instruction, 2026-10-13:** Independent human/external security review is deferred and is not a prerequisite for implementation, merge or deployment. AI source/security review and applicable passing tests are the operational review process. Actual defects and missing functionality still require fixes. External review/certification remain honestly pending. See [AGENTS.md](../AGENTS.md) and [review policy](../security/review-policy.json). This supersedes conflicting older review-gate wording below.
+
 # E2EESA applicability and implementation gate — PR-08
 
 This is a **target architecture and configuration diagnostic**, not evidence that
 the prototype implements E2EE, not a frozen upstream Candidate, and not a
-certification. Independent exact-source architecture/profile review remains
-required before PR-10. The current plaintext `/api/prepare` and unencrypted
+certification. AI exact-source architecture/profile review applies to PR-10; external human
+review is deferred under the owner instruction. The current plaintext `/api/prepare` and unencrypted
 `localStorage` flows remain known failures until replaced by PRs 09–13.
 
 ## Exact upstream basis
@@ -22,7 +24,7 @@ changed README without refreshing its frozen-file manifest. The upstream
 `b2ce78b0cf2a22564818a5568afd0a0a4a0c775b`. The preceding pin retains the valid
 manifest and identical normative specifications/profiles. This records the
 failure rather than repairing upstream bytes or waiving the source check.
-Any pin/profile change requires fresh resolution and independent review.
+Any pin/profile change requires fresh resolution and AI source/security review.
 
 ## Component and data-flow scope
 
@@ -103,6 +105,6 @@ configuration evaluator's result and exact resolutions. Source/artifact digests
 there bind the **configuration definition and resolved configuration**, not an
 application build. The report intentionally declares `inventory_supported=false`,
 no implementation claims, no certification eligibility, review pending and a
-closed crypto gate. Ten adversarial configuration tests pass; implementation
+owner-authorized AI review process. Ten adversarial configuration tests pass; implementation
 and external evidence remain absent. A configuration pass cannot authorize
 deployment or change any of these evidence states.

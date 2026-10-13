@@ -146,8 +146,8 @@ def check(upstream: Path, *, target=None, lock=None, requirements=None, threats=
     return {
         "scope_kind": "target-architecture", "artifact_kind": "configuration-only",
         "standard_commit": source["commit"], "implementation_controls_verified": False,
-        "independent_review": "pending", "cryptography_implementation_gate": "closed",
-        "privacy_retention_design_gate": "pending-independent-review",
+        "independent_review": "pending", "cryptography_implementation_gate": "open-with-ai-review",
+        "privacy_retention_design_gate": "ai-review-required",
         "crosswalk_valid": True, "control_count": len(requirements["controls"]), "threat_count": len(threats["threats"]),
         "claim_limitations": target["claim_limitations"], "profile_resolutions": configs,
         "configuration_assessment": result,
@@ -167,7 +167,7 @@ def main():
     if args.output:
         args.output.write_text(json.dumps(result, sort_keys=True, indent=2) + "\n")
     print(json.dumps({"configuration_valid": True, "implementation_controls_verified": False,
-                      "independent_review": "pending", "cryptography_implementation_gate": "closed",
+                      "independent_review": "pending", "cryptography_implementation_gate": "open-with-ai-review",
                       "production_certification_eligible": False}, sort_keys=True))
     return 0
 

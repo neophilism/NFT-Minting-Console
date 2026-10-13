@@ -43,7 +43,7 @@
     "state": "pending",
     "evidence_ref": null
   },
-  "cryptography_implementation_gate": "Independent exact-source architecture/profile review required before PR-10; a configuration pass is not implementation approval.",
+  "cryptography_implementation_gate": "Owner-authorized AI source/security review and applicable tests; independent external review is deferred, not a prerequisite.",
   "rejected_upstream_head": {
     "commit": "6ec85d51f9207da31f0e90fd8a7c82ffff8448f6",
     "reason": "The committed frozen-file manifest no longer matches README.md; the preceding documentation commit retains a valid exact-source lock. No normative spec or profile is changed by this pin."
