@@ -1,0 +1,50 @@
+name: Pinned Seaport development artifact
+on:
+  push:
+    branches: [work/nft26-marketplace-orders-20261012]
+    paths: [.github/workflows/seaport-source.yml]
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ProjectOpenSea/seaport-core
+          ref: 523097f9cee66c15d308c900c50f336b291cda08
+          path: vendor/seaport-core
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify pins and compile isolated official contracts
+        run: |
+          test "$(git -C vendor/seaport-core rev-parse HEAD)" = '523097f9cee66c15d308c900c50f336b291cda08'
+          test "$(git -C vendor/seaport-core/lib/seaport-types rev-parse HEAD)" = 'b72493221ee1d2f2fb30ed94a3cc535a9028d09f'
+          ln -s ../vendor/seaport-core/lib/seaport-types node_modules/seaport-types
+          mkdir -p test-seaport/contracts
+          printf '%s\n' '// SPDX-License-Identifier: MIT' 'pragma solidity 0.8.24;' 'import "../../vendor/seaport-core/src/Seaport.sol";' 'import "../../vendor/seaport-core/src/conduit/ConduitController.sol";' > test-seaport/contracts/Imports.sol
+          printf '%s\n' 'const base=require("./hardhat.config.cjs");' 'module.exports={...base,solidity:{version:"0.8.24",settings:{evmVersion:"cancun",viaIR:true,optimizer:{enabled:true,runs:200}}},paths:{sources:"./test-seaport/contracts",artifacts:"./artifacts-seaport",cache:"./cache-seaport"}};' > seaport-source.config.cjs
+          node node_modules/hardhat/internal/cli/cli.js compile --config seaport-source.config.cjs
+      - name: Package only public source and compiler outputs
+        run: |
+          mkdir -p "$RUNNER_TEMP/seaport-reference"
+          git -C vendor/seaport-core archive HEAD > "$RUNNER_TEMP/seaport-reference/core.tar"
+          git -C vendor/seaport-core/lib/seaport-types archive HEAD > "$RUNNER_TEMP/seaport-reference/types.tar"
+          tar -czf "$RUNNER_TEMP/seaport-reference/artifacts.tgz" artifacts-seaport
+          cd "$RUNNER_TEMP/seaport-reference"
+          sha256sum core.tar types.tar artifacts.tgz > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: seaport-reference-${{ github.run_id }}
+          path: ${{ runner.temp }}/seaport-reference/
+          retention-days: 1
+          if-no-files-found: error
