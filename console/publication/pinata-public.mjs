@@ -18,7 +18,7 @@ const fail=(code,cid)=>{throw new PublicUploadError(code,cid);};
 function fileType(kind,name,blob){
   const format=PUBLIC_UPLOAD_TYPES[kind];
   if(!format||typeof name!=='string'||name.length>200||!name||name==='.'||name==='..'||
-     name.trim()!==name||/[\/\\\u0000-\u001f\u007f]/u.test(name)||!blob||typeof blob.stream!=='function'||
+     name.trim()!==name||name.includes('/')||/[\\\u0000-\u001f\u007f]/u.test(name)||!blob||typeof blob.stream!=='function'||
      !Number.isSafeInteger(blob.size)||blob.size<1||blob.size>format.max)fail('INVALID_FILE');
   const ext=name.slice(name.lastIndexOf('.')).toLowerCase();
   if(!format.extensions.includes(ext))fail('INVALID_FILE_TYPE');
@@ -60,6 +60,7 @@ export async function publishReviewedFile({
   fetchImpl=globalThis.fetch,verifyGateway='pinata',timeoutMs=1200000
 }={}){
   const mime=fileType(kind,name,blob);
+  if(blob.type&&blob.type!==mime)fail('INVALID_MIME_TYPE');
   if(acknowledgePublic!==true)fail('PUBLIC_CONSENT_REQUIRED');
   if(typeof sha256!=='string'||!/^[a-f0-9]{64}$/.test(sha256))fail('INVALID_SHA256');
   if(typeof jwt!=='string'||jwt.length<16||jwt.length>8192||/[\s\u0000-\u001f\u007f]/u.test(jwt))fail('JWT_UNAVAILABLE');
