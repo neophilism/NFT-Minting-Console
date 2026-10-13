@@ -23,10 +23,16 @@ test('Section 4 investment priority was replaced; Section 5 and the artwork lice
   assert.equal(section(original,'## 1. Non-Exclusive Commercial License','## 2. Transfer'),section(draft,'## 1. Non-Exclusive Commercial License','## 2. Transfer'));
   assert.match(draft,/## 11\. No Future Managerial Undertaking[\s\S]*one-time delivery/);
 });
-test('Schedule A explicitly leaves three proposed entries incomplete without private repository access',async()=>{
+test('Schedule A has exactly two provisional, non-investment entries with no withdrawn codebase',async()=>{
   const schedule=md(await read(p+'SCHEDULE_A_TEMPLATE.md'));
-  for(const title of ['Unsealed Records Music Playlist','Music Analyzer','Live Debate Engine'])assert.ok(schedule.includes(title));
-  assert.match(schedule,/WORKING TEMPLATE/);assert.match(schedule,/private repository; identification only/);
+  const items=[...schedule.matchAll(/^\| \*\*(\d+)\. ([^|]*?)\*\* \|/gm)].map(match=>({index:Number(match[1]),title:match[2].trim()}));
+  assert.deepEqual(items,[
+    {index:1,title:'Unsealed Records Music Playlist'},
+    {index:2,title:'Live Debate Engine — source-code snapshot'},
+  ]);
+  assert.doesNotMatch(schedule,/Music Analyzer/i);
+  assert.match(schedule,/WORKING TEMPLATE/);
+  assert.match(schedule,/not\*\* the fixed deliverable/);
   assert.match(schedule,/TO BE COMPLETED/);assert.match(schedule,/SHA-256/);
   assert.match(schedule,/no additional commercial\/IP rights/i);
 });
