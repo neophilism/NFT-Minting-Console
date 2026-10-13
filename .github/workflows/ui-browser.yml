@@ -47,6 +47,8 @@ jobs:
       - run: npm run test:ui:model
       - name: Install the pinned Playwright browser
         run: npx --no-install playwright install --with-deps chromium
+      - name: Actual browser attachment cryptography
+        run: npm run test:crypto:browser
       - name: Desktop, mobile, wallet and accessibility acceptance
         env:
           NFT_TEST_DISPOSABLE_DATABASE: 'yes'

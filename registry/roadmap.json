@@ -73,7 +73,16 @@
     {
       "id": "NFT-10",
       "title": "Client-side draft E2EE and per-file chunking",
-      "origin": "original"
+      "origin": "original",
+      "implementationStatus": "partial",
+      "acceptanceStatus": "pending",
+      "evidenceFiles": [
+        "docs/CLIENT_ATTACHMENT_CRYPTO.md",
+        "console/crypto/attachments.mjs",
+        "test-crypto/attachments.test.mjs",
+        "test-crypto/attachments.browser.mjs"
+      ],
+      "scope": "Client-only chunked attachment AEAD and streaming hashes. Authenticated parent-message key distribution, device authorization, recovery, encrypted workspace/storage integration and complete acceptance remain pending."
     },
     {
       "id": "NFT-11",
@@ -250,7 +259,7 @@
     },
     {
       "id": "NFT-28",
-      "title": "Single “Mint & List” guided operation",
+      "title": "Single \u201cMint & List\u201d guided operation",
       "origin": "original"
     },
     {

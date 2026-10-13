@@ -43,6 +43,8 @@ jobs:
           path: artifacts/rehearsal/mint-report.json
           if-no-files-found: error
           retention-days: 7
+      - name: Verify client attachment cryptography
+        run: npm run test:crypto
       - name: Verify migrations and release isolation
         run: npm run test:data
       - name: Verify wallet authentication, HTTP and browser controls

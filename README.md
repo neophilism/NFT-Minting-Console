@@ -46,6 +46,13 @@ simulates them and reconciles receipts without a signer or transaction broadcast
 This is not the user-facing mint workflow, a public upload or an OpenSea listing.
 See [mint component and rehearsal boundaries](docs/MINT_RECONCILIATION.md).
 
+## Client attachment encryption component
+
+The client-only [attachment module](docs/CLIENT_ATTACHMENT_CRYPTO.md) provides
+fresh per-file AES-256-GCM keys, authenticated chunks and streaming hash checks.
+It is not yet connected to encrypted draft storage or authorized-device key
+delivery. Private workspaces remain unavailable until that integration passes.
+
 ## Durable transaction recovery
 
 Authenticated wallet accounts have a persistent mint-operation journal with
