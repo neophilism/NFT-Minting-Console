@@ -2,13 +2,13 @@
 
 **Status: WORKING DRAFT. NOT FOR PUBLIC SALE, PUBLICATION, OR MINT.**
 
-## Decisions documented 2026-10-12 and Schedule A examples revised 2026-10-13
+## Decisions documented 2026-10-12 through 2026-10-13
 
-The Creator replaced the former **Priority Investment Consideration** concept for Token #1 with **one-time delivery of a fixed Creator's Companion Portfolio**. The contents are creative, cultural and technical materials, not fundraising presentations: an Unsealed Records playlist and a provisional fixed snapshot of Live Debate Engine are the only two current examples. Do not promise early access to investment opportunities, first consideration, meetings, allocations, future projects, software milestones or continual releases under Section 4.
+The Creator replaced the former **Priority Investment Consideration** concept with an **optional per-token fixed Creator's Companion Portfolio**. Each selected token receives exactly two distinct project-information packages through its own Schedule A; a token may also expressly have no Companion Portfolio. The materials concern creative, cultural, nonprofit, technical and idea-stage work—not investment opportunities or fundraising presentations: an Unsealed Records playlist and a provisional fixed snapshot of Live Debate Engine are the only two current examples. Do not promise early access to investment opportunities, first consideration, meetings, allocations, future projects, software milestones or continual releases under Section 4.
 
 The preceding `reference/androids-of-the-vine/` agreement and metadata are **preserved byte-for-byte as historical materials**. Their rights hash (`0ddcfae9f5fc2d2e059ed12e7a33ea5815e00a64e70930485602bc73f3f374c9`) belongs only to that historical agreement. Do **not** use that rights document, hash, or archived metadata as the current legal offering without explicit reconsideration.
 
-The complete proposed successor is [RIGHTS_AGREEMENT_V2_DRAFT.md](RIGHTS_AGREEMENT_V2_DRAFT.md). The creator-owned inventory is [SCHEDULE_A_TEMPLATE.md](SCHEDULE_A_TEMPLATE.md). A deliberately unusable [pending metadata example](token-001.metadata.pending.json) prevents accidental reuse of the historical rights digest. None of these are live NFTs or uploaded/pinned assets.
+The complete proposed successor is [RIGHTS_AGREEMENT_V2_DRAFT.md](RIGHTS_AGREEMENT_V2_DRAFT.md). The creator-owned Token #001 example is [SCHEDULE_A_TEMPLATE.md](SCHEDULE_A_TEMPLATE.md). The [40-project optional catalog and allocation instructions](../companion/PROJECT_CATALOG_TEMPLATE.json) and [allocation design](../../../docs/AOTV_COMPANION_ALLOCATION.md) are separate provisional release planning materials. A deliberately unusable [pending metadata example](token-001.metadata.pending.json) prevents accidental reuse of the historical rights digest. None of these are live NFTs or uploaded/pinned assets.
 
 ### Unchanged rights and remaining review
 

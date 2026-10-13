@@ -4,6 +4,7 @@ import { emptyPlan, validatePlan } from './model';
 import type { Configuration, Plan, Session } from './model';
 import { Icon, Notice, SignInPrompt } from './components';
 import { RightsWorkbench } from './RightsWorkbench';
+import { CompanionPlanner } from './CompanionPlanner';
 
 const labels: Record<keyof Plan, string> = { name: 'Collection name', symbol: 'Token symbol', supply: 'Maximum supply', royalty: 'Creator royalty (%)', price: 'Initial listing price (ETH)', owner: 'OWNER wallet', minter: 'MINTER wallet', recipient: 'Royalty recipient' };
 type PlannerProps = { current: Session | null; config: Configuration; connect: () => void };
@@ -43,5 +44,6 @@ function PlannerContent({ current, config, connect }: PlannerProps) {
       <div className="form-actions"><p><Icon name="lock"/>No upload, signature or transaction at this step.</p><button className="button primary" type="submit">Review setup <Icon name="arrow"/></button></div>
     </form>}
     <RightsWorkbench key={`${current.wallet}:${current.chainId}:${current.csrf}`}/>
+    <CompanionPlanner key={`companion:${current.wallet}:${current.chainId}:${current.csrf}`}/>
   </>;
 }

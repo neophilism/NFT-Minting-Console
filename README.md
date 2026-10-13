@@ -66,14 +66,17 @@ or Sepolia signing. See [wallet UI boundaries and reproduction](docs/MINT_WALLET
 
 ## Token #1 rights revision (not finalized)
 
-For **Androids Of The Vine Token #1**, the Creator's current instruction replaces
-historical investor-priority language with a one-time, defined **Creator's Companion
-Portfolio** (music, software snapshots and video). The original rights/metadata
-remain byte-exact historical references; the [new full working rights agreement,
-provisional Schedule A and unusable pending metadata](releases/androids-of-the-vine/token-001/README.md)
-are **not yet ready to publish or mint**. Do not reuse the historical rights
-hash or assert the new bundle is finalized. The future collector-NFT allocation
-in Section 5 has not been changed and remains a distinct legal-review issue.
+For **Androids Of The Vine**, the Creator's current instruction replaces
+historical investor-priority language with an **optional**, fixed, token-specific
+**Creator's Companion Portfolio**. When enabled for a token, its own Schedule A
+identifies exactly two projects and their existing informational/creative
+materials; when disabled there is no such additional benefit. The [40-by-2
+offline assignment and Schedule A tooling](docs/AOTV_COMPANION_ALLOCATION.md)
+creates drafts only. The original rights/metadata remain byte-exact historical
+references; the [new working rights and provisional Token #1 schedule](releases/androids-of-the-vine/token-001/README.md)
+are **not ready to publish or mint**. Do not reuse the historical rights hash
+or assert a template is an approved offering. The separate future NFT collector
+allocation in Section 5 is unchanged and remains a legal-review issue.
 
 ## Start here for development or handoff
 
