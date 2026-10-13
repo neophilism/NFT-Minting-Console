@@ -167,12 +167,15 @@
       "acceptanceStatus": "pending",
       "evidenceFiles": [
         "docs/MINT_RECONCILIATION.md",
-        "docs/PR25_ACCEPTANCE.md"
+        "docs/PR25_ACCEPTANCE.md",
+        "docs/MINT_WALLET_UI.md"
       ],
       "scope": "Direct-EOA unsigned batch planning, simulation and immutable receipt reconciliation; disposable local factory rehearsal. Persistent wallet/Safe/publication/validator/Sepolia/production integration remains pending.",
       "pullRequests": [
-        25
-      ]
+        25,
+        27
+      ],
+      "walletUiScope": "Direct-EOA local fee review and one-request mint with durable browser/HTTP/PostgreSQL receipt recovery; production/Safe/publication/validator/marketplace acceptance remains pending."
     },
     {
       "id": "NFT-23",
@@ -181,9 +184,15 @@
       "implementationStatus": "partial",
       "acceptanceStatus": "pending",
       "evidenceFiles": [
-        "docs/MINT_JOURNAL.md"
+        "docs/MINT_JOURNAL.md",
+        "docs/MINT_WALLET_UI.md"
       ],
-      "journalScope": "Wallet/chain-scoped durable reservations and public transaction reconciliation; production wallet, Safe, publication and validator integration remain separate."
+      "journalScope": "Wallet/chain-scoped durable reservations and public transaction reconciliation; production wallet, Safe, publication and validator integration remain separate.",
+      "pullRequests": [
+        26,
+        27
+      ],
+      "walletUiScope": "Direct-EOA local fee review and one-request mint with durable browser/HTTP/PostgreSQL receipt recovery; production/Safe/publication/validator/marketplace acceptance remains pending."
     },
     {
       "id": "NFT-24",
@@ -199,13 +208,17 @@
       "evidenceFiles": [
         "docs/MINT_RECONCILIATION.md",
         "docs/PR25_ACCEPTANCE.md",
-        "docs/MINT_JOURNAL.md"
+        "docs/MINT_JOURNAL.md",
+        "docs/MINT_WALLET_UI.md"
       ],
       "scope": "Direct-EOA unsigned batch planning, simulation and immutable receipt reconciliation; disposable local factory rehearsal. Persistent wallet/Safe/publication/validator/Sepolia/production integration remains pending.",
       "pullRequests": [
-        25
+        25,
+        26,
+        27
       ],
-      "journalScope": "Wallet/chain-scoped durable reservations and public transaction reconciliation; production wallet, Safe, publication and validator integration remain separate."
+      "journalScope": "Wallet/chain-scoped durable reservations and public transaction reconciliation; production wallet, Safe, publication and validator integration remain separate.",
+      "walletUiScope": "Direct-EOA local fee review and one-request mint with durable browser/HTTP/PostgreSQL receipt recovery; production/Safe/publication/validator/marketplace acceptance remains pending."
     },
     {
       "id": "NFT-26",

@@ -81,6 +81,7 @@ test('browser wallet to real database and local-chain mint survives reload',asyn
   expect(await sends(page)).toBe(0); // new page performed verification, not a repeated wallet send
   const checks=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();expect(checks.violations).toEqual([]);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.evaluate(()=>window.scrollTo(0,0));
   await page.screenshot({path:`test-results/${info.project.name}-mint-recovery.png`,fullPage:true});
 });
 test('wallet rejection is recorded without automatic retry or a false successful mint',async({page},info)=>{

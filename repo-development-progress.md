@@ -32,3 +32,19 @@ transaction envelopes, real order construction/posting/verification, and the
 remaining private-workspace and production gates. Do not call a URL a listing,
 a mint an active order, an assistant review an independent audit, or a partial
 work package completed. Never modify frozen rights or weaken production guards.
+
+## Merged journal and current wallet UI
+
+PR #26 merged as `33a7616c38f9d3c82b3375c20d53f18e1ecc3358` after core
+38324907382, native runtime 38324907391, browser 38324907386 and record-integrity
+38324907387 passed. Separate assistant review: 5497222114. It is not an
+independent expert audit.
+
+PR #27 now integrates the journal into Mint transactions: fee/disclosure review,
+selected-wallet account/chain/nonce checks, one request, local real-chain receipt
+recovery, reload, lost wallet/claim/storage response handling and mainnet-off
+controls. Local 86 model, 62 contract, 223 auth and 8 data cases passed. Final
+remote browser acceptance and exact-head security review must pass before merge.
+See docs/MINT_WALLET_UI.md. The complete encrypted publish/mint/list product and
+external production gates remain incomplete; never equate this rehearsal with
+live user NFTs for sale.
