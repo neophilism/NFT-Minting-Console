@@ -94,14 +94,14 @@ jobs:
   native-postgres:
     docker:
       - image: cimg/node:22.20.0
-      - image: postgres@sha256:885953109528ad3dfc90362b1a6f50a78620b5315be19f187753d267e484dc5b
+      - image: 'postgres@sha256:885953109528ad3dfc90362b1a6f50a78620b5315be19f187753d267e484dc5b'
         environment:
           POSTGRES_PASSWORD: disposable-ci-only
           POSTGRES_DB: nft_console_ci
     resource_class: large
     environment:
       NFT_TEST_DISPOSABLE_DATABASE: 'yes'
-      TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:disposable-ci-only@127.0.0.1:5432/nft_console_ci
+      TEST_DATABASE_URL_UNPOOLED: 'postgresql://postgres:disposable-ci-only@127.0.0.1:5432/nft_console_ci'
     steps:
       - checkout
       - run: npm ci --ignore-scripts --no-audit --no-fund
@@ -137,14 +137,14 @@ jobs:
   browser:
     docker:
       - image: cimg/node:22.20.0-browsers
-      - image: postgres@sha256:885953109528ad3dfc90362b1a6f50a78620b5315be19f187753d267e484dc5b
+      - image: 'postgres@sha256:885953109528ad3dfc90362b1a6f50a78620b5315be19f187753d267e484dc5b'
         environment:
           POSTGRES_PASSWORD: disposable-browser-ci-only
           POSTGRES_DB: nft_console_ci
     resource_class: large
     environment:
       NFT_TEST_DISPOSABLE_DATABASE: 'yes'
-      TEST_DATABASE_URL_UNPOOLED: postgresql://postgres:disposable-browser-ci-only@127.0.0.1:5432/nft_console_ci
+      TEST_DATABASE_URL_UNPOOLED: 'postgresql://postgres:disposable-browser-ci-only@127.0.0.1:5432/nft_console_ci'
     steps:
       - checkout
       - run:
