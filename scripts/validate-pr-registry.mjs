@@ -8,7 +8,7 @@ if (retired.repository !== repository || retired.deprecated !== true || retired.
     Object.hasOwn(retired, 'milestones') || Object.hasOwn(retired, 'units') || Object.hasOwn(retired, 'plannedPrCount'))
   throw new Error('Only registry/prs.json may contain the active PR plan');
 const specification=await readFile(new URL('../docs/DEVELOPMENT_PLAN.md',import.meta.url),'utf8');
-const headings=[...specification.matchAll(/^\\*\\*PR-(\\d{2})\\s/gm)].map(m=>'NFT-'+m[1]);
+const headings=[...specification.matchAll(/^\*\*PR-(\d{2})\s/gm)].map(m=>'NFT-'+m[1]);
 if (headings.length!==document.units.length || headings.some((id,index)=>document.units[index]?.id!==id))
   throw new Error('Approved plan and canonical registry work-unit IDs disagree');
 console.log(`Valid PR registry: ${repository}, ${document.units.length} approved units; runtime acceptance is separate.`);
