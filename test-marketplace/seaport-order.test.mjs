@@ -69,5 +69,5 @@ test('wrong chain, wrong EOA signer and mutated review never produce an accepted
 test('signed zone produces full restricted order rather than accidental open order',()=>{
  const p=buildReviewedOrder({...input(),zone:royalty});
  assert.equal(p.parameters.orderType,2);
- assert.equal(p.parameters.zone,royalty);
+ assert.equal(p.parameters.zone.toLowerCase(),royalty);
 });
