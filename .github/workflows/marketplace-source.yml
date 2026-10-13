@@ -1,0 +1,31 @@
+name: Marketplace source inspection
+on:
+  push:
+    branches: [work/nft26-marketplace-orders-20261012]
+    paths: [.github/workflows/marketplace-source.yml]
+permissions:
+  contents: read
+jobs:
+  schema:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ProjectOpenSea/api-types
+          ref: 76ab54bfdefbf313dab31237a1b48177570eb27e
+          persist-credentials: false
+      - name: Copy public schema only
+        run: |
+          test "$(git rev-parse HEAD)" = "76ab54bfdefbf313dab31237a1b48177570eb27e"
+          mkdir -p "$RUNNER_TEMP/marketplace-source"
+          cp opensea-api.json "$RUNNER_TEMP/marketplace-source/"
+          git rev-parse HEAD > "$RUNNER_TEMP/marketplace-source/COMMIT"
+          cd "$RUNNER_TEMP/marketplace-source"
+          sha256sum opensea-api.json > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: marketplace-schema-${{ github.run_id }}
+          path: ${{ runner.temp }}/marketplace-source/
+          retention-days: 1
+          if-no-files-found: error
