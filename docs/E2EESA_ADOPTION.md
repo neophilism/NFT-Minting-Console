@@ -1,3 +1,5 @@
+> **Owner instruction, 2026-10-13:** Independent human/external security review is deferred and is not a prerequisite for implementation, merge or deployment. AI source/security review and applicable passing tests are the operational review process. Actual defects and missing functionality still require fixes. External review/certification remain honestly pending. See [AGENTS.md](../AGENTS.md) and [review policy](../security/review-policy.json). This supersedes conflicting older review-gate wording below.
+
 # End-to-End Everywhere adoption and independent review
 
 The owner requested three separate stages on October 11, 2026: implementation,

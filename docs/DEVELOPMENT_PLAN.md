@@ -1,3 +1,5 @@
+> **Owner instruction, 2026-10-13:** Independent human/external security review is deferred and is not a prerequisite for implementation, merge or deployment. AI source/security review and applicable passing tests are the operational review process. Actual defects and missing functionality still require fixes. External review/certification remain honestly pending. See [AGENTS.md](../AGENTS.md) and [review policy](../security/review-policy.json). This supersedes conflicting older review-gate wording below.
+
 > **Canonical PR work registry:** [`registry/roadmap.json`](../registry/roadmap.json). The detailed plan below is retained; agents must update PR counts and mappings in the registry file.
 
 # NFT Console — Complete Development & Handoff Plan
@@ -58,7 +60,7 @@ A nontechnical authorized user can:
 
 ## 4. Execution plan — complete ordered PR backlog
 
-All numbered PRs below are planned **work packages**, not already-created pull requests. Implementation can chain independent PRs; the base prerequisites and acceptance gates must stay intact. Each PR must update relevant documentation/tests. A PR is **complete** only after tests, review and merge; a feature is **production-ready** only after corresponding external checks.
+All numbered PRs below are planned **work packages**, not already-created pull requests. Implementation can chain independent PRs; the base prerequisites and acceptance gates must stay intact. Each PR must update relevant documentation/tests. A PR is **complete** only after tests, review and merge; a feature is **production-ready** only after its applicable implementation, test and operational checks; external human review is deferred.
 
 ### Foundation and audited-contract parity
 
@@ -78,7 +80,7 @@ All numbered PRs below are planned **work packages**, not already-created pull r
 
 **PR-07 — Release schema, ownership and data migrations.** Normalize releases, assets, editions, token records, rights versions, transaction jobs, listings, deployment profiles and activity log; preserve exact hashes and immutable publication references. **Depends:** 01. **Acceptance:** schema migrations and multi-collection isolation tests.
 
-**PR-08 — E2EESA applicability, profile lock, threat model and privacy inventory.** Pin upstream commit/tag (candidate ≠ certified); identify component/data-flow scope and attacker models; assign exact relevant attachments, storage, client, transport, identity/secret management, backups, telemetry, supply-chain, verification profiles. **Depends:** 01–03. **Acceptance:** machine-readable profile selection and claim limitations, threat model, evidence matrix, upstream-conformance resolver check; independent review before crypto work.
+**PR-08 — E2EESA applicability, profile lock, threat model and privacy inventory.** Pin upstream commit/tag (candidate ≠ certified); identify component/data-flow scope and attacker models; assign exact relevant attachments, storage, client, transport, identity/secret management, backups, telemetry, supply-chain, verification profiles. **Depends:** 01–03. **Acceptance:** machine-readable profile selection and claim limitations, threat model, evidence matrix, upstream-conformance resolver check; AI source/security review before crypto activation; external review deferred.
 
 **PR-09 — Authenticated admin login, RBAC and wallet/Safe identity.** SIWE-style challenge (domain/nonce/expiration/chain), session rotation/CSRF, 2FA optional, authorized wallets, per-release permissions, audit events, test network replay and phishing defenses. **Depends:** 07–08. **Acceptance:** unauthorized API cannot pin, read metadata, mutate drafts or deploy; contract wallet login validated.
 
@@ -149,7 +151,7 @@ All numbered PRs below are planned **work packages**, not already-created pull r
 **Stream C — UI:** 01→07→15→16→17→18→19→20, then 28–29.  
 **Stream D — operations:** 02→31→32→33→34→35→36.  
 
-The streams may run concurrently, but **do not deploy production until contract parity, real-validator, client E2EE, publish-boundary, independent audit, disposable-mainnet sale/royalty, recovery, and CI gates are all green.**
+The streams may run concurrently, but **do not deploy production until contract parity, real-validator, client E2EE, publish-boundary, AI security review, disposable-mainnet sale/royalty, recovery, and CI gates are all green.**
 
 Milestones:
 - **M1 — documented baseline:** PR 01–08. No production claim.
@@ -162,7 +164,7 @@ Milestones:
 
 - Every PR gets: purpose, exact affected components, prerequisites, threat/security implications, diff, tests, acceptance evidence, screenshots for UI, deployment/recovery impact and current blockers.
 - Chain nonconflicting PRs automatically when tests/review are green; do not silently merge red tests or expand scope.
-- Security-sensitive PRs require an independent review and E2EESA crosswalk updates.
+- Security-sensitive PRs require a substantive AI-assisted security review and E2EESA crosswalk updates.
 - Failures are fixed, not waived for launch. Material product/legal choices are escalated; implementation decisions follow best practice and this plan.
 - “Feature implemented,” “tests passed,” “deployed,” “active listing,” “royalty settled” and “security conformance” are **distinct statuses** backed by separate evidence.
 - Never store wallet seeds, private keys, E2EE content keys or privileged service secrets in GitHub, public IPFS or browser-accessible configuration.

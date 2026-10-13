@@ -110,9 +110,9 @@
       "Inventory is declared only; trusted source/build observations and completeness assessment are pending."
     ],
     "production_certification_eligible": false,
-    "request_digest": "sha256:0b2269294d01fa5bd20ec15d16abf84c583c00a483990ee03739aaa9ece49357",
+    "request_digest": "sha256:2c9df07c31301ea7c717b2f4f85ce175038172ffb5e1a381054e08309a2370bb",
     "result_class": "configuration",
-    "result_digest": "sha256:53b3a05f4d1c1af80ed90e22b611be466824f990e0ff4e894dea9be5810ea95a",
+    "result_digest": "sha256:10fbf8f9212fdf802eed4823690f6c864a52cd8cca6658da14423f7db911cce4",
     "schema_version": "0.2",
     "standard_lock": {
       "digest_scheme": "e2eesa-sha256-domain-v1",
@@ -125,10 +125,10 @@
   },
   "control_count": 16,
   "crosswalk_valid": true,
-  "cryptography_implementation_gate": "closed",
+  "cryptography_implementation_gate": "open-with-ai-review",
   "implementation_controls_verified": false,
   "independent_review": "pending",
-  "privacy_retention_design_gate": "pending-independent-review",
+  "privacy_retention_design_gate": "ai-review-required",
   "profile_resolutions": [
     {
       "auto_added_profiles": [],

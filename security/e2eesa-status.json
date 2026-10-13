@@ -39,7 +39,7 @@
     "ownerAccepted": false,
     "sourceDigest": null,
     "pending": [
-      "Owner-arranged independent qualified expert review remains pending."
+      "Deferred owner-arranged external expert review; not a development, merge or deployment blocker under AGENTS.md."
     ]
   },
   "existingSecurityEvidence": [
@@ -50,7 +50,7 @@
   "nextActions": [
     "The README reports prototype plaintext public-IPFS upload and missing private-artwork E2EE; keep private/mainnet use gated until the actual endpoint/rights/recovery controls are implemented and verified.",
     "Read the product plan, AGENTS, current implementation, security pins and the existing evidence listed above; preserve approved scope.",
-    "Complete and independently review the source/build/runtime component and data-flow inventory using the pinned upstream contracts.",
+    "Complete and perform AI source/security review of the source/build/runtime component and data-flow inventory using the pinned upstream contracts.",
     "Implement or close unverified protected flows; retain intentional public data and authorized business processing boundaries.",
     "Verify all six required gates and actual applicable integrations/platforms on the same source, preserving immutable reports.",
     "Keep the owner-arranged independent expert review unchecked until qualified authenticated review and owner acceptance are recorded."

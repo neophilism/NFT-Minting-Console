@@ -19,10 +19,12 @@ class ProfileScopeTests(unittest.TestCase):
         cls.requirements = checker.load_json(ROOT / "security/requirements.json")
         cls.threats = checker.load_json(ROOT / "security/threat-model.json")
 
-    def test_configuration_pass_does_not_open_crypto_or_certification(self):
+    def test_owner_policy_allows_crypto_work_without_claiming_certification(self):
         result = checker.check(self.upstream)
         self.assertFalse(result["implementation_controls_verified"])
-        self.assertEqual(result["cryptography_implementation_gate"], "closed")
+        self.assertEqual(result["cryptography_implementation_gate"], "open-with-ai-review")
+        self.assertEqual(result["independent_review"], "pending")
+        self.assertEqual(result["privacy_retention_design_gate"], "ai-review-required")
         assessment = result["configuration_assessment"]
         self.assertFalse(assessment["inventory_supported"])
         self.assertFalse(assessment["production_certification_eligible"])

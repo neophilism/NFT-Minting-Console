@@ -1,0 +1,9 @@
+{
+  "effective_at": "2026-10-13",
+  "authority": "explicit-owner-instruction",
+  "development_requires_external_review": false,
+  "deployment_requires_external_review": false,
+  "required_review": "ai-source-security-review-and-applicable-tests",
+  "external_review": "deferred-not-completed",
+  "certification_claims": "evidence-required"
+}
