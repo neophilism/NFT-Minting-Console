@@ -61,6 +61,10 @@ test('wrong chain, wrong EOA signer and mutated review never produce an accepted
  await assert.rejects(signReviewedEOA({plan,provider:badSignature,confirmed:true}),matches('WRONG_SIGNATURE'));
  const tampered={...plan,parameters:{...plan.parameters,counter:'9'}};
  await assert.rejects(signReviewedEOA({plan:tampered,provider:badSignature,confirmed:true}),matches('MUTATED_REVIEW'));
+ const misleading={...plan,review:{...plan.review,priceWei:'1'}};
+ await assert.rejects(signReviewedEOA({plan:misleading,provider:badSignature,confirmed:true}),matches('MUTATED_REVIEW'));
+ assert.equal(Object.isFrozen(plan.review.payments),true);
+ assert.equal(Object.isFrozen(plan.parameters.offer[0]),true);
 });
 test('signed zone produces full restricted order rather than accidental open order',()=>{
  const p=buildReviewedOrder({...input(),zone:royalty});
