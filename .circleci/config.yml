@@ -25,6 +25,7 @@ jobs:
       - run: npm run test:ui:model
       - run: npm run test:rights:aotv
       - run: npm run test:marketplace:transport
+      - run: npm run test:publication
       - run: npm run security:scan
       - run: npm run build
       - store_artifacts:

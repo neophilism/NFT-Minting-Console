@@ -85,6 +85,10 @@ are **not ready to publish or mint**. Do not reuse the historical rights hash
 or assert a template is an approved offering. The separate future NFT collector
 allocation in Section 5 is unchanged and remains a legal-review issue.
 
+## Exact public-file readback
+
+The [public readback verifier](docs/PUBLIC_FILE_VERIFICATION.md) compares independently reviewed SHA-256 and length commitments against intentionally published IPFS content through strict HTTPS gateways. This is verification only: it never publishes, signs, mints, or submits an OpenSea order.
+
 ## Owner security-review instruction
 
 Independent human/external review is deferred and does not block development,
