@@ -100,7 +100,7 @@ and [review policy](security/review-policy.json).
 ## Start here for development or handoff
 
 1. [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md)
-   and [canonical registry](registry/roadmap.json).
+   and [canonical registry](registry/prs.json).
 2. [Recovered Decisions](docs/HANDOFF_CONTEXT.md) and the dated [historical handoff audit](docs/HANDOFF_STATUS.md).
 3. [Durable authorization](docs/PR09_DURABLE_STORAGE.md), [native PostgreSQL and actual Safe acceptance](docs/PR09_RUNTIME_ACCEPTANCE.md)
    and [React/browser acceptance](docs/PR15_UI_ACCEPTANCE.md) and [combined browser/Safe/PostgreSQL acceptance](docs/PR09_BROWSER_ACCEPTANCE.md). These supersede earlier execution blockers, not the full product plan.

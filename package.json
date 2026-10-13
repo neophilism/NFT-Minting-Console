@@ -9,7 +9,7 @@
   "packageManager": "npm@10.9.3",
   "scripts": {
     "build": "npm run compile && npm run check && npm run build:ui",
-    "ci": "npm run compile && npm run lint && npm run typecheck && npm test && npm run mint:rehearse && npm run test:crypto && npm run test:publication && npm run test:data && npm run test:auth && npm run test:ui:model && npm run security:scan && npm run build",
+    "ci": "npm run compile && npm run lint && npm run typecheck && npm test && npm run mint:rehearse && npm run test:crypto && npm run test:publication && npm run test:registry && npm run test:data && npm run test:auth && npm run test:ui:model && npm run security:scan && npm run build",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:integration": "npm run compile && node scripts/run-validator-integration.mjs",
@@ -42,7 +42,8 @@
     "test:crypto": "node --test test-crypto/*.test.mjs",
     "test:crypto:browser": "node --test test-crypto/*.browser.mjs",
     "public:verify": "node scripts/verify-public-files.mjs",
-    "test:publication": "node --test test-publication/*.test.mjs"
+    "test:publication": "node --test test-publication/*.test.mjs",
+    "test:registry": "node --test registry/pr-contract.test.mjs && node scripts/validate-pr-registry.mjs"
   },
   "dependencies": {
     "axios": "1.20.0",

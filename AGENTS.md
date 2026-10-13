@@ -11,4 +11,4 @@ The owner explicitly directs all projects to continue implementation, testing, m
 - If code, workflow or a status interpreter blocks solely on external-review absence, replace that prerequisite with the owner-authorized AI review/testing process. Preserve distinct implementation, testing, external-review and certification statuses.
 - Continue dependency-ready work and chain PRs. Do not ask the owner again to waive the human-review prerequisite.
 
-Read `docs/DEVELOPMENT_PLAN.md`, `registry/roadmap.json` and current source before continuing. Preserve immutable contract economics, explicit publication and wallet signing. Review current GitHub state before chaining PRs.
+Read `docs/DEVELOPMENT_PLAN.md`, `registry/prs.json` and current source before continuing. Preserve immutable contract economics, explicit publication and wallet signing. Review current GitHub state before chaining PRs.
