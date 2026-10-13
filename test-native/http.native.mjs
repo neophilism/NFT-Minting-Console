@@ -147,6 +147,38 @@ test('native restricted-runtime PostgreSQL and actual Express HTTP', async t => 
     assert.equal((await request(a, '/api/auth/session', owner)).status, 200);
     assert.equal((await request(a, `/api/releases/${draft.id}`, owner)).status, 200);
   });
+  const mintBody={intentId:'0x'+'a1'.repeat(32),collection:'0x'+'ab'.repeat(20),runtimeCodeHash:'0x'+'b1'.repeat(32)};
+  const mintPath='/api/mint-operations/'+mintBody.intentId;
+  await t.test('journal HTTP is authenticated, CSRF-bound and refuses client completion claims',async()=>{
+    assert.equal((await request(a,'/api/mint-operations',null)).status,401);
+    assert.equal((await request(a,'/api/mint-operations',editor,'POST',mintBody)).status,403);
+    assert.equal((await request(a,'/api/mint-operations',{Cookie:owner.Cookie},'POST',mintBody)).status,403);
+    assert.equal((await request(a,'/api/mint-operations',owner,'POST',{...mintBody,state:'verified'})).status,400);
+    assert.equal((await request(a,'/api/mint-operations',owner,'POST',mintBody)).status,201);
+    assert.equal((await request(b,'/api/mint-operations',owner,'POST',mintBody)).status,200);
+    assert.equal((await request(b,mintPath,stranger)).status,404);
+  });
+  await t.test('two HTTP nodes produce one wallet reservation and preserve it over restart',async()=>{
+    const results=await Promise.all([request(a,mintPath+'/claim',owner,'POST',{expectedRevision:'1'}),request(b,mintPath+'/claim',owner,'POST',{expectedRevision:'1'})]);
+    assert.deepEqual(results.map(result=>result.status).sort(),[200,409]);
+    await closeApp(a);a=await openApp();
+    const stored=await (await request(a,mintPath,owner)).json();assert.equal(stored.state,'wallet_pending');
+    assert.equal((await request(a,mintPath+'/cancel',owner,'POST',{expectedRevision:stored.revision})).status,409);
+    assert.equal((await request(b,mintPath+'/wallet-outcome',owner,'POST',{expectedRevision:stored.revision,attemptId:stored.attemptId,outcome:'unknown'})).status,200);
+    const unknown=await (await request(a,mintPath,owner)).json();assert.equal(unknown.state,'attention');
+    assert.equal((await request(a,mintPath+'/claim',owner,'POST',{expectedRevision:unknown.revision})).status,409);
+  });
+  await t.test('transaction attachment and audit persist but unavailable RPC never confirms a mint',async()=>{
+    const transactionHash='0x'+'c1'.repeat(32);
+    assert.equal((await request(a,mintPath+'/transaction',owner,'POST',{transactionHash})).status,200);
+    const value=await (await request(b,mintPath+'/reconcile',owner,'POST',{})).json();
+    assert.equal(value.state,'attention');assert.equal(value.lastCode,'RPC_VERIFICATION_UNAVAILABLE');assert.equal(value.listingVerified,false);
+    assert.equal((await request(b,mintPath+'/reconcile',owner,'POST',{state:'verified'})).status,400);
+    const events=await (await request(a,mintPath+'/events',owner)).json();assert.equal(events.events.length,5);
+    await closeApp(b);b=await openApp();
+    assert.equal((await (await request(b,mintPath,owner)).json()).transactionHash,transactionHash);
+    assert.equal((await request(b,mintPath+'/events',stranger)).status,404);
+  });
   await t.test('cross-instance logout cannot be undone by a stale session touch', async () => {
     assert.equal((await request(a, '/api/auth/logout', owner, 'POST', {})).status, 200);
     assert.equal((await request(b, '/api/auth/session', owner)).status, 401);

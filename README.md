@@ -46,6 +46,16 @@ simulates them and reconciles receipts without a signer or transaction broadcast
 This is not the user-facing mint workflow, a public upload or an OpenSea listing.
 See [mint component and rehearsal boundaries](docs/MINT_RECONCILIATION.md).
 
+## Durable transaction recovery
+
+Authenticated wallet accounts have a persistent mint-operation journal with
+one-winner wallet reservations, idempotent transaction recording, immutable
+runtime audit events and receipt reconciliation after restart. It stores only
+routing commitments and public transaction references, never unpublished
+calldata or private drafts. Apply the new forward-only authorization migration
+before starting a configured database-backed server. See [API, safety and
+recovery rules](docs/MINT_JOURNAL.md). This does not enable production signing.
+
 ## Start here for development or handoff
 
 1. [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md)
