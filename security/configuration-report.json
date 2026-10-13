@@ -110,9 +110,9 @@
       "Inventory is declared only; trusted source/build observations and completeness assessment are pending."
     ],
     "production_certification_eligible": false,
-    "request_digest": "sha256:70e200c52eef71e561416ff8db38fa9013aa77ecb0f9f54b296966b6c7ac68bf",
+    "request_digest": "sha256:2c9df07c31301ea7c717b2f4f85ce175038172ffb5e1a381054e08309a2370bb",
     "result_class": "configuration",
-    "result_digest": "sha256:db677928d18f465927672edd5ba54fb5f5903c157fd9722b4ff2204c1edd90e1",
+    "result_digest": "sha256:10fbf8f9212fdf802eed4823690f6c864a52cd8cca6658da14423f7db911cce4",
     "schema_version": "0.2",
     "standard_lock": {
       "digest_scheme": "e2eesa-sha256-domain-v1",

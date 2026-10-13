@@ -74,8 +74,21 @@ def validate_crosswalk(upstream, source, target, configs, requirements, threats)
         raise ValueError("Every crosswalk control needs an explicit threat relationship")
 
 
+def review_policy():
+    policy = load_json(ROOT / "security/review-policy.json")
+    if (policy.get("authority") != "explicit-owner-instruction"
+            or policy.get("development_requires_external_review") is not False
+            or policy.get("deployment_requires_external_review") is not False
+            or policy.get("required_review") != "ai-source-security-review-and-applicable-tests"
+            or policy.get("external_review") != "deferred-not-completed"
+            or policy.get("certification_claims") != "evidence-required"):
+        raise ValueError("Review policy must retain the explicit owner instruction and truthful evidence requirements")
+    return policy
+
+
 def check(upstream: Path, *, target=None, lock=None, requirements=None, threats=None):
     upstream = upstream.resolve()
+    policy = review_policy()
     lock = load_json(ROOT / "security/e2eesa.lock.json") if lock is None else lock
     target = load_json(ROOT / "security/target-architecture.json") if target is None else target
     requirements = load_json(ROOT / "security/requirements.json") if requirements is None else requirements
@@ -125,7 +138,7 @@ def check(upstream: Path, *, target=None, lock=None, requirements=None, threats=
             raise ValueError("; ".join(resolution.errors))
         configs.append(resolution.to_dict())
     validate_crosswalk(upstream, source, target, configs, requirements, threats)
-    definition_digest = canonical.canonical_digest({"lock": lock, "target": target, "requirements": requirements, "threats": threats})
+    definition_digest = canonical.canonical_digest({"lock": lock, "target": target, "requirements": requirements, "threats": threats, "review_policy": policy})
     artifact_digest = canonical.canonical_digest({"configuration_scope": "target-architecture", "resolutions": configs})
     inventory = {
         "schema_version": "0.2", "product_id": target["product_id"],
