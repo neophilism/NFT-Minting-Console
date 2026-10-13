@@ -1,6 +1,8 @@
 # NFT Console — Handoff Completeness and Current-State Audit
 
-**As of 2026-10-10.** Read with [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [HANDOFF_CONTEXT.md](HANDOFF_CONTEXT.md). This is a factual snapshot, **not** a certification that the unfinished prototype is safe to deploy.
+**As of 2026-10-10 (historical snapshot).** Read with [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [HANDOFF_CONTEXT.md](HANDOFF_CONTEXT.md). This is a factual snapshot, **not** a certification that the unfinished prototype is safe to deploy.
+
+> **Later 2026-10-12 legal-direction change:** the archived AOTV Token #1 investment-consideration rights are historical. The Creator has selected a proposed fixed Companion Portfolio instead. Its revised document and Schedule A are incomplete and not approved for minting; see [Token #1 revision](../releases/androids-of-the-vine/token-001/README.md). The unchanged archived bytes and hashes below remain historical integrity baselines.
 
 ## Verdict
 
