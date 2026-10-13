@@ -16,8 +16,9 @@ else {
     if(digest===archived)fatal('The historical investor-priority document is not the revised rights artifact.');
     if(meta.release_status==='DO_NOT_MINT_OR_PUBLISH'||meta.properties?.companion_portfolio_schedule_status==='INCOMPLETE_DRAFT')fatal('Metadata remains a non-publishable template.');
     if(meta.properties?.rights_sha256!==digest||!/^[a-f0-9]{64}$/.test(digest))fatal('Exact SHA-256 of consolidated rights does not match the metadata.');
-    if(!/^ipfs:\/\/[a-zA-Z0-9]+$/.test(meta.properties?.rights_uri||'')||/REPLACE_WITH/.test(meta.properties.rights_uri))fatal('Provide the verified published final rights URI.');
-    if(!/^ipfs:\/\/[a-zA-Z0-9]+$/.test(meta.image)||!/^ipfs:\/\/[a-zA-Z0-9]+$/.test(meta.animation_url))fatal('Actual media and poster CIDs must be finalized.');
+    const ipfsUri=value=>typeof value==='string'&&/^ipfs:\/\/[a-zA-Z0-9]{20,}(?:\/[a-zA-Z0-9._~!    if(!/^ipfs'()+,;=:@%-]+)*$/.test(value)&&!value.includes('REPLACE_WITH');
+    if(!ipfsUri(meta.properties?.rights_uri))fatal('Provide the verified published final rights URI.');
+    if(!ipfsUri(meta.image)||!ipfsUri(meta.animation_url))fatal('Actual media and poster CIDs must be finalized.');
     if(process.exitCode!==1)console.log('AOTV rights/metadata byte-match preflight passed. Still requires legal approval, schedule delivery verification, IPFS byte retrieval and mint/product gates. SHA-256='+digest);
   }catch{fatal('Files missing or invalid; do not mint.');}
 }
