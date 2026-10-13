@@ -2,6 +2,8 @@
 
 > **WORKING TEMPLATE — NOT FINAL, NOT AN OFFER, NOT A DELIVERABLE.** The creator will replace or confirm each example, supply actual content, choose delivery rights and approve the final inventory. This template itself confers no access to any repository, playlist, project, or external service. Do not publish it as the operative rights Schedule A or mint against it.
 
+**Optional per-token benefit:** This Schedule A is included only if the Creator explicitly enables the companion portfolio for Token #001. Tokens without the benefit have no Schedule A and no project-information delivery right. Other tokens use different independent schedules.  
+**40-token planning:** The project allocation tool pairs exactly two projects per selected NFT; if all 40 NFTs participate, the 40 distinct projects each appear twice. All allocations remain provisional until approved and attached to their respective exact rights files.  
 **Related rights draft:** `RIGHTS_AGREEMENT_V2_DRAFT.md` — Token #1, Androids Of The Vine.  
 **Final schedule date:** `TO BE COMPLETED`  
 **Recipient:** Original Purchaser only, as defined in the rights agreement.  

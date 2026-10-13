@@ -101,14 +101,18 @@
         "docs/PR24_ACCEPTANCE.md",
         "releases/androids-of-the-vine/token-001/README.md",
         "releases/androids-of-the-vine/token-001/RIGHTS_AGREEMENT_V2_DRAFT.md",
-        "releases/androids-of-the-vine/token-001/SCHEDULE_A_TEMPLATE.md"
+        "releases/androids-of-the-vine/token-001/SCHEDULE_A_TEMPLATE.md",
+        "docs/AOTV_COMPANION_ALLOCATION.md",
+        "console/companion/portfolio.mjs",
+        "console/ui/src/CompanionPlanner.tsx",
+        "test-rights/companion.test.mjs"
       ],
       "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance",
       "pullRequests": [
         24,
         28
       ],
-      "rightsRevisionScope": "Token #1 rights-only prospective companion-portfolio replacement. Archived legal bytes unchanged; Schedule A and final signoff pending. Does not complete compliance, collection builder, media/rights editor or production publication."
+      "rightsRevisionScope": "Optional token-specific two-project creator portfolios; balanced 40/40 example when all tokens opted in; local draft generator and browser preview only. Historical rights preserved; legal approval, per-token final contents, E2EE and IPFS publication pending."
     },
     {
       "id": "NFT-15",
@@ -150,14 +154,18 @@
         "docs/PR24_ACCEPTANCE.md",
         "releases/androids-of-the-vine/token-001/README.md",
         "releases/androids-of-the-vine/token-001/RIGHTS_AGREEMENT_V2_DRAFT.md",
-        "releases/androids-of-the-vine/token-001/SCHEDULE_A_TEMPLATE.md"
+        "releases/androids-of-the-vine/token-001/SCHEDULE_A_TEMPLATE.md",
+        "docs/AOTV_COMPANION_ALLOCATION.md",
+        "console/companion/portfolio.mjs",
+        "console/ui/src/CompanionPlanner.tsx",
+        "test-rights/companion.test.mjs"
       ],
       "scope": "Client-only exact-byte rights and allowlisted public metadata preparation; no collector registry, legal approval, encryption, publication or completed work-package acceptance",
       "pullRequests": [
         24,
         28
       ],
-      "rightsRevisionScope": "Token #1 rights-only prospective companion-portfolio replacement. Archived legal bytes unchanged; Schedule A and final signoff pending. Does not complete compliance, collection builder, media/rights editor or production publication."
+      "rightsRevisionScope": "Optional token-specific two-project creator portfolios; balanced 40/40 example when all tokens opted in; local draft generator and browser preview only. Historical rights preserved; legal approval, per-token final contents, E2EE and IPFS publication pending."
     },
     {
       "id": "NFT-20",

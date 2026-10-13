@@ -16,12 +16,13 @@ test('byte-exact former contract rights and metadata are archival and unchanged'
 test('Section 4 investment priority was replaced; Section 5 and the artwork license were preserved',async()=>{
   const original=md(await read('reference/androids-of-the-vine/ANDROID_OF_THE_VINE_TOKEN_001_RIGHTS_FINAL.md'));
   const draft=md(await read(p+'RIGHTS_AGREEMENT_V2_DRAFT.md'));
-  assert.match(draft,/## 4\. Fixed Creator.s Companion Portfolio/);
+  assert.match(draft,/## 4\. Optional Fixed Creator.s Companion Portfolio/);
   assert.doesNotMatch(draft,/Priority Investment Consideration|will consider timely indications of interest|initial group of prospective investors/i);
   assert.match(draft,/no right to invest/i);assert.match(draft,/one-time benefit/i);
+  assert.match(draft,/optional on each NFT/i);
   assert.equal(section(original,'## 5. Collector-Only Allocation','## 6. Authentication'),section(draft,'## 5. Collector-Only Allocation','## 6. Authentication'));
   assert.equal(section(original,'## 1. Non-Exclusive Commercial License','## 2. Transfer'),section(draft,'## 1. Non-Exclusive Commercial License','## 2. Transfer'));
-  assert.match(draft,/## 11\. No Future Managerial Undertaking[\s\S]*one-time delivery/);
+  assert.match(draft,/## 11\. No Future Managerial Undertaking[\s\S]*one-time fixed Companion Portfolio benefit/);
 });
 test('Schedule A has exactly two provisional, non-investment entries with no withdrawn codebase',async()=>{
   const schedule=md(await read(p+'SCHEDULE_A_TEMPLATE.md'));
