@@ -53,6 +53,7 @@ jobs:
         run: npm run test:rights:aotv
       - name: Verify OpenSea read-only transport fail-closed behavior
         run: npm run test:marketplace:transport
+      - name: Verify published-file readback and integrity
         run: npm run test:publication
       - name: Audit production dependencies
         run: npm run security:scan
