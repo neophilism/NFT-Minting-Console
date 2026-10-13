@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer';
+
 /**
  * Versioned, machine-readable PR register.
  * Each work unit is explicitly mapped to real GitHub PR numbers; prose is never parsed.
