@@ -11,6 +11,7 @@ import {createWalletVerifier} from './auth/wallet.mjs';
 import {createPersistence} from './data/persistence.mjs';
 import {installReleaseRoutes} from './data/http.mjs';
 import {installJournalRoutes} from './operations/http.mjs';
+import {localMintMode} from './operations/local-mode.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const chainRegistry=JSON.parse(fs.readFileSync(path.join(root,'config/chains.json'),'utf8'));
 const blockedFeatures=Object.freeze([
@@ -29,6 +30,7 @@ export function createApp({env=process.env,authService}={}) {
   const chainId=Number(env.CHAIN_ID||11155111),profile=chainRegistry.chains[String(chainId)];
   if(!profile)throw new Error('Unsupported CHAIN_ID.');
   const origin=env.PUBLIC_ORIGIN||`http://localhost:${port}`,roles=rolesFromEnvironment(env);
+  const localMint=localMintMode(env,chainId,origin);
   const factoryValue=env.DEPLOYMENT_FACTORY_ADDRESS||'';
   if(factoryValue&&!ethers.isAddress(factoryValue))throw new Error('Invalid DEPLOYMENT_FACTORY_ADDRESS.');
   const factoryAddress=factoryValue?ethers.getAddress(factoryValue):null;
@@ -50,7 +52,7 @@ export function createApp({env=process.env,authService}={}) {
   app.use(express.json({limit:'64kb',strict:true}));
   const requireAction=installAuthRoutes(app,auth,{production});
   if(persistence){installReleaseRoutes(app,requireAction,persistence.repository);installJournalRoutes(app,requireAction,persistence.journal,provider);}
-  app.get('/api/config',(_req,res)=>res.json({chainId,chainSlug:profile.slug,chainName:profile.name,production:profile.production,deploymentFactory:factoryAddress,pinningReady:false,pinningConfigured:Boolean(env.PINATA_JWT),loginConfigured:roles.size>0&&Boolean(provider),validator:env.TRANSFER_VALIDATOR_ADDRESS||profile.validator,signedZone:env.OPENSEA_SIGNED_ZONE||profile.signedZone,productionReady:false,authStore:persistence?'postgresql':'development-memory',capabilities:{mintJournal:Boolean(persistence),privateDrafts:false,opaqueReleaseApi:Boolean(persistence),publish:false,mint:false,list:false,deploy:chainId!==1&&Boolean(factoryAddress)}}));
+  app.get('/api/config',(_req,res)=>res.json({chainId,chainSlug:profile.slug,chainName:profile.name,production:profile.production,deploymentFactory:factoryAddress,pinningReady:false,pinningConfigured:Boolean(env.PINATA_JWT),loginConfigured:roles.size>0&&Boolean(provider),validator:env.TRANSFER_VALIDATOR_ADDRESS||profile.validator,signedZone:env.OPENSEA_SIGNED_ZONE||profile.signedZone,productionReady:false,authStore:persistence?'postgresql':'development-memory',capabilities:{localMint,mintJournal:Boolean(persistence),privateDrafts:false,opaqueReleaseApi:Boolean(persistence),publish:false,mint:false,list:false,deploy:chainId!==1&&Boolean(factoryAddress)}}));
   app.get('/api/health',(_req,res)=>res.json({ok:true,productionReady:false}));
   app.get('/api/launch-readiness',requireAction('read'),(_req,res)=>res.json({productionReady:false,mintingEvidence:'not-verified',listingEvidence:'not-verified',blockers:blockedFeatures,authentication:'software-integration-accepted',storage:persistence?'durable-configured-not-production-accepted':'development-memory',note:'These are software gates, not a live wallet inventory or security certification.'}));
   app.get('/api/artifact',requireAction('deploy'),(_req,res)=>{

@@ -48,9 +48,10 @@ export function useAuthentication(config: Configuration | null) {
   const [error, setError] = useState('');
   const [restoring, setRestoring] = useState(false), [retryLogout, setRetryLogout] = useState(false);
   const active = useRef<Session | null>(null), epoch = useRef(0), running = useRef(false);
+  const selectedProvider = useRef<WalletProvider | null>(null);
   const cleanupProvider = useRef<() => void>(() => {}), pendingLogout = useRef<string | null>(null);
   const setSession = (value: Session | null) => { active.current = value; setCurrent(value); };
-  const removeProvider = () => { const clean = cleanupProvider.current; cleanupProvider.current = () => {}; try { clean(); } catch { /* A provider cleanup error must never prevent server revocation. */ } };
+  const removeProvider = () => { selectedProvider.current = null; const clean = cleanupProvider.current; cleanupProvider.current = () => {}; try { clean(); } catch { /* A provider cleanup error must never prevent server revocation. */ } };
   const logout = useCallback(async () => {
     epoch.current++;
     const token = active.current?.csrf || pendingLogout.current;
@@ -67,6 +68,7 @@ export function useAuthentication(config: Configuration | null) {
     const invalidate = () => { void logout(); setError('Wallet or network changed. Sign in again before continuing.'); };
     cleanupProvider.current = () => { for (const event of ['accountsChanged', 'chainChanged', 'disconnect']) provider.removeListener?.(event, invalidate); };
     for (const event of ['accountsChanged', 'chainChanged', 'disconnect']) provider.on(event, invalidate);
+    selectedProvider.current = provider;
   }, [logout]);
   useEffect(() => {
     if (!config) return;
@@ -138,5 +140,6 @@ export function useAuthentication(config: Configuration | null) {
   }
   function cancel() { epoch.current++; setError('Sign-in cancelled. Dismiss the request in your wallet.'); }
   return { current, phase, error, restoring, connect, logout, expire, cancel,
+    walletProvider: () => active.current ? selectedProvider.current : null,
     retryLogout, clearError: () => setError('') };
 }

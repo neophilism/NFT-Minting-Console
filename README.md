@@ -56,6 +56,14 @@ calldata or private drafts. Apply the new forward-only authorization migration
 before starting a configured database-backed server. See [API, safety and
 recovery rules](docs/MINT_JOURNAL.md). This does not enable production signing.
 
+## Wallet transaction screen
+
+Open **Mint transactions** for saved operations, receipt checks and interrupted
+wallet-response recovery. A separately enabled loopback/chain-31337 rehearsal
+supports public test-manifest import, explicit simulation disclosure, fee review,
+a single wallet request and durable receipt recovery. It does not enable mainnet
+or Sepolia signing. See [wallet UI boundaries and reproduction](docs/MINT_WALLET_UI.md).
+
 ## Start here for development or handoff
 
 1. [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md)

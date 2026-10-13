@@ -40,6 +40,8 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Compile and verify the pinned actual Safe
         run: npm run test:safe
+      - name: Compile the actual collection used in browser mints
+        run: npm run compile
       - run: npm run build:ui
       - run: npm run typecheck:ui
       - run: npm run test:ui:model

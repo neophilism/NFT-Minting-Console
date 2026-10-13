@@ -7,8 +7,11 @@ import { createApp } from '../console/server.mjs';
 import { createAuthService } from '../console/auth/core.mjs';
 import { createWalletVerifier } from '../console/auth/wallet.mjs';
 import { OWNER, VIEWER, EDITOR, SAFE, ORIGIN } from './fixtures.mjs';
+import { startMintFixture } from './mint-fixture.mjs';
+import { testWallets } from './fixtures.mjs';
 import { setupBrowserDatabase } from './database.mjs';
 
+if (hre.network.name !== 'hardhat' || hre.network.config.forking) throw new Error('Browser acceptance refuses nonlocal or forked networks.');
 if (process.env.NFT_UI_FIXTURE !== '1') throw new Error('Browser fixture must be started explicitly by the test harness.');
 if (Number(await hre.network.provider.send('eth_chainId')) !== 31337) throw new Error('Browser tests require the disposable local EVM.');
 // Compile these exact upstream sources with npm run test:safe first. No test
@@ -31,7 +34,7 @@ if (await safe.VERSION() !== '1.4.1' || await safe.getThreshold() !== 2n) throw 
 
 // Read-only JSON-RPC bridge. No transaction, signer, debug-write or private-key
 // API is exposed. All setup transactions above are local-EVM fixtures only.
-const methods = new Set(['eth_chainId', 'net_version', 'eth_blockNumber', 'eth_getCode', 'eth_call']);
+const methods = new Set(['eth_chainId', 'net_version', 'eth_blockNumber', 'eth_getCode', 'eth_call', 'eth_getBlockByNumber', 'eth_getTransactionByHash', 'eth_getTransactionReceipt']);
 const rpc = http.createServer(async (request, response) => {
   const chunks = []; let bytes = 0;
   try {
@@ -63,12 +66,13 @@ rpc.listen(0, '127.0.0.1'); await once(rpc, 'listening');
 const rpcUrl = `http://127.0.0.1:${rpc.address().port}`;
 const provider = new JsonRpcProvider(rpcUrl, undefined, { batchMaxCount: 1, cacheTimeout: -1 });
 const roles = new Map([[OWNER.toLowerCase(), 'owner'], [VIEWER.toLowerCase(), 'viewer'],
-  [EDITOR.toLowerCase(), 'editor'], [SAFE.toLowerCase(), 'owner']]);
+  [EDITOR.toLowerCase(), 'editor'], [SAFE.toLowerCase(), 'owner'], [testWallets[3].address.toLowerCase(), 'owner']]);
 const database = await setupBrowserDatabase(roles);
+const stopMintFixture = await startMintFixture(hre);
 const auth = createAuthService({ origin: ORIGIN, chainId: 31337, roles: () => roles,
   checksumAddress: getAddress, store: database.store, verifyWallet: createWalletVerifier(provider) });
 const app = createApp({ env: { NODE_ENV: 'test', PORT: '4173', PUBLIC_ORIGIN: ORIGIN, CHAIN_ID: '31337',
-  ADMIN_WALLETS: `${OWNER},${SAFE}`, VIEWER_WALLETS: VIEWER, EDITOR_WALLETS: EDITOR,
+  NFT_LOCAL_MINT_REHEARSAL: '1', ADMIN_WALLETS: `${OWNER},${SAFE},${testWallets[3].address}`, VIEWER_WALLETS: VIEWER, EDITOR_WALLETS: EDITOR,
   RPC_URL: rpcUrl, DATABASE_URL: database.runtimeUrl }, authService: auth });
 await app.locals.ready;
 const server = app.listen(4173, '127.0.0.1'); await once(server, 'listening');
@@ -77,6 +81,6 @@ async function stop() {
   server.closeAllConnections(); rpc.closeAllConnections();
   await new Promise(resolve => server.close(resolve));
   await new Promise(resolve => rpc.close(resolve));
-  provider.destroy(); await app.locals.close(); await database.close(); process.exit(0);
+  await stopMintFixture(); provider.destroy(); await app.locals.close(); await database.close(); process.exit(0);
 }
 process.once('SIGTERM', () => void stop()); process.once('SIGINT', () => void stop());

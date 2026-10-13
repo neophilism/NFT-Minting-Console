@@ -1,0 +1,5 @@
+import type { Provider } from 'ethers';
+export interface MintWork { readonly tokenId:string; readonly title:string; readonly metadataURI:string; readonly mediaHash:string; readonly rightsURI:string; readonly rightsHash:string }
+export interface MintBatch { readonly chainId:number; readonly collection:string; readonly minter:string; readonly runtimeCodeHash:string; readonly works:readonly MintWork[]; readonly id:string; readonly data:string; readonly value:'0x0'; readonly version:1; readonly status:'prepared-unverified' }
+export function prepareMintPlan(input:unknown): {readonly version:1;readonly status:'prepared-unverified';readonly batches:readonly MintBatch[];readonly productionReady:false;readonly listingVerified:false};
+export function simulateMintBatch(provider:Provider,batch:MintBatch,options?:{signal?:AbortSignal}):Promise<{status:'chain-simulation-passed';intentId:string;blockNumber:number;blockHash:string;productionReady:false;publicContentVerified:false;validatorPolicyVerified:false;listingVerified:false}>;
