@@ -1,5 +1,5 @@
 import {Buffer} from 'node:buffer';
-const SEAPORT='0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC';
+const SEAPORT='0x0000000000000068F116a894984e2DB1123eB395';
 const ZERO='0x'+'0'.repeat(40);
 const MAX=(1n<<256n)-1n;
 export class ListingTransportError extends Error {
