@@ -7,7 +7,6 @@ export const AOTV_TOKENS = 40;
 export const AOTV_PROJECTS = 40;
 export const PROJECTS_PER_TOKEN = 2;
 const ID = /^PROJECT-(0[1-9]|[1-3][0-9]|40)$/;
-const DIGEST = /^[a-f0-9]{64}$/;
 const FORBIDDEN_FIELDS = new Set(['investment', 'equity', 'ownership', 'financing', 'valuation', 'returns', 'proceeds', 'allocation']);
 function fail(message) { throw new Error(message); }
 function record(value, keys, label) {
@@ -35,7 +34,7 @@ function safeArray(value, label, max) {
   if (Reflect.ownKeys(value).length !== value.length + 1) fail('Invalid ' + label);
   return value;
 }
-function markdown(value) { return value.replace(/[\\\`*_{}[\]()>#+.!|~-]/g, '\\$&'); }
+function markdown(value) { return value.replace(/[\\`*_{}[\]()>#+.!|~-]/g, '\\$&'); }
 function blankName(name) { return /^TO_BE_SELECTED_\d{2}$/.test(name); }
 export function planCompanionCollection(config) {
   const row = record(config, ['enabled', 'projects', 'enabledTokenIds'], 'companion configuration');
