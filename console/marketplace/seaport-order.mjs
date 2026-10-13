@@ -41,6 +41,13 @@ function bytes32(s){
   if(typeof s!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(s))fail('BYTES32');
   return s.toLowerCase();
 }
+function deepFreeze(value){
+  if(value&&typeof value==='object'){
+    for(const item of Object.values(value))deepFreeze(item);
+    Object.freeze(value);
+  }
+  return value;
+}
 function secureSalt(){
   const c=globalThis.crypto;
   if(!c||typeof c.getRandomValues!=='function')fail('NO_SECURE_RANDOM');
@@ -83,7 +90,7 @@ export function buildReviewedOrder({seller,collection,tokenId,priceWei,payments,
     priceWei:gross.toString(),endTime:end.toString(),payments:consideration.map(x=>({
       recipient:x.recipient,amountWei:x.startAmount,
     }))};
-  return Object.freeze({domain,types:EIP712_TYPES,parameters,review,digest,chainId:1,
+  return deepFreeze({domain,types:EIP712_TYPES,parameters,review,digest,chainId:1,
     productionReady:false,signatureAuthorized:false});
 }
 /**
@@ -97,6 +104,13 @@ export async function signReviewedEOA({plan,provider,confirmed=false}={}){
      plan.domain?.version!=='1.6'||plan.domain?.name!=='Seaport')fail('DOMAIN');
   const digest=TypedDataEncoder.hash(plan.domain,EIP712_TYPES,plan.parameters);
   if(digest!==plan.digest)fail('MUTATED_REVIEW');
+  const p=plan.parameters,r=plan.review;
+  if(!r||r.seller!==p.offerer||r.collection!==p.offer?.[0]?.token||
+     r.tokenId!==p.offer?.[0]?.identifierOrCriteria||r.endTime!==p.endTime||
+     !Array.isArray(r.payments)||r.payments.length!==p.consideration?.length||
+     r.priceWei!==p.consideration.reduce((sum,x)=>sum+uint(x.startAmount),0n).toString()||
+     r.payments.some((x,i)=>x.recipient!==p.consideration[i].recipient||
+       x.amountWei!==p.consideration[i].startAmount))fail('MUTATED_REVIEW');
   const chain=await provider.request({method:'eth_chainId',params:[]});
   if(chain!=='0x1')fail('WRONG_CHAIN');
   const accounts=await provider.request({method:'eth_accounts',params:[]});
