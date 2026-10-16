@@ -21,6 +21,7 @@ export async function createRuntime({env=process.env,testDependencies}={}){
   if(env.DATABASE_URL_UNPOOLED)throw new Error('Migration credentials must not be present in the application environment.');
   const production=env.NODE_ENV==='production',origin=canonicalOrigin(env.PUBLIC_ORIGIN,production),chainId=Number(env.CHAIN_ID),profile=registry.chains[String(chainId)];
   if(!profile||(!production&&env.NODE_ENV!=='test')||(chainId===31337&&env.NODE_ENV!=='test'))throw new Error('Browser enrollment requires an explicit supported production or test environment.');
+  if(production&&(env.NFT_PUBLIC_LAUNCH!=='1'||(chainId===1&&env.NFT_MAINNET_ACK!=='ethereum-mainnet-real-fees')))throw new Error('Configure the public launch scope before administrator enrollment.');
   let rpc;try{rpc=new URL(env.RPC_URL);}catch{throw new Error('Configure RPC_URL before enabling browser enrollment.');}
   if(rpc.username||rpc.password||(!['https:'].includes(rpc.protocol)&&!(env.NODE_ENV==='test'&&rpc.origin.startsWith('http://127.0.0.1:'))))throw new Error('Use an HTTPS RPC URL.');
   let pool=testDependencies?.pool;
@@ -42,6 +43,7 @@ export async function createRuntime({env=process.env,testDependencies}={}){
     try{return await activating;}finally{activating=null;}
   }
   try{
+    if((await provider.getNetwork()).chainId!==BigInt(chainId))throw new Error('The configured RPC network does not match CHAIN_ID.');
     const owner=await store.owner();
     if(!owner&&!/^[a-f0-9]{64}$/.test(env.NFT_SETUP_CODE||''))throw new Error('Set a randomly generated 64-character NFT_SETUP_CODE in the hosting environment.');
     const app=express();app.disable('x-powered-by');app.set('trust proxy',false);
