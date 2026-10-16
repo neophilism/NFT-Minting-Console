@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import hre from 'hardhat';
 import { Contract, ContractFactory, JsonRpcProvider, ZeroAddress, getAddress } from 'ethers';
 import { createApp } from '../console/server.mjs';
+import {createRuntime} from '../console/runtime.mjs';
 import { createAuthService } from '../console/auth/core.mjs';
 import { createWalletVerifier } from '../console/auth/wallet.mjs';
 import { OWNER, VIEWER, EDITOR, SAFE, ORIGIN } from './fixtures.mjs';
@@ -77,8 +78,14 @@ const app = createApp({ env: { NODE_ENV: 'test', PORT: '4173', PUBLIC_ORIGIN: OR
   RPC_URL: rpcUrl, DATABASE_URL: database.runtimeUrl }, authService: auth,launchContentOptions:{fetchImpl:publicBrowserFetch} });
 await app.locals.ready;
 const server = app.listen(4173, '127.0.0.1'); await once(server, 'listening');
+const setupServers=[];
+for(const port of [4175,4176]){
+  const runtime=await createRuntime({env:{NODE_ENV:'test',NFT_SETUP_ENABLED:'1',NFT_SETUP_CODE:'f'.repeat(64),NFT_PUBLIC_LAUNCH:'1',NFT_UI_FIXTURE:'1',PUBLIC_ORIGIN:`http://127.0.0.1:${port}`,CHAIN_ID:'31337',RPC_URL:rpcUrl,DATABASE_URL:database.runtimeUrl}});
+  const instance=runtime.listen(port,'127.0.0.1');await once(instance,'listening');setupServers.push({runtime,instance});
+}
 console.info('Disposable browser fixture ready: restricted PostgreSQL and actual local Safe/EOA verification.');
 async function stop() {
+  for(const {runtime,instance} of setupServers){instance.closeAllConnections();await new Promise(resolve=>instance.close(resolve));await runtime.locals.close();}
   server.closeAllConnections(); rpc.closeAllConnections();
   await new Promise(resolve => server.close(resolve));
   await new Promise(resolve => rpc.close(resolve));

@@ -1,0 +1,50 @@
+name: Public CircleCI diagnostics
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/circle-public-diagnostics.yml'
+permissions:
+  contents: read
+jobs:
+  public-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Read public secondary-runner evidence without credentials
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, urllib.parse, pathlib
+          root = pathlib.Path('circle-diagnostics'); root.mkdir()
+          def read(url, name):
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as response:
+                      content=response.read(8*1024*1024+1)
+                      if len(content)>8*1024*1024: raise ValueError('oversized response')
+                  (root/name).write_bytes(content)
+                  return json.loads(content)
+              except Exception as error:
+                  print(name, type(error).__name__)
+                  return None
+          slug='circleci/6Vqi2CTeH5RHCx66K21Noh/AUWWCvhw9PBwwddjnRXtpd'
+          base='https://circleci.com/api/v2/project/'+slug
+          read(base+'/job/162','job.json')
+          data=read(base+'/162/artifacts','artifacts.json')
+          if data:
+              for item in data.get('items',[]):
+                  path=item.get('path',''); url=item.get('url',''); host=urllib.parse.urlparse(url).hostname or ''
+                  if url.startswith('https://') and (host=='circleci.com' or host.endswith('.circle-artifacts.com')) and (path.endswith('browser-results.json') or path.endswith('error-context.md')):
+                      read(url, 'evidence-'+str(len(list(root.iterdir())))+'.json')
+          legacy=read('https://circleci.com/api/v1.1/project/'+slug+'/162','legacy-job.json')
+          if legacy:
+              for index,step in enumerate(legacy.get('steps',[])):
+                  for action in step.get('actions',[]):
+                      url=action.get('output_url','')
+                      if action.get('failed') and url.startswith('https://circleci.com/'):
+                          read(url,'failed-step-'+str(index)+'.json')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-circle-browser-diagnostics
+          path: circle-diagnostics
+          retention-days: 1
+          if-no-files-found: warn

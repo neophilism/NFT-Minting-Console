@@ -1,0 +1,32 @@
+# Browser-first administrator registration
+
+The installation owner registers the first administrator directly in the web interface. No wallet address needs to be sent in chat, and no private wallet key is collected. This is first-run authorization, not a mint, a listing, or proof that the complete product roadmap has shipped.
+
+## Before enabling a new installation
+
+Use the existing intended Neon database and its restricted application login. Apply the normal forward migration runner in a separate operator environment, including `006_browser_installation.sql`; never rerun first-time initialization over existing tables or place a migration-owner password in the application. The runtime account retains only the three original non-inherited application roles. The new tables add no schema ownership or RLS bypass.
+
+Set the backend environment (not the repository or a preset):
+
+- `NFT_SETUP_ENABLED=1`, `NODE_ENV=production`, and an exact HTTPS `PUBLIC_ORIGIN`.
+- Restricted `DATABASE_URL`, a matching HTTPS `RPC_URL`, explicit `CHAIN_ID`, and `HOST=0.0.0.0` for the hosted service.
+- `NFT_PUBLIC_LAUNCH=1` for the public-mint runtime; chain 1 additionally requires `NFT_MAINNET_ACK=ethereum-mainnet-real-fees`.
+- A cryptographically random 32-byte hex value in `NFT_SETUP_CODE`. An operator can generate it with `node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('hex'))"`, then enter it directly into the hosting secret environment. Never commit it, put it in a URL, or substitute an API credential or wallet seed.
+
+Leave `ADMIN_WALLETS`, `EDITOR_WALLETS` and `VIEWER_WALLETS` unset/empty for this browser-enrollment mode. Existing explicitly allowlisted installations continue using the original mode with `NFT_SETUP_ENABLED` absent. Mixing the two is refused rather than silently changing an existing policy. Only direct EOA enrollment is implemented in this first-mint scope; existing Safe sign-in support remains separate.
+
+## In the interface
+
+The first-run screen displays the exact site, network and verified restricted-database connection. The owner obtains `NFT_SETUP_CODE` from the existing Render service's Environment settings, enters it into the password field, and connects the selected wallet. Preparing registration produces a preview of the exact origin/wallet/network/purpose/nonce/time-bound message. The owner checks its meaning, explicitly approves administrator registration, and signs that message in the wallet. This is not an on-chain transaction and does not authorize asset transfers.
+
+The successful claim is stored durably. Reload and sign in with the same wallet using the ordinary sign-in flow. Collection owner, minter and royalty recipient are separate collection parameters, not secret setup inputs. Different accounts must also be authorized before acting through the console; this initial enrollment does not silently grant every collection-address field console access.
+
+The setup code and wallet signature stay out of browser storage, URLs and logs. The setup cookie is short-lived, HttpOnly, same-site and HTTPS-secure in deployment. After a claim, registration is closed on all instances; changing the code cannot replace the recorded administrator. Network changes on a claimed origin fail closed rather than reopening registration. The old setup code may be removed after successful enrollment. Losing an administrator is not automatically resolved by giving a stranger the site: database-admin recovery requires a separately reviewed operator process.
+
+## Implementation and acceptance
+
+The runtime uses the current restricted-pool guard and database migrations, not an in-memory ownership flag. Unique insert semantics give concurrent claims one winner. Challenges use database time, are five-minute, cookie-bound and one-use, and include a hash of the current setup code. Invalid signatures consume their challenge. Challenge counts are bounded per installation across instances; authenticated setup attempts have an additional bounded process-local limit. Raw provider errors are not returned.
+
+The tests cover actual PostgreSQL-engine SQL through PGlite, real EOA signatures, wrong origin/code/network/binding/signature, expiry/replay, concurrent claims, code rotation, immutable administrator grants and restart. The browser suite starts two independent runtime instances on the disposable restricted PostgreSQL fixture and runs the complete registration-to-normal-sign-in flow on desktop and mobile. Final exact-head GitHub and native-runtime results are recorded in the PR review, not presumed by this document.
+
+Development labeling remains while full private drafting, public publication integration, marketplace operations and the complete roadmap are unfinished. `NODE_ENV=production`, an initialized database, and a successful administrator claim are not full-product acceptance or security certification.

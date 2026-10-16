@@ -24,19 +24,24 @@ export function Notice({ children, error = false }: { children: ReactNode; error
 }
 export function Modal({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
   const ref = useRef<HTMLDialogElement>(null), id = useId();
-  const closeRef = useRef(close);
+  const closeRef = useRef(close), dismissRef = useRef<() => void>(() => {});
   closeRef.current = close;
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const onClose = () => {
-      // Strict Mode's setup/cleanup/setup can leave a queued close event from
-      // the previous setup. It is not a user close if the dialog is open again.
-      if (dialog.open) return;
-      if (opener?.isConnected) opener.focus();
-      closeRef.current();
+    let notified = false;
+    const dismiss = () => {
+      if (notified) return;
+      notified = true;
+      // Cancel sensitive work synchronously, before the native queued close
+      // event or a late wallet promise can run. Closing the DOM alone is not cancellation.
+      try { closeRef.current(); }
+      finally { dialog.close(); if (opener?.isConnected) opener.focus(); }
     };
+    dismissRef.current = dismiss;
+    const onClose = () => { if (!dialog.open) dismiss(); };
+    const onCancel = (event: Event) => { event.preventDefault(); dismiss(); };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Tab') return;
       const targets = [...dialog.querySelectorAll<HTMLElement>(
@@ -44,7 +49,7 @@ export function Modal({ title, children, close }: { title: string; children: Rea
       )].filter(element => element.tabIndex >= 0 && !element.matches(':disabled') &&
         !element.closest('[inert]') && element.getClientRects().length > 0 &&
         getComputedStyle(element).visibility !== 'hidden');
-      if (!targets.length) return; // The visible close button normally guarantees one.
+      if (!targets.length) return;
       const index = targets.indexOf(document.activeElement as HTMLElement);
       const next = index < 0 ? (event.shiftKey ? targets.length - 1 : 0) :
         (index + (event.shiftKey ? -1 : 1) + targets.length) % targets.length;
@@ -52,17 +57,20 @@ export function Modal({ title, children, close }: { title: string; children: Rea
       targets[next]?.focus();
     };
     dialog.addEventListener('close', onClose);
+    dialog.addEventListener('cancel', onCancel);
     dialog.addEventListener('keydown', onKeyDown);
     dialog.showModal();
     return () => {
+      notified = true;
       dialog.removeEventListener('close', onClose);
+      dialog.removeEventListener('cancel', onCancel);
       dialog.removeEventListener('keydown', onKeyDown);
       dialog.close();
       if (opener?.isConnected) opener.focus();
     };
   }, []);
   return <dialog className="modal" ref={ref} aria-labelledby={id}>
-    <div className="modal-heading"><h2 id={id}>{title}</h2><button className="icon-button" aria-label="Close dialog" onClick={() => ref.current?.close()}><Icon name="close"/></button></div>
+    <div className="modal-heading"><h2 id={id}>{title}</h2><button className="icon-button" aria-label="Close dialog" onClick={() => dismissRef.current()}><Icon name="close"/></button></div>
     {children}
   </dialog>;
 }

@@ -1,0 +1,17 @@
+# Browser completion execution plan - 2026-10-16
+
+The owner will use the interface after the software is genuinely complete and deployed. Do not request wallet addresses in chat, remove development wording merely cosmetically, register the first unauthenticated visitor as owner, or equate a deployment with a verified live mint.
+
+## Dependency-ordered increments
+
+1. Secure first-run administrator enrollment (NFT-09, NFT-32, NFT-36). Installation-specific secret entered only into a same-origin setup form, wallet proof of possession bound to origin/chain/purpose/time, durable single-winner claim, restart/multi-instance persistence, no re-opening after code rotation or network changes. Provision the existing restricted production connection. Preserve existing configured installations. Test negative origin/token/signature/replay/race cases, actual database privileges, desktop/mobile setup and runtime transition. No wallet transaction is involved.
+2. Browser public publication (NFT-13, NFT-18, NFT-19, NFT-20). Final-file selection, local hashes and previews, explicit disclosure, narrowly scoped public upload authorization without exposing Pinata JWT, exact-byte readback, durable uncertain-outcome recovery, metadata generation and automatic bundle handoff to total-cost and mint review. Retain CLI compatibility. Never publish private drafts, retry an unknown paid/upload result blindly, or call unverified files ready.
+3. Integrate setup, publication, full-release cost review, deployment, minting, recovery and existing-collection inventory; update every affected tutorial. Verify provider capabilities with redacted diagnostics and exercise the integrated route with disposable fixtures. Wallet approvals and creator-finalized rights remain deliberate user operations, not software blockers or invisible defaults.
+4. Reconcile the full 36-work-package scope: private encrypted drafts/recovery/sharing, large resumable encrypted storage, Safe transaction envelopes, validator-policy provisioning and complete marketplace/order verification remain real software work. Do not mark those complete because the separate public mint route passes.
+5. Release labeling and deployment evidence. Record runtime mode separately from feature/acceptance status. Remove DEVELOPMENT BUILD only for an accepted release scope with passing source-bound checks and verified deployment, not through an environment flag alone. A setup-required installation, public minting scope, full product readiness, and real NFT/marketplace evidence are distinct states.
+
+## Acceptance and security boundaries
+
+All code changes require applicable core, database, browser/accessibility, contract and security-record checks. New endpoints use bounded inputs, origin/CSRF controls, least-privilege database roles, bounded provider I/O and redacted errors. No user funds, real artwork or private keys are used in developer fixtures. Any live upload of user files or wallet send requires the user's own explicit action. External expert review remains deferred under AGENTS.md; no certification is claimed.
+
+Current baseline: PR #52 (tutorials/public presets) and PR #53 (total-cost review/production schema) merged. The live service remains unconfigured for owner sign-in and public launch at the last observed checkpoint. The production schema exists; do not rerun first-time migrations. Apply only new forward migrations after reviewing the actual ledger.
