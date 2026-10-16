@@ -25,4 +25,17 @@ describe('First-mint direct collection deployment',function(){
     expect(()=>m.prepareCollectionDeployment(artifact,config,{chainId:5,requester:from.address,nonce:0})).to.throw('WRONG_CHAIN');
     expect(()=>m.expectedRuntime({...artifact,immutables:{}},config)).to.throw('INVALID_ARTIFACT');
   });
+  it('read-only funding inspection simulates the exact constructor without spending gas or changing the nonce',async()=>{
+    const {inspectDeploymentFunding}=await import('../console/launch/doctor.mjs');
+    const nonce=await from.getNonce(),balance=await ethers.provider.getBalance(from.address);
+    const result=await inspectDeploymentFunding(ethers.provider,artifact,{version:1,wallet:from.address,collection:config},31337);
+    expect(result.constructorSimulated).eq(true);expect(result.withinLimits).eq(true);expect(result.funded).eq(true);
+    expect(BigInt(result.maximumCostWei)).eq(BigInt(result.gasLimit)*BigInt(result.gasPrice));
+    expect(result.additionalWei).eq('0');expect(result.transactionSent).eq(false);expect(result.mintGasIncluded).eq(false);
+    expect(await from.getNonce()).eq(nonce);expect(await ethers.provider.getBalance(from.address)).eq(balance);
+    expect(await ethers.provider.getCode(result.predictedCollection)).eq('0x');
+    const empty=ethers.Wallet.createRandom();
+    const unfunded=await inspectDeploymentFunding(ethers.provider,artifact,{version:1,wallet:empty.address,collection:{...config,minter:empty.address}},31337);
+    expect(unfunded.funded).eq(false);expect(unfunded.additionalWei).eq(unfunded.maximumCostWei);
+  });
 });

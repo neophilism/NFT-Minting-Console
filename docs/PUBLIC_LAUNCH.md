@@ -69,4 +69,38 @@ No real user artwork, private wallet key, public-chain transaction or paid servi
 
 Inputs still needed for the owner's real mint: public owner/minter/royalty addresses and supply; finalized artwork/poster and final rights; Pinata access and RPC endpoints; funded signing wallet and explicit wallet signatures. OpenSea API access is only required for automated marketplace listing. Keep service secrets in the hosting/operations environment. Never supply a seed phrase or wallet private key.
 
+## Read-only operator check and deployment budget
+
+Create a public `launch-request.json` with the intended deployment wallet and exact collection configuration. These are constructor choices, not defaults for the owner's release:
+
+```json
+{
+  "version": 1,
+  "wallet": "0xYOUR_DEPLOYMENT_WALLET",
+  "collection": {
+    "name": "Your approved collection",
+    "symbol": "YOUR_SYMBOL",
+    "seriesSize": "YOUR_APPROVED_SUPPLY",
+    "royaltyBps": "YOUR_APPROVED_BASIS_POINTS",
+    "owner": "0xYOUR_COLLECTION_OWNER",
+    "minter": "0xYOUR_MINTING_WALLET",
+    "royaltyRecipient": "0xYOUR_ROYALTY_RECIPIENT"
+  }
+}
+```
+
+```sh
+npm run build
+npm run launch:doctor -- launch-request.json
+npm run launch:doctor -- launch-request.json --network
+```
+
+Use the application environment with `NODE_ENV=production`, the explicit chain, HTTPS origin/RPC, `ADMIN_WALLETS`, restricted `DATABASE_URL`, and public-launch flag/real-mainnet-fee acknowledgement described above. Both deployment and minting wallets must have the console owner role. Migration credentials belong in a separate operations environment; the check rejects them in the app environment. Pinata credential presence is reported separately and is not evidence of successful authentication or publication.
+
+The default command checks configuration locally and never reports live readiness. `--network` additionally uses a fresh runtime database connection in a **read-only transaction**, verifies its restricted role and forced-RLS launch tables, confirms immutable-plan/event permission limits and zero unbound row visibility, then rolls back. It does not apply migrations, inspect private rows, create auth sessions, upload files, reserve journal entries, request a signature or broadcast anything. Schema presence/permissions are verified; migration checksum history is deliberately not claimed accessible to the restricted login.
+
+The RPC check simulates exact compiler-derived creation output, checks direct EOA deployment/minter wallets, and obtains pending nonce/balance and current gas price. Its fee calculation shares the wallet's 20% gas-limit margin, upper limits and rounding. The report includes the deployment cap and **additional wei/ETH needed above the wallet's existing balance**. This estimate covers one collection deployment only: minting needs additional gas after its exact public batch exists. It is time-sensitive, contains no swap/bridge/exchange purchase instruction, and does not authorize a transaction. Wallet review repeats live checks before any signature.
+
+The report redacts service credentials and URLs. Failed checks exit nonzero. `readyForDeploymentReview` can become true only when every configuration/database/simulation/fee/balance check passes; `mintingVerified`, `listingVerified` and `transactionSent` remain false. An empty wallet can be inspected without buying ETH first when the RPC supports zero-price estimation; unsupported simulations fail without inventing a funding amount.
+
 Canonical PR records treat public-launch work as contributing evidence for unfinished roadmap packages. Validator provisioning, encrypted release editing, full mint-job orchestration and production rollout are not marked complete by the public-flow merges.

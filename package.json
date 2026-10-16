@@ -47,7 +47,8 @@
     "public:pin": "node scripts/pin-public-file.mjs",
     "release:inspect": "node scripts/publish-release.mjs inspect",
     "release:publish": "node scripts/publish-release.mjs publish",
-    "release:reconcile": "node scripts/publish-release.mjs reconcile"
+    "release:reconcile": "node scripts/publish-release.mjs reconcile",
+    "launch:doctor": "node scripts/launch-doctor.mjs"
   },
   "dependencies": {
     "axios": "1.20.0",
