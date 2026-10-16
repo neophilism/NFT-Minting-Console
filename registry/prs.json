@@ -211,7 +211,8 @@
       "title": "Publishing boundary and public-media preflight",
       "origin": "original",
       "prs": [
-        44
+        44,
+        45
       ],
       "dependsOn": [
         "NFT-10",
@@ -387,7 +388,8 @@
       "origin": "original",
       "prs": [
         43,
-        44
+        44,
+        45
       ],
       "dependsOn": [
         "NFT-05",
@@ -454,7 +456,8 @@
       "origin": "original",
       "prs": [
         43,
-        44
+        44,
+        45
       ],
       "dependsOn": [
         "NFT-06",
@@ -471,7 +474,8 @@
       "title": "Batch mint pipeline",
       "origin": "original",
       "prs": [
-        44
+        44,
+        45
       ],
       "implementationStatus": "partial",
       "acceptanceStatus": "pending",
@@ -580,7 +584,8 @@
       "title": "Threat-driven audit and contract verification",
       "origin": "original",
       "prs": [
-        44
+        44,
+        45
       ],
       "dependsOn": [
         "NFT-05",
@@ -658,7 +663,8 @@
       "title": "Production launch and staged rollout",
       "origin": "original",
       "prs": [
-        44
+        44,
+        45
       ],
       "dependsOn": [
         "NFT-33"

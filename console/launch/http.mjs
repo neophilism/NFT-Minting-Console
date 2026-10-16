@@ -58,6 +58,7 @@ export function installLaunchRoutes(app,requireAction,{journal,provider,artifact
     exact(req.body,[]);const row=await journal.get(req.actor,req.params.id);if(!row.transactionHash)stop('TRANSACTION_REQUIRED');
     let observation;
     try{
+      if(row.plan.kind==='mint'){const tx=await provider.getTransaction(row.transactionHash);if(tx&&tx.nonce!==row.plan.nonce)stop('TRANSACTION_MISMATCH');}
       const e=row.plan.kind==='deploy'?await verifyDeploymentReceipt(provider,row.plan,row.transactionHash):await verifyMintReceipt(provider,row.plan.batch,row.transactionHash);
       observation={state:'verified',block:e.blockNumber,blockHash:e.blockHash,confirmations:Math.min(e.confirmations,2147483647),code:null};
     }catch(e){const code=e instanceof LaunchError||e instanceof MintCheckError?e.code:'RPC_VERIFICATION_UNAVAILABLE';
