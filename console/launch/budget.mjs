@@ -1,4 +1,4 @@
-import {Interface,ZeroAddress,getAddress,toQuantity,formatEther,keccak256} from 'ethers';
+import {Interface,ZeroAddress,getAddress,toQuantity,formatEther,keccak256,hexlify,randomBytes} from 'ethers';
 import {exact,address,collectionConfig,prepareCollectionCreation,digest,stop,LaunchError} from './contracts.mjs';
 import {prepareMintWorks,MINT_ABI,MintCheckError} from '../chain/mint.mjs';
 import {launchFeeBudget,LAUNCH_FEE_LIMITS} from './fees.mjs';
@@ -39,8 +39,17 @@ function validateMintLogs(call,creation,works){
 export async function inspectCombinedBudget(provider,artifact,request,workInputs,chainId){
   exact(request,['version','wallet','collection']);if(request.version!==1)stop('INVALID_INPUT');
   if(!Number.isSafeInteger(chainId)||chainId<1)stop('WRONG_CHAIN');
-  const config=collectionConfig(request.collection),wallet=address(request.wallet),mint=prepareMintWorks(workInputs);
-  if(mint.works.some(w=>BigInt(w.tokenId)>BigInt(config.seriesSize)))stop('TOKEN_OUTSIDE_SUPPLY');
+  if(!Array.isArray(workInputs)||Object.getPrototypeOf(workInputs)!==Array.prototype||workInputs.length<1||workInputs.length>500||
+    Reflect.ownKeys(workInputs).length!==workInputs.length+1)stop('INVALID_BATCH');
+  for(let i=0;i<workInputs.length;i++){
+    const descriptor=Object.getOwnPropertyDescriptor(workInputs,String(i));
+    if(!descriptor||!('value' in descriptor)||!descriptor.enumerable)stop('INVALID_BATCH');
+  }
+  const config=collectionConfig(request.collection),wallet=address(request.wallet),mints=[];
+  for(let i=0;i<workInputs.length;i+=10)mints.push(prepareMintWorks(workInputs.slice(i,i+10)));
+  const works=mints.flatMap(mint=>mint.works);
+  if(new Set(works.map(w=>w.tokenId)).size!==works.length)stop('DUPLICATE_TOKEN_ID');
+  if(works.some(w=>BigInt(w.tokenId)>BigInt(config.seriesSize)))stop('TOKEN_OUTSIDE_SUPPLY');
   if((await provider.getNetwork()).chainId!==BigInt(chainId))stop('WRONG_CHAIN');
   const block=await provider.getBlock('latest');
   if(!block||!Number.isSafeInteger(block.number)||block.number<0||typeof block.gasLimit!=='bigint')stop('INVALID_BLOCK');digest(block.hash);
@@ -61,47 +70,70 @@ export async function inspectCombinedBudget(provider,artifact,request,workInputs
   if(await provider.getCode(creation.expected.collection,block.number)!=='0x')stop('ALREADY_DEPLOYED');
   const price=quantity(await provider.send('eth_gasPrice',[]));
   if(price<1n||price>LAUNCH_FEE_LIMITS.maximumGasPrice)stop('FEE_POLICY_EXCEEDED');
-  const iface=new Interface(artifact.abi),views=[];
-  const view=(name,args,expected)=>views.push({name,args,expected:iface.encodeFunctionResult(name,expected)});
-  for(const [name,value] of [['owner',config.owner],['MINTER',config.minter],['SERIES_SIZE',config.seriesSize],['CREATOR_ROYALTY_BPS',config.royaltyBps],
-    ['ROYALTY_RECIPIENT',config.royaltyRecipient],['name',config.name],['symbol',config.symbol]])view(name,[],[value]);
-  view('royaltyInfo',[1n,10000n],[config.royaltyRecipient,config.royaltyBps]);
-  view('totalMinted',[],[mint.works.length]);
-  view('mintingClosed',[],[BigInt(mint.works.length)===BigInt(config.seriesSize)]);
-  for(const w of mint.works)for(const [name,value] of [['workTitle',w.title],['tokenURI',w.metadataURI],['mediaSHA256',w.mediaHash],['rightsURI',w.rightsURI],['rightsSHA256',w.rightsHash],['ownerOf',config.minter]])view(name,[w.tokenId],[value]);
-  views.push({name:'getTransferValidator',args:[],expected:null});
-  const mintNonce=nonceOf(config.minter)+(config.minter===wallet?1:0);
+  // Read-only getters use a separate virtual caller so they cannot consume
+  // the signing wallets' simulated nonces between real mint batches.
+  const reader=getAddress(hexlify(randomBytes(20)));
+  if([wallet,config.minter,creation.expected.collection,DEFAULT_VALIDATOR,ZeroAddress].includes(reader))stop('SIMULATION_READER_COLLISION');
+  const [readerCode,readerNonce,readerBalance]=await Promise.all([
+    provider.getCode(reader,block.number),provider.getTransactionCount(reader,block.number),provider.getBalance(reader,block.number)]);
+  if(readerCode!=='0x'||!Number.isSafeInteger(readerNonce)||readerNonce<0||readerNonce>Number.MAX_SAFE_INTEGER-5000||
+    typeof readerBalance!=='bigint'||readerBalance<0n||readerBalance>=(1n<<256n))stop('INVALID_SIMULATION_READER');
+  const iface=new Interface(artifact.abi),batchViews=[];
+  let mintedCount=0,readNonce=readerNonce;
+  const firstMintNonce=nonceOf(config.minter)+(config.minter===wallet?1:0);
   const tx=(from,nonce,data,to,gas)=>({from,nonce:toQuantity(nonce),input:data,...(to?{to}:{}),value:'0x0',gas:toQuantity(gas),gasPrice:toQuantity(price)});
-  const payload={validation:true,traceTransfers:false,returnFullTransactions:false,blockStateCalls:[
-    {stateOverrides:Object.fromEntries(wallets.map(w=>[w.wallet,{balance:toQuantity(10n**24n)}])),
-      calls:[tx(wallet,creation.nonce,creation.data,null,cap)]},
-    {calls:[tx(config.minter,mintNonce,mint.data,creation.expected.collection,cap),
-      ...views.map((v,i)=>tx(config.minter,mintNonce+1+i,iface.encodeFunctionData(v.name,v.args),creation.expected.collection,300000n))]}
-  ]};
+  const blockStateCalls=[{stateOverrides:Object.fromEntries([...wallets.map(w=>[w.wallet,{balance:toQuantity(10n**24n)}]),[reader,{balance:toQuantity(10n**24n)}]]),
+    calls:[tx(wallet,creation.nonce,creation.data,null,cap)]}];
+  for(let batchIndex=0;batchIndex<mints.length;batchIndex++){
+    const mint=mints[batchIndex],views=[];
+    const view=(name,args,expected)=>views.push({name,args,expected:iface.encodeFunctionResult(name,expected)});
+    for(const [name,value] of [['owner',config.owner],['MINTER',config.minter],['SERIES_SIZE',config.seriesSize],['CREATOR_ROYALTY_BPS',config.royaltyBps],
+      ['ROYALTY_RECIPIENT',config.royaltyRecipient],['name',config.name],['symbol',config.symbol]])view(name,[],[value]);
+    view('royaltyInfo',[mint.works[0].tokenId,10000n],[config.royaltyRecipient,config.royaltyBps]);
+    mintedCount+=mint.works.length;view('totalMinted',[],[mintedCount]);
+    view('mintingClosed',[],[BigInt(mintedCount)===BigInt(config.seriesSize)]);
+    for(const w of mint.works)for(const [name,value] of [['workTitle',w.title],['tokenURI',w.metadataURI],['mediaSHA256',w.mediaHash],['rightsURI',w.rightsURI],['rightsSHA256',w.rightsHash],['ownerOf',config.minter]])view(name,[w.tokenId],[value]);
+    views.push({name:'getTransferValidator',args:[],expected:null});batchViews.push(views);
+    blockStateCalls.push({calls:[tx(config.minter,firstMintNonce+batchIndex,mint.data,creation.expected.collection,cap),
+      ...views.map(v=>tx(reader,readNonce++,iface.encodeFunctionData(v.name,v.args),creation.expected.collection,300000n))]});
+  }
+  const payload={validation:true,traceTransfers:false,returnFullTransactions:false,blockStateCalls};
   let simulated;
   try{simulated=await provider.send('eth_simulateV1',[payload,toQuantity(block.number)]);}
   catch{stop('COMBINED_SIMULATION_UNAVAILABLE');}
-  if(!Array.isArray(simulated)||simulated.length!==2||simulated[0]?.parentHash!==block.hash||
-    simulated[1]?.parentHash!==simulated[0]?.hash||quantity(simulated[0]?.number)!==BigInt(block.number)+1n||
-    quantity(simulated[1]?.number)!==BigInt(block.number)+2n||!Array.isArray(simulated[0]?.calls)||simulated[0].calls.length!==1||
-    !Array.isArray(simulated[1]?.calls)||simulated[1].calls.length!==views.length+1)stop('INVALID_SIMULATION_RESULT');
-  digest(simulated[0].hash);digest(simulated[1].hash);
-  const deployed=success(simulated[0].calls[0]),minted=success(simulated[1].calls[0]);
-  if(bytes(deployed.returnData)!==creation.runtime.toLowerCase()||bytes(minted.returnData)!=='0x')stop('SIMULATED_DEPLOYMENT_MISMATCH');
-  validateMintLogs(minted,creation,mint.works);
-  let validator;
-  for(let i=0;i<views.length;i++){
-    const actual=success(simulated[1].calls[i+1]);if(actual.logs.length)stop('SIMULATED_READBACK_MISMATCH');
-    if(views[i].expected!==null){if(bytes(actual.returnData)!==views[i].expected.toLowerCase())stop('SIMULATED_READBACK_MISMATCH');}
-    else{try{validator=address(iface.decodeFunctionResult('getTransferValidator',actual.returnData)[0]);if(bytes(actual.returnData)!==iface.encodeFunctionResult('getTransferValidator',[validator]).toLowerCase())stop('INVALID_VALIDATOR');}catch{stop('INVALID_VALIDATOR');}}
+  if(!Array.isArray(simulated)||simulated.length!==mints.length+1)stop('INVALID_SIMULATION_RESULT');
+  const virtualHashes=new Set();
+  for(let i=0;i<simulated.length;i++){
+    const virtual=simulated[i],expectedCalls=i===0?1:batchViews[i-1].length+1;
+    if(virtual?.parentHash!==(i===0?block.hash:simulated[i-1].hash)||quantity(virtual?.number)!==BigInt(block.number)+BigInt(i)+1n||
+      !Array.isArray(virtual?.calls)||virtual.calls.length!==expectedCalls)stop('INVALID_SIMULATION_RESULT');
+    digest(virtual.hash);if(virtualHashes.has(virtual.hash))stop('INVALID_SIMULATION_RESULT');virtualHashes.add(virtual.hash);
   }
-  if(validator!==DEFAULT_VALIDATOR)stop('INVALID_VALIDATOR');
-  const validatorCode=await provider.getCode(validator,block.number);bytes(validatorCode);const validatorContractPresent=validatorCode!=='0x';
-  const operations=[['deploy',wallet,deployed,creation.data],['first-mint',config.minter,minted,mint.data]].map(([kind,from,call,data])=>{
+  const deployed=success(simulated[0].calls[0]);
+  if(bytes(deployed.returnData)!==creation.runtime.toLowerCase())stop('SIMULATED_DEPLOYMENT_MISMATCH');
+  const operation=(kind,from,call,data,tokenIds=[])=>{
     const maximum=peak(call,cap),fee=launchFeeBudget(maximum,price,0n);
-    return {kind,wallet:from,gasUsed:quantity(call.gasUsed).toString(),peakGas:maximum.toString(),gasLimit:fee.gasLimit,gasPriceWei:fee.gasPrice,
+    return {kind,wallet:from,tokenIds,gasUsed:quantity(call.gasUsed).toString(),peakGas:maximum.toString(),gasLimit:fee.gasLimit,gasPriceWei:fee.gasPrice,
       maximumCostWei:fee.maximumCostWei,withinLimits:fee.withinLimits&&BigInt(fee.gasLimit)<=cap,calldataHash:keccak256(data)};
-  });
+  };
+  const operations=[operation('deploy',wallet,deployed,creation.data)];
+  for(let batchIndex=0;batchIndex<mints.length;batchIndex++){
+    const mint=mints[batchIndex],minted=success(simulated[batchIndex+1].calls[0]),views=batchViews[batchIndex];
+    if(bytes(minted.returnData)!=='0x')stop('SIMULATED_DEPLOYMENT_MISMATCH');
+    validateMintLogs(minted,creation,mint.works);
+    for(let i=0;i<views.length;i++){
+      const actual=success(simulated[batchIndex+1].calls[i+1]);if(actual.logs.length)stop('SIMULATED_READBACK_MISMATCH');
+      if(views[i].expected!==null){if(bytes(actual.returnData)!==views[i].expected.toLowerCase())stop('SIMULATED_READBACK_MISMATCH');}
+      else{
+        let observedValidator;
+        try{observedValidator=address(iface.decodeFunctionResult('getTransferValidator',actual.returnData)[0]);}
+        catch{stop('INVALID_VALIDATOR');}
+        if(observedValidator!==DEFAULT_VALIDATOR||bytes(actual.returnData)!==iface.encodeFunctionResult('getTransferValidator',[DEFAULT_VALIDATOR]).toLowerCase())stop('INVALID_VALIDATOR');
+      }
+    }
+    operations.push(operation(batchIndex===0?'first-mint':'mint-batch-'+(batchIndex+1),config.minter,minted,mint.data,mint.works.map(w=>w.tokenId)));
+  }
+  const validator=DEFAULT_VALIDATOR,validatorCode=await provider.getCode(validator,block.number);bytes(validatorCode);const validatorContractPresent=validatorCode!=='0x';
   const funding=wallets.map(w=>{
     const selected=operations.filter(op=>op.wallet===w.wallet),required=selected.reduce((n,op)=>n+BigInt(op.maximumCostWei),0n),additional=required>w.balance?required-w.balance:0n;
     return {wallet:getAddress(w.wallet),operations:selected.map(op=>op.kind),balanceWei:w.balance.toString(),maximumCostWei:required.toString(),
@@ -109,14 +141,15 @@ export async function inspectCombinedBudget(provider,artifact,request,workInputs
   });
   if((await provider.getBlock(block.number))?.hash!==block.hash||(await provider.getNetwork()).chainId!==BigInt(chainId))stop('CHAIN_REORG');
   for(const w of wallets)if(await provider.getTransactionCount(w.wallet,'pending')!==w.nonce||await provider.getBalance(w.wallet,'pending')!==w.balance)stop('WALLET_CHANGED_DURING_SIMULATION');
+  if(await provider.getTransactionCount(reader,'pending')!==readerNonce||await provider.getBalance(reader,'pending')!==readerBalance)stop('WALLET_CHANGED_DURING_SIMULATION');
   return {version:1,readOnly:true,method:'eth_simulateV1',chainId,observedBlock:block.number,observedBlockHash:block.hash,
-    predictedCollection:creation.expected.collection,deploymentNonce:creation.nonce,firstMintNonce:mintNonce,tokenIds:mint.works.map(w=>w.tokenId),
+    predictedCollection:creation.expected.collection,deploymentNonce:creation.nonce,firstMintNonce,mintBatchCount:mints.length,suppliedWorkCount:works.length,seriesSize:config.seriesSize,entireSeriesIncluded:BigInt(works.length)===BigInt(config.seriesSize),simulationReader:reader,tokenIds:works.map(w=>w.tokenId),
     constructorRuntimeMatched:true,simulatedMintEventsMatched:true,simulatedImmutableReadbackMatched:true,sourceWalletStateUnchanged:true,
     operations,funding,totalMaximumCostWei:operations.reduce((n,op)=>n+BigInt(op.maximumCostWei),0n).toString(),
     totalAdditionalWei:funding.reduce((n,w)=>n+BigInt(w.additionalWei),0n).toString(),totalAdditionalEth:formatEther(funding.reduce((n,w)=>n+BigInt(w.additionalWei),0n)),
     feeCapsWithinLimits:operations.every(op=>op.withinLimits),signingWalletsFunded:funding.every(w=>w.funded),
     validator,validatorContractPresent,validatorPolicyVerified:false,publicFilesVerified:false,readyForFundingReview:false,
     transactionSent:false,mintingVerified:false,listingVerified:false,walletOwnershipVerified:false,estimateIsTimeSensitive:true,
-    scope:'One new collection and its first batch of up to ten works. Policy changes, approvals, listings, later batches and exchange/bridge costs are excluded.'};
+    scope:'One new collection and every supplied work (up to 500), in batches of ten. Policy changes, approvals, listings, unsupplied works and exchange/bridge costs are excluded.'};
 }
 export function budgetErrorCode(error){return error instanceof LaunchError||error instanceof MintCheckError?error.code:'BUDGET_VERIFICATION_UNAVAILABLE';}

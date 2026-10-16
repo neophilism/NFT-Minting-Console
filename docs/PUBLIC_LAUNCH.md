@@ -107,22 +107,24 @@ The report redacts service credentials and URLs. Failed checks exit nonzero. `re
 Canonical PR records treat public-launch work as contributing evidence for unfinished roadmap packages. Validator provisioning, encrypted release editing, full mint-job orchestration and production rollout are not marked complete by the public-flow merges.
 
 
-## Combined deployment and first-batch funding estimate
+## Combined deployment and supplied-batch funding estimate
 
-After publishing and independently reading back the approved final files, use the same public collection request and generated public mint bundle:
+After publishing and independently reading back the approved final files, use the same public collection request and one or more generated public mint bundles:
 
 ```sh
 npm run build
-npm run launch:budget -- launch-request.json public-mint-bundle.json
+npm run launch:budget -- launch-request.json public-mint-bundle.json additional-public-bundle.json
 ```
 
-Only HTTPS `RPC_URL` and explicit Ethereum-mainnet/Sepolia `CHAIN_ID` are needed for this read-only command. The bundle must contain one to ten works with matching canonical metadata bytes, public IPFS files and exact media/rights commitments. The command performs GET readback; it does not upload or change the publication checkpoint.
+Only HTTPS `RPC_URL` and explicit Ethereum-mainnet/Sepolia `CHAIN_ID` are needed for this read-only command. Each bundle must contain one to ten works with matching canonical metadata bytes, public IPFS files and exact media/rights commitments. Supply up to 500 works across at most 500 bundle files, with an 8 MiB total public JSON input limit. Duplicate token IDs across files are rejected. The command performs GET readback; it does not upload or change the publication checkpoint.
 
 The RPC must support [`eth_simulateV1`](https://geth.ethereum.org/docs/interacting-with-geth/rpc/ns-eth#eth-simulate-v1), including the optional [`maxUsedGas` field](https://ethereum.github.io/execution-apis/api/methods/eth_simulateV1/) for each funded operation. This field records peak gas before refunds. A missing peak measurement stops the combined quote; net receipt gas alone is not used as its funding basis.
 
-Two virtual blocks execute exact compiler-derived deployment bytes and the first mint batch. Only virtual balances are overridden; real nonce, code, storage, policy state and balances are not changed. Direct EOA signers and a stable wallet nonce/balance snapshot are required. The result checks constructor runtime, ordered mint events, all intended token fields/initial owners, collection configuration and royalty readback. It also observes the pinned v5 default validator address and actual source-chain code presence. Policy provisioning and listing verification remain separate.
+A virtual deployment block followed by one virtual block per batch executes exact compiler-derived deployment bytes and every supplied mint batch. A separate random virtual reader calls the public getters so those simulated reads cannot consume the signing wallets' mint nonces. The reader never requires a real key or funding. Only virtual balances are overridden; real nonce, code, storage, policy state and balances are not changed. Direct EOA signers and a stable wallet nonce/balance snapshot are required. The result checks constructor runtime, ordered mint events, all intended token fields/initial owners, collection configuration and royalty readback. It also observes the pinned v5 default validator address and actual source-chain code presence. Policy provisioning and listing verification remain separate.
 
-The report groups gas caps by deployment/minter wallet. If they are the same wallet, its existing balance is subtracted **once from the combined cap**. Different wallets receive separate shortfalls. Every cap uses peak gas plus the same upward-rounded 20% limit margin and fee ceilings as browser review. The quote covers one new collection and its first batch; later batches, policy changes, token approvals, listings and exchange/bridge costs are excluded. It is time-sensitive and is not a guarantee that prices or wallet state will remain unchanged.
+The report groups gas caps by deployment/minter wallet. If they are the same wallet, its existing balance is subtracted **once from the combined cap**. Different wallets receive separate shortfalls. Every cap uses peak gas plus the same upward-rounded 20% limit margin and fee ceilings as browser review. The quote covers one new collection and all supplied works, grouped into batches of ten. The report explicitly gives `suppliedWorkCount`, `seriesSize` and `entireSeriesIncluded`; it does not assume unsupplied NFTs are covered. Policy changes, token approvals, listings, unsupplied works and exchange/bridge costs are excluded. It is time-sensitive and is not a guarantee that prices or wallet state will remain unchanged.
+
+RPC providers can cap total simulated gas, blocks or response size. If any batch, peak-gas measurement or readback is unavailable, the command fails instead of publishing a partial total. It does not change RPC gas limits or substitute a linear guess for later batches.
 
 `publicFilesVerified` requires actual readback. `readyForFundingReview` also requires valid fee caps and observed validator contract presence. This is a funding-scope observation, not application/DB readiness, ownership proof or transaction authorization: run `launch:doctor` separately. Virtual block/transaction hashes are not recorded as public-chain receipt evidence, and `transactionSent`, `mintingVerified`, `listingVerified` and `validatorPolicyVerified` remain false. Wallet review repeats independent live checks before each real signature.
 
@@ -139,3 +141,7 @@ A verified cancellation stores append-only public evidence separately from the o
 Apply authorization migration `005_launch_nonce_resolution.sql` through the separate migration environment before enabling the updated application. It creates a forced-RLS, account/chain-bound proof table with no runtime update/delete grant. The readiness doctor checks the new table's forced RLS, immutable-proof privileges and unbound visibility. Existing migration bytes are unchanged. No migration to the production Neon default branch has been applied by this change.
 
 Regression coverage includes actual disposable EVM cancellation receipts, malformed/adversarial RPC evidence, embedded and native PostgreSQL history/permission checks, and desktop/mobile browser recovery after an unknown wallet outcome. These tests use synthetic wallets only; passing them does not prove a public-chain launch occurred.
+
+## Multi-batch funding evidence
+
+The private pinned-Geth acceptance fixture exercises shared and distinct deployment/minter wallets for two-work and eleven-work releases. The eleven-work release crosses the ten-work boundary, checks final supply closure and immutable per-token readback, and requires sequential real-operation nonces despite the intervening virtual getter calls. The aggregate quote contains only deployment and mint costs; no synthetic reader cost is charged to a signing wallet. Source balances/nonces/code remain unchanged. Larger releases remain bounded by the selected provider's simulation capacity and are not claimed to have been publicly minted.

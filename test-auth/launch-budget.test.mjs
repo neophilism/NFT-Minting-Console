@@ -49,7 +49,7 @@ function fixture({separate=false,mutate,changed=false,delegated=false}={}){
 }
 test('combined cap subtracts one shared-wallet balance once and uses peak gas before refunds',async()=>{
   const f=fixture(),r=await inspectCombinedBudget(f.provider,artifact,f.request,works,31337);
-  assert.equal(r.funding.length,1);assert.equal(r.totalMaximumCostWei,'5640000000000000');assert.equal(r.totalAdditionalWei,'4640000000000000');
+  assert.equal(r.funding.length,1);assert.equal(r.suppliedWorkCount,1);assert.equal(r.entireSeriesIncluded,false);assert.equal(r.totalMaximumCostWei,'5640000000000000');assert.equal(r.totalAdditionalWei,'4640000000000000');
   assert.equal(r.operations[0].gasLimit,'2400000');assert.equal(r.operations[1].gasLimit,'420000');
   assert.equal(r.readyForFundingReview,false);assert.equal(r.transactionSent,false);assert.equal(r.validatorPolicyVerified,false);
   assert.deepEqual(f.sent,['eth_gasPrice','eth_simulateV1']);
@@ -78,4 +78,16 @@ test('CLI configuration failures stay redacted and require no credentials or net
     env:{...process.env,CHAIN_ID:'5',RPC_URL:'https://rpc.example/secret-token-never-print'},encoding:'utf8',timeout:5000});
   assert.equal(r.status,1);assert.match(r.stderr,/RPC_CONFIGURATION_REQUIRED/);assert.match(r.stderr,/Usage:/);
   assert.equal((r.stdout+r.stderr).includes('secret-token-never-print'),false);assert.equal((r.stdout+r.stderr).includes('private-input-never-print'),false);
+});
+
+test('multiple batches reject duplicate IDs, oversized lists and accessor arrays before any RPC',async()=>{
+  const provider={getNetwork:async()=>{throw new Error('Input rejection must precede RPC');}};
+  const eleven=Array.from({length:11},(_,i)=>({...works[0],tokenId:String(i+1)})),request=requestFor(wallet);
+  const duplicate=[...eleven.slice(0,10),{...eleven[10],tokenId:'1'}];
+  await assert.rejects(inspectCombinedBudget(provider,artifact,{...request,collection:{...request.collection,seriesSize:'11'}},duplicate,31337),e=>e.code==='DUPLICATE_TOKEN_ID');
+  await assert.rejects(inspectCombinedBudget(provider,artifact,request,Array.from({length:501},()=>works[0]),31337),e=>e.code==='INVALID_BATCH');
+  let evaluated=false;const accessor=[works[0]];
+  Object.defineProperty(accessor,'0',{get(){evaluated=true;return works[0];},enumerable:true});
+  await assert.rejects(inspectCombinedBudget(provider,artifact,request,accessor,31337),e=>e.code==='INVALID_BATCH');assert.equal(evaluated,false);
+  await assert.rejects(inspectCombinedBudget(provider,artifact,request,eleven,31337),e=>e.code==='TOKEN_OUTSIDE_SUPPLY');
 });
