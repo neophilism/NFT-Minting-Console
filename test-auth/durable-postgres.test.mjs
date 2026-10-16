@@ -5,6 +5,7 @@ import {readFile,mkdtemp,writeFile,rm} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {PGlite} from '@electric-sql/pglite';
+import {launchCases} from './launch-cases.mjs';
 import {journalCases} from './journal-cases.mjs';
 import pg from 'pg';
 import {migrate} from '../scripts/migrate.mjs';
@@ -39,7 +40,7 @@ test('durable store and release API repository against PostgreSQL',async t=>{
   const repo=new ReleaseRepository({pool,knownRoles:()=>roles});
   t.diagnostic(native?'Native PostgreSQL through pg; synthetic data only.':'Embedded PostgreSQL; serialized connection leases, not a native pg-driver claim.');
   await t.test('baseline and authorization migrations are checksum-bound and repeatable',async()=>{
-    assert.deepEqual(baseline,['001_release_model.sql']);assert.deepEqual(authorization,['001_auth_store.sql','002_release_rbac.sql','003_mint_journal.sql']);
+    assert.deepEqual(baseline,['001_release_model.sql']);assert.deepEqual(authorization,['001_auth_store.sql','002_release_rbac.sql','003_mint_journal.sql','004_public_launch_journal.sql']);
     assert.deepEqual(await migrate(db),[]);assert.deepEqual(await migrateAuth(db),[]);
     const directory=await mkdtemp(path.join(os.tmpdir(),'nft-auth-migration-'));
     try{
@@ -102,4 +103,5 @@ test('durable store and release API repository against PostgreSQL',async t=>{
     const client=await pool.connect();try{await client.query('BEGIN');await client.query('SET LOCAL ROLE nft_console_api');assert.equal((await client.query('SELECT id FROM nft_console.releases')).rows.length,0);await client.query('COMMIT');}catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
   });
   await journalCases(t,repo,owner,{wallet:O,role:'owner',chainId});
+  await launchCases(t,repo,owner,{wallet:O,role:'owner',chainId});
 });

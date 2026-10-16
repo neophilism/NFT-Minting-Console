@@ -105,3 +105,22 @@ export async function verifyDeploymentReceipt(provider,plan,hash,{minConfirmatio
   await canonical(provider,plan.chainId,{number:r.blockNumber,hash:r.blockHash});
   return {...verified,status:'deployment-verified',transactionHash:hash,blockNumber:r.blockNumber,blockHash:r.blockHash,confirmations,listingVerified:false};
 }
+
+export function mintActionId(batchId,nonce){
+  digest(batchId);if(!Number.isSafeInteger(nonce)||nonce<0)stop('INVALID_NONCE');
+  return keccak256(AbiCoder.defaultAbiCoder().encode(['string','bytes32','uint256'],['nft-console.public-mint.v1',batchId,nonce]));
+}
+/** A confirmed revert consumed its nonce but did not perform the intended action. Retain evidence without trapping all later operations. */
+export async function verifyFailedTransaction(provider,plan,hash,{minConfirmations=2}={}){
+  digest(hash);const head=await anchor(provider,plan.chainId);
+  if(!Number.isSafeInteger(minConfirmations)||minConfirmations<1||minConfirmations>256)stop('INVALID_CONFIRMATIONS');
+  const [tx,r]=await Promise.all([provider.getTransaction(hash),provider.getTransactionReceipt(hash)]);
+  if(!tx||!r)stop('PENDING_OR_UNKNOWN');
+  if(r.status!==0||tx.hash!==hash||r.hash!==hash||tx.chainId!==BigInt(plan.chainId)||tx.from!==plan.from||r.from!==plan.from||
+    tx.to!==plan.to||r.to!==plan.to||tx.data!==plan.data||tx.value!==0n||tx.nonce!==plan.nonce||![0,1,2].includes(tx.type)||
+    tx.authorizationList?.length||tx.blobVersionedHashes?.length||tx.blockHash!==r.blockHash||tx.blockNumber!==r.blockNumber)stop('TRANSACTION_MISMATCH');
+  const confirmations=head.number-r.blockNumber+1;if(confirmations<minConfirmations)stop('INSUFFICIENT_CONFIRMATIONS');
+  const block=await provider.getBlock(r.blockNumber);if(!block||block.hash!==r.blockHash||!block.transactions.includes(hash))stop('CHAIN_REORG');
+  await canonical(provider,plan.chainId,{number:r.blockNumber,hash:r.blockHash});
+  return {blockNumber:r.blockNumber,blockHash:r.blockHash,confirmations,failed:true};
+}

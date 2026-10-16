@@ -8,6 +8,7 @@ import { createAuthService } from '../console/auth/core.mjs';
 import { createWalletVerifier } from '../console/auth/wallet.mjs';
 import { OWNER, VIEWER, EDITOR, SAFE, ORIGIN } from './fixtures.mjs';
 import { startMintFixture } from './mint-fixture.mjs';
+import {publicBrowserFetch} from './launch-content.mjs';
 import { testWallets } from './fixtures.mjs';
 import { setupBrowserDatabase } from './database.mjs';
 
@@ -34,7 +35,7 @@ if (await safe.VERSION() !== '1.4.1' || await safe.getThreshold() !== 2n) throw 
 
 // Read-only JSON-RPC bridge. No transaction, signer, debug-write or private-key
 // API is exposed. All setup transactions above are local-EVM fixtures only.
-const methods = new Set(['eth_chainId', 'net_version', 'eth_blockNumber', 'eth_getCode', 'eth_call', 'eth_getBlockByNumber', 'eth_getTransactionByHash', 'eth_getTransactionReceipt']);
+const methods = new Set(['eth_chainId', 'net_version', 'eth_blockNumber', 'eth_getCode', 'eth_call', 'eth_getBlockByNumber', 'eth_getTransactionByHash', 'eth_getTransactionReceipt','eth_getTransactionCount','eth_estimateGas','eth_gasPrice','eth_getBalance']);
 const rpc = http.createServer(async (request, response) => {
   const chunks = []; let bytes = 0;
   try {
@@ -66,14 +67,14 @@ rpc.listen(0, '127.0.0.1'); await once(rpc, 'listening');
 const rpcUrl = `http://127.0.0.1:${rpc.address().port}`;
 const provider = new JsonRpcProvider(rpcUrl, undefined, { batchMaxCount: 1, cacheTimeout: -1 });
 const roles = new Map([[OWNER.toLowerCase(), 'owner'], [VIEWER.toLowerCase(), 'viewer'],
-  [EDITOR.toLowerCase(), 'editor'], [SAFE.toLowerCase(), 'owner'], [testWallets[3].address.toLowerCase(), 'owner']]);
+  [EDITOR.toLowerCase(), 'editor'], [SAFE.toLowerCase(), 'owner'], [testWallets[3].address.toLowerCase(), 'owner'], [testWallets[4].address.toLowerCase(), 'owner'], [testWallets[5].address.toLowerCase(), 'owner']]);
 const database = await setupBrowserDatabase(roles);
 const stopMintFixture = await startMintFixture(hre);
 const auth = createAuthService({ origin: ORIGIN, chainId: 31337, roles: () => roles,
   checksumAddress: getAddress, store: database.store, verifyWallet: createWalletVerifier(provider) });
 const app = createApp({ env: { NODE_ENV: 'test', PORT: '4173', PUBLIC_ORIGIN: ORIGIN, CHAIN_ID: '31337',
-  NFT_LOCAL_MINT_REHEARSAL: '1', ADMIN_WALLETS: `${OWNER},${SAFE},${testWallets[3].address}`, VIEWER_WALLETS: VIEWER, EDITOR_WALLETS: EDITOR,
-  RPC_URL: rpcUrl, DATABASE_URL: database.runtimeUrl }, authService: auth });
+  NFT_UI_FIXTURE:'1',NFT_PUBLIC_LAUNCH:'1',NFT_LOCAL_MINT_REHEARSAL: '1', ADMIN_WALLETS: `${OWNER},${SAFE},${testWallets[3].address},${testWallets[4].address},${testWallets[5].address}`, VIEWER_WALLETS: VIEWER, EDITOR_WALLETS: EDITOR,
+  RPC_URL: rpcUrl, DATABASE_URL: database.runtimeUrl }, authService: auth,launchContentOptions:{fetchImpl:publicBrowserFetch} });
 await app.locals.ready;
 const server = app.listen(4173, '127.0.0.1'); await once(server, 'listening');
 console.info('Disposable browser fixture ready: restricted PostgreSQL and actual local Safe/EOA verification.');
