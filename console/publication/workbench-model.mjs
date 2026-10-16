@@ -13,10 +13,12 @@ export const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function exact(v,keys){if(!v||typeof v!=='object'||Array.isArray(v)||Object.getPrototypeOf(v)!==Object.prototype||Object.keys(v).length!==keys.length||Object.keys(v).some(k=>!keys.includes(k)))stop('INVALID_PUBLICATION_INPUT');}
 export function workId(value){if(typeof value!=='string'||!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(value))stop('INVALID_PUBLICATION_ID');return value.toLowerCase();}
 export function descriptor(v){
-  exact(v,['kind','name','mime','byteLength','sha256']);const type=TYPES[v.kind];
-  if(!type||typeof v.name!=='string'||!v.name||v.name.length>200||v.name.trim()!==v.name||/[\\/]/.test(v.name)||Array.from(v.name).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127))stop('INVALID_FILE_DESCRIPTION');
+  exact(v,['kind','name','mime','byteLength','sha256']);
+  if(typeof v.kind!=='string'||!Object.hasOwn(TYPES,v.kind))stop('INVALID_FILE_DESCRIPTION');
+  const type=TYPES[v.kind];
+  if(typeof v.name!=='string'||!v.name||v.name.length>200||v.name.trim()!==v.name||/[\\/]/.test(v.name)||Array.from(v.name).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127))stop('INVALID_FILE_DESCRIPTION');
   const extension=v.name.slice(v.name.lastIndexOf('.')).toLowerCase();
-  if(type.mime[extension]!==v.mime||!Number.isSafeInteger(v.byteLength)||v.byteLength<1||v.byteLength>type.max||typeof v.sha256!=='string'||!/^[a-f0-9]{64}$/.test(v.sha256))stop('INVALID_FILE_DESCRIPTION');
+  if(!Object.hasOwn(type.mime,extension)||type.mime[extension]!==v.mime||!Number.isSafeInteger(v.byteLength)||v.byteLength<1||v.byteLength>type.max||typeof v.sha256!=='string'||!/^[a-f0-9]{64}$/.test(v.sha256))stop('INVALID_FILE_DESCRIPTION');
   return {kind:v.kind,name:v.name,mime:v.mime,byteLength:v.byteLength,sha256:v.sha256};
 }
 export function publicWork(v){
@@ -43,3 +45,4 @@ export function bundleFor(plan,files,metadataJson){
   const work={tokenId:plan.tokenId,title:plan.title,metadataURI:by.metadata.verifiedUri,mediaHash:'0x'+(by.media||by.image).sha256,rightsURI:by.rights.verifiedUri,rightsHash:'0x'+by.rights.sha256};
   const item={work,files:{version:1,publicDisclosureConfirmed:true,files:files.map(f=>({kind:f.kind,uri:f.verifiedUri,sha256:f.sha256,byteLength:f.byteLength}))},metadataJson};
   reviewedWork(item);return {version:1,works:[item]};
+}
