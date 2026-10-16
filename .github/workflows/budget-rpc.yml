@@ -1,0 +1,78 @@
+name: Combined budget RPC acceptance
+on:
+  pull_request:
+    paths:
+      - "console/launch/**"
+      - "console/chain/**"
+      - "contracts/**"
+      - "scripts/budget-launch.mjs"
+      - "test-native/budget.rpc.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/budget-rpc.yml"
+  push:
+    branches: [main]
+    paths:
+      - "console/launch/**"
+      - "console/chain/**"
+      - "contracts/**"
+      - "scripts/budget-launch.mjs"
+      - "test-native/budget.rpc.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/budget-rpc.yml"
+permissions:
+  contents: read
+concurrency:
+  group: budget-rpc-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  geth-simulation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ethereum/go-ethereum
+          ref: a579077007b98217c3e253a66e4b452ca0c32b96
+          path: vendor/go-ethereum
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version-file: vendor/go-ethereum/go.mod
+          cache: false
+      - name: Build pinned Geth v1.17.8 for a private developer chain
+        working-directory: vendor/go-ethereum
+        env:
+          GOFLAGS: -mod=readonly
+        run: |
+          test "$(git rev-parse HEAD)" = a579077007b98217c3e253a66e4b452ca0c32b96
+          go build -trimpath -o /tmp/nft-budget-geth ./cmd/geth
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run compile
+      - name: Exercise actual read-only simulation with no peers, user keys or public-chain transactions
+        env:
+          NFT_TEST_DISPOSABLE_GETH: "yes"
+          NFT_BUDGET_TEST_RPC: http://127.0.0.1:18545
+        run: |
+          mkdir -m 700 /tmp/nft-budget-geth-data
+          /tmp/nft-budget-geth --dev --dev.period 0 --datadir /tmp/nft-budget-geth-data --nodiscover --maxpeers 0 --port 0 --ipcdisable --http --http.addr 127.0.0.1 --http.port 18545 --http.api eth,net,web3 --http.vhosts localhost,127.0.0.1 --miner.gaslimit 30000000 > /tmp/nft-budget-geth.log 2>&1 &
+          budget_geth_pid=$!
+          trap 'kill "$budget_geth_pid" 2>/dev/null || true' EXIT
+          curl --retry 20 --retry-delay 1 --retry-connrefused --max-time 2 --fail --silent --show-error -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"web3_clientVersion","params":[]}' http://127.0.0.1:18545 > /tmp/nft-budget-geth-ready.json
+          node --test test-native/budget.rpc.mjs
+      - name: Retain synthetic-node diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: synthetic-budget-geth-diagnostics
+          path: /tmp/nft-budget-geth.log
+          if-no-files-found: ignore
+          retention-days: 3

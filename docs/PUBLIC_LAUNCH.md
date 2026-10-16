@@ -105,3 +105,25 @@ The RPC check simulates exact compiler-derived creation output, checks direct EO
 The report redacts service credentials and URLs. Failed checks exit nonzero. `readyForDeploymentReview` can become true only when every configuration/database/simulation/fee/balance check passes; `mintingVerified`, `listingVerified` and `transactionSent` remain false. An empty wallet can be inspected without buying ETH first when the RPC supports zero-price estimation; unsupported simulations fail without inventing a funding amount.
 
 Canonical PR records treat public-launch work as contributing evidence for unfinished roadmap packages. Validator provisioning, encrypted release editing, full mint-job orchestration and production rollout are not marked complete by the public-flow merges.
+
+
+## Combined deployment and first-batch funding estimate
+
+After publishing and independently reading back the approved final files, use the same public collection request and generated public mint bundle:
+
+```sh
+npm run build
+npm run launch:budget -- launch-request.json public-mint-bundle.json
+```
+
+Only HTTPS `RPC_URL` and explicit Ethereum-mainnet/Sepolia `CHAIN_ID` are needed for this read-only command. The bundle must contain one to ten works with matching canonical metadata bytes, public IPFS files and exact media/rights commitments. The command performs GET readback; it does not upload or change the publication checkpoint.
+
+The RPC must support [`eth_simulateV1`](https://geth.ethereum.org/docs/interacting-with-geth/rpc/ns-eth#eth-simulate-v1), including the optional [`maxUsedGas` field](https://ethereum.github.io/execution-apis/api/methods/eth_simulateV1/) for each funded operation. This field records peak gas before refunds. A missing peak measurement stops the combined quote; net receipt gas alone is not used as its funding basis.
+
+Two virtual blocks execute exact compiler-derived deployment bytes and the first mint batch. Only virtual balances are overridden; real nonce, code, storage, policy state and balances are not changed. Direct EOA signers and a stable wallet nonce/balance snapshot are required. The result checks constructor runtime, ordered mint events, all intended token fields/initial owners, collection configuration and royalty readback. It also observes the pinned v5 default validator address and actual source-chain code presence. Policy provisioning and listing verification remain separate.
+
+The report groups gas caps by deployment/minter wallet. If they are the same wallet, its existing balance is subtracted **once from the combined cap**. Different wallets receive separate shortfalls. Every cap uses peak gas plus the same upward-rounded 20% limit margin and fee ceilings as browser review. The quote covers one new collection and its first batch; later batches, policy changes, token approvals, listings and exchange/bridge costs are excluded. It is time-sensitive and is not a guarantee that prices or wallet state will remain unchanged.
+
+`publicFilesVerified` requires actual readback. `readyForFundingReview` also requires valid fee caps and observed validator contract presence. This is a funding-scope observation, not application/DB readiness, ownership proof or transaction authorization: run `launch:doctor` separately. Virtual block/transaction hashes are not recorded as public-chain receipt evidence, and `transactionSent`, `mintingVerified`, `listingVerified` and `validatorPolicyVerified` remain false. Wallet review repeats independent live checks before each real signature.
+
+CI builds [Geth v1.17.8](https://github.com/ethereum/go-ethereum/releases/tag/v1.17.8) from exact commit `a579077007b98217c3e253a66e4b452ca0c32b96` and starts a no-peer, loopback-only developer chain. Synthetic EOA cases exercise actual unsigned simulation for shared and distinct deployment/minter wallets, compare immutable fields, and confirm that source nonce, balance, predicted-address code and head are unchanged. That fixture has no deployed default validator and must not be promoted to public-chain readiness. Operator RPC availability and a real mint still await user inputs.

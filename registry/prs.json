@@ -559,7 +559,7 @@
     },
     {
       "id": "NFT-28",
-      "title": "Single \u201cMint & List\u201d guided operation",
+      "title": "Single “Mint & List” guided operation",
       "origin": "original",
       "prs": [],
       "dependsOn": [
@@ -715,9 +715,10 @@
       "externalDependencies": [],
       "externalPrerequisites": [],
       "contributingPrs": [
-        47
+        47,
+        49
       ],
-      "publicLaunchOperatorScope": "PR 47 adds a read-only configuration/runtime-role/constructor simulation and shared deployment-fee check. Production credentials, database target setup, public-chain mint evidence and complete roadmap acceptance remain pending."
+      "publicLaunchOperatorScope": "PRs 47 and 49 add read-only configuration/runtime-role, deployment and combined first-batch funding checks. Production credentials, database target setup, public-chain mint evidence and complete roadmap acceptance remain pending."
     }
   ],
   "pullRequests": [
