@@ -130,7 +130,7 @@ CI builds [Geth v1.17.8](https://github.com/ethereum/go-ethereum/releases/tag/v1
 
 ## Recover an existing wallet cancellation
 
-A lost wallet response remains unresolved until there is chain evidence. The launch page accepts the hash of an **existing** wallet cancellation and performs a read-only check. It never asks the wallet to cancel or replace a transaction.
+A lost wallet response remains unresolved until there is chain evidence. The launch page accepts the hash of an **existing** wallet cancellation and performs independent read-only receipt checks through the connected wallet RPC and the server RPC. It never asks the wallet to sign, cancel or replace a transaction.
 
 The narrow accepted form is a successful zero-value self-transfer by the same direct EOA, on the same chain and nonce, with empty calldata, empty access/authorization lists, exactly 21,000 gas limit and gas used, no logs and no created contract. The signer must have no code at the preceding block or receipt block. The receipt must be included in its canonical block, with a canonical RPC `finalized` block at least one block later. Providers without finalized-tag support and other replacement formats remain unresolved.
 

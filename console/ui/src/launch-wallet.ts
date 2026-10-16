@@ -1,3 +1,5 @@
+import {verifyNonceCancellation} from '../../launch/cancellation.mjs';
+import type {NonceCancellationProof} from '../../launch/cancellation.mjs';
 import {BrowserProvider, getAddress, keccak256, toQuantity} from 'ethers';
 import {simulateDeployment,verifyCollection,mintActionId} from '../../launch/contracts.mjs';
 import {launchFeeBudget,LAUNCH_FEE_LIMITS as FEE} from '../../launch/fees.mjs';
@@ -12,7 +14,7 @@ import {operation,HASH} from './mint-model.ts';
 import type {MintOperation} from './mint-model.ts';
 export interface PublicMintPlan {version:1;kind:'mint';intentId:string;chainId:number;from:string;to:string;data:string;value:'0x0';nonce:number;expected:CollectionExpected;batch:MintBatch;publicFilesVerifiedAt:string;validator:string;validatorPolicyVerified:false}
 export type LaunchPlan=DeployPlan|PublicMintPlan;
-export interface NonceResolution {version:1;kind:'finalized-self-cancellation';chainId:number;wallet:string;nonce:number;transactionHash:string;blockNumber:number;blockHash:string;finalizedBlockNumber:number;finalizedBlockHash:string;confirmations:number;originalActionVerified:false;transactionSent:false}
+export type NonceResolution=NonceCancellationProof;
 export interface LaunchOperation extends MintOperation {plan:LaunchPlan;nonceResolution:NonceResolution|null}
 export interface LaunchReview {intentId:string;reviewedAt:number;gas:string;gasPrice:string;maximumCost:string;nonce:string;commitment:string}
 const fail=(message:string):never=>{throw new MintFlowError(message);};
@@ -107,4 +109,18 @@ export async function sendLaunch(wallet:WalletProvider,input:LaunchOperation,rev
   if(signal.aborted)throw new MintFlowError('The session changed after submission. Save this transaction hash for recovery.',hash as string);
   try{return launchOperation(await post('/transaction',{transactionHash:hash}),session);}
   catch{throw new MintFlowError('Saving the transaction hash was not confirmed. Recover this operation without sending again.',hash as string);}
+}
+
+/** Independent wallet-RPC readback only. Never asks the wallet to send a cancellation. */
+export async function reviewNonceCancellation(wallet:WalletProvider,input:LaunchOperation,transactionHash:string,session:Session,signal:AbortSignal):Promise<NonceResolution>{
+  const row=launchOperation(input,session);
+  if(row.nonceResolution||!['wallet_pending','submitted','attention'].includes(row.state))fail('Select an unresolved wallet operation.');
+  await matching(wallet,row.plan,session,signal);
+  const provider=new BrowserProvider(wallet,undefined,{cacheTimeout:-1});
+  try{
+    const proof=await verifyNonceCancellation(provider,row.plan,transactionHash);active(signal);
+    await matching(wallet,row.plan,session,signal);
+    return proof;
+  }catch(error){if(error instanceof MintFlowError)throw error;active(signal);return fail('The wallet RPC could not verify this finalized cancellation. The operation remains unresolved.');}
+  finally{provider.destroy();}
 }
