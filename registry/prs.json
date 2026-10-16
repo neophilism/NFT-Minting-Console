@@ -102,7 +102,8 @@
       "title": "Release schema, ownership and data migrations",
       "origin": "original",
       "prs": [
-        12
+        12,
+        44
       ],
       "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
       "dependsOn": [
@@ -135,7 +136,8 @@
       "prs": [
         18,
         20,
-        22
+        22,
+        44
       ],
       "implementationStatus": "complete",
       "acceptanceStatus": "passed",
@@ -208,7 +210,9 @@
       "id": "NFT-13",
       "title": "Publishing boundary and public-media preflight",
       "origin": "original",
-      "prs": [],
+      "prs": [
+        44
+      ],
       "dependsOn": [
         "NFT-10",
         "NFT-11",
@@ -281,7 +285,9 @@
       "id": "NFT-16",
       "title": "Multi-release dashboard and saved settings",
       "origin": "original",
-      "prs": [],
+      "prs": [
+        44
+      ],
       "dependsOn": [
         "NFT-07",
         "NFT-09",
@@ -380,7 +386,8 @@
       "title": "Automated validator policy provisioning",
       "origin": "original",
       "prs": [
-        43
+        43,
+        44
       ],
       "dependsOn": [
         "NFT-05",
@@ -446,7 +453,8 @@
       "title": "Canonical deployment wizard",
       "origin": "original",
       "prs": [
-        43
+        43,
+        44
       ],
       "dependsOn": [
         "NFT-06",
@@ -462,7 +470,9 @@
       "id": "NFT-25",
       "title": "Batch mint pipeline",
       "origin": "original",
-      "prs": [],
+      "prs": [
+        44
+      ],
       "implementationStatus": "partial",
       "acceptanceStatus": "pending",
       "evidenceFiles": [
@@ -569,7 +579,9 @@
       "id": "NFT-30",
       "title": "Threat-driven audit and contract verification",
       "origin": "original",
-      "prs": [],
+      "prs": [
+        44
+      ],
       "dependsOn": [
         "NFT-05",
         "NFT-08",
@@ -645,7 +657,9 @@
       "id": "NFT-34",
       "title": "Production launch and staged rollout",
       "origin": "original",
-      "prs": [],
+      "prs": [
+        44
+      ],
       "dependsOn": [
         "NFT-33"
       ],

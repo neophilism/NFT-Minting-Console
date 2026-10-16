@@ -1,6 +1,6 @@
 import http from 'node:http';
 import {once} from 'node:events';
-import {Transaction,ContractFactory,keccak256} from 'ethers';
+import {Transaction,ContractFactory,keccak256,Interface,AbiCoder} from 'ethers';
 import {readFile} from 'node:fs/promises';
 import {prepareMintPlan} from '../console/chain/mint.mjs';
 import {testWallets} from './fixtures.mjs';
@@ -16,6 +16,9 @@ export async function startMintFixture(hre){
     const collection=await new ContractFactory(artifact.abi,artifact.bytecode,signer).deploy('Synthetic UI '+index,'TUI',1000,600,signer.address,signer.address,signer.address);await collection.waitForDeployment();
     contexts.set(index,{address:await collection.getAddress(),codeHash:keccak256(await hre.ethers.provider.getCode(await collection.getAddress())),next:1});
   }
+  const iface=new Interface(artifact.abi),publicCollections=new Set();
+  const validatorArtifact=JSON.parse(await readFile(new URL('../artifacts/contracts/test/TestTransferValidator.sol/TestTransferValidator.json',import.meta.url),'utf8'));
+  await hre.network.provider.send('hardhat_setCode',['0x721C008fdff27BF06E7E123956E2Fe03B63342e3',validatorArtifact.deployedBytecode]);
   const allowed=new Set(),reads=new Set(['eth_chainId','eth_blockNumber','eth_getCode','eth_call','eth_getBlockByNumber','eth_getTransactionByHash','eth_getTransactionReceipt','eth_getTransactionCount','eth_estimateGas','eth_gasPrice','eth_getBalance']);
   const server=http.createServer(async(req,res)=>{
     try{
@@ -32,9 +35,19 @@ export async function startMintFixture(hre){
       }else if(method==='eth_sendRawTransaction'){
         if(params.length!==1||typeof params[0]!=='string'||params[0].length>262144)throw new Error('Invalid signed fixture');
         const tx=Transaction.from(params[0]);
+        const publicSigner=[testWallets[4].address.toLowerCase(),testWallets[5].address.toLowerCase()].includes(tx.from?.toLowerCase());
+        let publicAllowed=false;
+        if(publicSigner&&tx.to===null&&tx.data.startsWith(artifact.bytecode)){
+          const args=AbiCoder.defaultAbiCoder().decode(['string','string','uint256','uint96','address','address','address'],'0x'+tx.data.slice(artifact.bytecode.length));
+          publicAllowed=args[0].startsWith('Browser public launch')&&args[1]==='BPL'&&args[2]===87n&&args[3]===600n&&args[4]===tx.from&&args[5]===tx.from&&args[6]===tx.from;
+        }else if(publicSigner&&publicCollections.has(tx.to?.toLowerCase())){
+          const parsed=iface.parseTransaction({data:tx.data});const work=parsed?.args[0]?.[0];
+          publicAllowed=parsed?.name==='mintWorksBatch'&&parsed.args[0].length===1&&work?.tokenId===87n&&work?.title==='Browser public work';
+        }
         if(!tx.signature||tx.chainId!==31337n||tx.type!==0||tx.value!==0n||tx.gasLimit>12000000n||!tx.gasPrice||tx.gasPrice>1000000000000n||
-          !allowed.has(tx.from?.toLowerCase()+':'+tx.to?.toLowerCase()+':'+tx.data))throw new Error('Only exact issued fixture mints are accepted.');
+          (!allowed.has(tx.from?.toLowerCase()+':'+tx.to?.toLowerCase()+':'+tx.data)&&!publicAllowed))throw new Error('Only exact issued fixture mints are accepted.');
         result=await hre.network.provider.send(method,params);await hre.network.provider.send('evm_mine');
+        if(publicAllowed&&tx.to===null){const receipt=await hre.ethers.provider.getTransactionReceipt(result);if(receipt?.contractAddress)publicCollections.add(receipt.contractAddress.toLowerCase());}
       }else if(reads.has(method))result=await hre.network.provider.send(method,params);
       else throw new Error('Unsupported fixture method');
       res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({result}));

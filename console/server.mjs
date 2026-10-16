@@ -11,6 +11,10 @@ import {createWalletVerifier} from './auth/wallet.mjs';
 import {createPersistence} from './data/persistence.mjs';
 import {installReleaseRoutes} from './data/http.mjs';
 import {installJournalRoutes} from './operations/http.mjs';
+import {publicLaunchMode} from './launch/mode.mjs';
+import {LaunchJournal} from './launch/journal.mjs';
+import {loadCollectionArtifact} from './launch/artifacts.mjs';
+import {installLaunchRoutes} from './launch/http.mjs';
 import {localMintMode} from './operations/local-mode.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const chainRegistry=JSON.parse(fs.readFileSync(path.join(root,'config/chains.json'),'utf8'));
@@ -23,14 +27,17 @@ const blockedFeatures=Object.freeze([
   {id:'production-evidence',milestones:['NFT-30','NFT-31','NFT-32','NFT-33','NFT-34','NFT-35','NFT-36'],description:'Audits, deployed infrastructure, real-sale rehearsal and final acceptance are not complete.'},
 ]);
 const closed=(res,code,error)=>res.status(409).json({code,error,productionReady:false});
-export function createApp({env=process.env,authService}={}) {
+export function createApp({env=process.env,authService,launchContentOptions}={}) {
   const app=express(),production=env.NODE_ENV==='production';
-  if(production)throw new Error('Production startup is blocked until authentication, publication and release gates are accepted.');
+  if(production&&(env.NFT_PUBLIC_LAUNCH!=='1'||authService))throw new Error('Production startup is blocked without the configured public launch scope and durable authentication.');
   const port=Number(env.PORT||3000);if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid PORT.');
   const chainId=Number(env.CHAIN_ID||11155111),profile=chainRegistry.chains[String(chainId)];
   if(!profile)throw new Error('Unsupported CHAIN_ID.');
   const origin=env.PUBLIC_ORIGIN||`http://localhost:${port}`,roles=rolesFromEnvironment(env);
   const localMint=localMintMode(env,chainId,origin);
+  const publicLaunch=publicLaunchMode(env,chainId,origin,roles);
+  if(launchContentOptions&&!(env.NODE_ENV==='test'&&env.NFT_UI_FIXTURE==='1'&&chainId===31337&&origin.startsWith('http://127.0.0.1:')))throw new Error('Content transport injection is limited to the disposable browser fixture.');
+  const launchArtifact=publicLaunch?loadCollectionArtifact():null;
   const factoryValue=env.DEPLOYMENT_FACTORY_ADDRESS||'';
   if(factoryValue&&!ethers.isAddress(factoryValue))throw new Error('Invalid DEPLOYMENT_FACTORY_ADDRESS.');
   const factoryAddress=factoryValue?ethers.getAddress(factoryValue):null;
@@ -41,7 +48,8 @@ export function createApp({env=process.env,authService}={}) {
     auth=authService||createAuthService({origin,chainId,production,roles:()=>roles,...(persistence?{store:persistence.store}:{}),checksumAddress:ethers.getAddress,verifyWallet:provider?createWalletVerifier(provider):async()=>{throw new AuthError(503,'unavailable');},audit:record=>console.info(JSON.stringify(record))});
     if(auth.origin!==origin||auth.chainId!==chainId)throw new Error('Authentication realm does not match server configuration.');
   }catch(error){provider?.destroy();void persistence?.close();throw error;}
-  const ready=persistence?.ready||Promise.resolve();
+  const launchJournal=persistence&&publicLaunch?new LaunchJournal(persistence.repository):null;
+  const ready=(persistence?.ready||Promise.resolve()).then(()=>launchJournal?.checkSchema());
   app.disable('x-powered-by');app.set('trust proxy',false);
   app.use((_req,res,next)=>{
     res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','no-referrer');res.setHeader('Cross-Origin-Resource-Policy','same-origin');
@@ -49,10 +57,12 @@ export function createApp({env=process.env,authService}={}) {
     if(auth.origin.startsWith('https:'))res.setHeader('Strict-Transport-Security','max-age=31536000');next();
   });
   app.use('/api',(_req,res,next)=>{ready.then(()=>next(),()=>res.status(503).json({error:'Configured database authorization is unavailable. No memory fallback is permitted.',code:'database_unavailable'}));});
+  app.use('/api/launch/mint',express.json({limit:'1536kb',strict:true}));
   app.use(express.json({limit:'64kb',strict:true}));
   const requireAction=installAuthRoutes(app,auth,{production});
   if(persistence){installReleaseRoutes(app,requireAction,persistence.repository);installJournalRoutes(app,requireAction,persistence.journal,provider);}
-  app.get('/api/config',(_req,res)=>res.json({chainId,chainSlug:profile.slug,chainName:profile.name,production:profile.production,deploymentFactory:factoryAddress,pinningReady:false,pinningConfigured:Boolean(env.PINATA_JWT),loginConfigured:roles.size>0&&Boolean(provider),validator:env.TRANSFER_VALIDATOR_ADDRESS||profile.validator,signedZone:env.OPENSEA_SIGNED_ZONE||profile.signedZone,productionReady:false,authStore:persistence?'postgresql':'development-memory',capabilities:{localMint,mintJournal:Boolean(persistence),privateDrafts:false,opaqueReleaseApi:Boolean(persistence),publish:false,mint:false,list:false,deploy:chainId!==1&&Boolean(factoryAddress)}}));
+  if(launchJournal)installLaunchRoutes(app,requireAction,{journal:launchJournal,provider,artifact:launchArtifact,enabled:publicLaunch,chainId,contentOptions:launchContentOptions});
+  app.get('/api/config',(_req,res)=>res.json({chainId,chainSlug:profile.slug,chainName:profile.name,production:profile.production,deploymentFactory:factoryAddress,pinningReady:false,pinningConfigured:Boolean(env.PINATA_JWT),loginConfigured:roles.size>0&&Boolean(provider),validator:env.TRANSFER_VALIDATOR_ADDRESS||profile.validator,signedZone:env.OPENSEA_SIGNED_ZONE||profile.signedZone,productionReady:false,authStore:persistence?'postgresql':'development-memory',capabilities:{publicLaunch,localMint,mintJournal:Boolean(persistence),privateDrafts:false,opaqueReleaseApi:Boolean(persistence),publish:false,mint:false,list:false,deploy:chainId!==1&&Boolean(factoryAddress)}}));
   app.get('/api/health',(_req,res)=>res.json({ok:true,productionReady:false}));
   app.get('/api/launch-readiness',requireAction('read'),(_req,res)=>res.json({productionReady:false,mintingEvidence:'not-verified',listingEvidence:'not-verified',blockers:blockedFeatures,authentication:'software-integration-accepted',storage:persistence?'durable-configured-not-production-accepted':'development-memory',note:'These are software gates, not a live wallet inventory or security certification.'}));
   app.get('/api/artifact',requireAction('deploy'),(_req,res)=>{
@@ -92,7 +102,7 @@ export function createApp({env=process.env,authService}={}) {
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
   const app=createApp();
   try{await app.locals.ready;}catch{await app.locals.close();throw new Error('Database authorization startup failed. Check restricted role provisioning and migrations.');}
-  const server=app.listen(Number(process.env.PORT||3000),process.env.HOST||'127.0.0.1',()=>console.info('NFT Console development server listening; publication and minting remain gated.'));
+  const server=app.listen(Number(process.env.PORT||3000),process.env.HOST||'127.0.0.1',()=>console.info('NFT Console listening; capabilities are reported by /api/config.'));
   const stop=()=>server.close(()=>{app.locals.close().then(()=>process.exit(0),()=>process.exit(1));});
   process.once('SIGTERM',stop);process.once('SIGINT',stop);
 }

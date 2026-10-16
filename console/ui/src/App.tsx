@@ -8,6 +8,7 @@ import { ReleaseInventory } from './ReleaseInventory';
 import { CollectionPlanner } from './CollectionPlanner';
 import { ReleaseReadiness } from './ReleaseReadiness';
 import { Settings } from './Settings';
+const PublicLaunch = lazy(() => import('./PublicLaunch').then(module => ({default: module.PublicLaunch})));
 const MintTransactions = lazy(() => import('./MintTransactions').then(module => ({ default: module.MintTransactions })));
 
 export default function App() {
@@ -38,11 +39,12 @@ export default function App() {
         {auth.error && !walletOpen && <Notice error>{auth.error} {auth.retryLogout && <button className="text-button" onClick={() => void auth.logout()}>Retry sign-out</button>}</Notice>}
         {!config && !configError && <p className="loading" role="status">Connecting to the console...</p>}
         {config && <>
-          {route === 'releases' && <><div className="environment-note"><Icon name="info"/><p><strong>Development workspace.</strong> Wallet sign-in and release records are available when configured. Private drafting, minting and listing are not yet enabled.</p><a href="#/readiness">View release gates <Icon name="arrow"/></a></div>
+          {route === 'releases' && <><div className="environment-note"><Icon name="info"/><p><strong>Development workspace.</strong> Wallet sign-in and release records are available when configured. Use Deploy &amp; mint for finalized public releases when launch setup is configured. Private drafting and automated listing remain separate features.</p><a href="#/readiness">View release gates <Icon name="arrow"/></a></div>
             <div className="overview-cards"><article><Icon name="wallet"/><span>Wallet access</span><strong>{current ? 'Signed in' : 'Not connected'}</strong><small>{current ? `${current.role} access` : 'No signature requested yet'}</small></article><article><Icon name="lock"/><span>Private workspace</span><strong>Client encryption pending</strong><small>No artwork uploads in this build</small></article><article><Icon name="layers"/><span>Mint &amp; list</span><strong>Not enabled</strong><small>No active orders verified</small></article></div>
             <ReleaseInventory current={current} config={config} connect={openWallet} expired={auth.expire}/></>}
           {route === 'create' && <CollectionPlanner current={current} config={config} connect={openWallet}/>}
           {route === 'readiness' && <ReleaseReadiness current={current} connect={openWallet} expired={auth.expire}/>}
+          {route === 'launch' && <Suspense fallback={<p role="status">Loading mint tools...</p>}><PublicLaunch current={current} config={config} connect={openWallet} expired={auth.expire} walletProvider={auth.walletProvider}/></Suspense>}
           {route === 'transactions' && <Suspense fallback={<p role="status">Loading transaction tools...</p>}><MintTransactions current={current} config={config} connect={openWallet} expired={auth.expire} walletProvider={auth.walletProvider}/></Suspense>}
           {route === 'settings' && <Settings config={config} current={current}/>}
         </>}

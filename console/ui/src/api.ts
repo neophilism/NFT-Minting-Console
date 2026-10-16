@@ -1,10 +1,11 @@
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); }
 }
-export async function api(path: string, options: { method?: string; body?: unknown; csrf?: string; signal?: AbortSignal } = {}): Promise<unknown> {
+export async function api(path: string, options: { method?: string; body?: unknown; csrf?: string; signal?: AbortSignal; timeoutMs?: number } = {}): Promise<unknown> {
+  if (options.timeoutMs !== undefined && (!Number.isInteger(options.timeoutMs) || options.timeoutMs < 1000 || options.timeoutMs > 300000)) throw new Error('Invalid request timeout.');
   if (!path.startsWith('/api/')) throw new Error('Only this console API may be called.');
   const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), 15_000);
+  const timer = window.setTimeout(() => controller.abort(), options.timeoutMs ?? 15_000);
   const abort = () => controller.abort();
   if (options.signal?.aborted) controller.abort();
   options.signal?.addEventListener('abort', abort, { once: true });
