@@ -13,6 +13,18 @@ project's custom ERC-721C-compatible collection family. Not an AOTV-only product
 > automated OpenSea listing remain separate unfinished capabilities. No mainnet
 > mint, active listing or security certification has been claimed.
 
+## First-run administrator registration
+
+The [browser-first installation flow](docs/BROWSER_INSTALLATION.md) lets the
+installation owner use a hosting setup code plus an exact wallet message to
+register the first administrator directly in the interface. No wallet address
+needs to be sent in chat. Ownership is durable and single-winner, and is not
+reopened by rotating the setup code. Existing environment-allowlisted
+installations remain supported. Apply the new forward authorization migration
+before enabling this mode. The complete [browser completion plan](docs/BROWSER_COMPLETION_PLAN.md)
+keeps unfinished publication/private/marketplace work and development labeling
+explicit; registration alone does not complete the whole platform.
+
 ## Help, tutorials and saved configurations
 
 **Help & tutorials** is always available, including before sign-in. Twelve

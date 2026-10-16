@@ -14,4 +14,4 @@ class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
 }
 const root = document.getElementById('root');
 if (!root) throw new Error('Application root missing.');
-createRoot(root).render(<StrictMode><Boundary><SetupGate><App/></SetupGate><TutorialCenter/></Boundary></StrictMode>);
+createRoot(root).render(<StrictMode><Boundary><a href="#main-content" className="skip-link" onClick={event=>{event.preventDefault();document.getElementById('main-content')?.focus();}}>Skip to main content</a><SetupGate><App/></SetupGate><TutorialCenter/></Boundary></StrictMode>);
