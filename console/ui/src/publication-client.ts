@@ -21,12 +21,50 @@ export async function describeFile(kind:FileKind,file:File,signal?:AbortSignal):
   if(size!==file.size)throw new Error('File could not be read completely.');
   return {kind,name:file.name,mime,byteLength:size,sha256:hex(digest.digest())};
 }
-export function publicRow(value:unknown):PublicWorkRow{
-  const v=value as PublicWorkRow;
-  if(!v||typeof v.id!=='string'||!v.plan||v.plan.id!==v.id||v.plan.version!==1||v.plan.publicDisclosureConfirmed!==true||typeof v.plan.title!=='string'||!Array.isArray(v.files)||v.files.length<2||v.files.length>4)throw new Error('The saved public work could not be read.');
-  for(const f of v.files){if(!formats[f.kind]||typeof f.name!=='string'||typeof f.mime!=='string'||typeof f.sha256!=='string'||!/^[a-f0-9]{64}$/.test(f.sha256)||!Number.isSafeInteger(f.byteLength)||f.byteLength<1||f.byteLength>formats[f.kind].max||!Number.isInteger(f.attempts)||f.attempts<0||f.attempts>20)throw new Error('The saved file commitment is invalid.');if(f.verifiedUri)publicIpfsUri(f.verifiedUri);if(f.candidateUri)publicIpfsUri(f.candidateUri);}
-  if(v.metadataJson!==null&&(typeof v.metadataJson!=='string'||new TextEncoder().encode(v.metadataJson).length>131072))throw new Error('The metadata is invalid.');
-  return v;
+function invalidRow():never{throw new Error('The saved public work or its exact file commitments could not be verified.');}
+function record(value:unknown,keys:string[]):Record<string,unknown>{
+  if(!value||typeof value!=='object'||Array.isArray(value)||Object.getPrototypeOf(value)!==Object.prototype)invalidRow();
+  const v=value as Record<string,unknown>;
+  if(Object.keys(v).length!==keys.length||Object.keys(v).some(k=>!keys.includes(k)))invalidRow();return v;
+}
+function identity(value:unknown):string{if(typeof value!=='string'||!(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i).test(value))invalidRow();return value;}
+function tokenId(value:unknown):string{if(typeof value!=='string'||!(/^[1-9][0-9]{0,77}$/).test(value)||BigInt(value)>=1n<<256n)invalidRow();return value;}
+function timestamp(value:unknown):string{if(typeof value!=='string'||value.length>40||!Number.isFinite(Date.parse(value)))invalidRow();return value;}
+function title(value:unknown):string{if(typeof value!=='string'||!value.trim()||new TextEncoder().encode(value).length>200)invalidRow();return value;}
+function fileDescription(value:Record<string,unknown>):PublicFile{
+  const {kind,name,mime,byteLength}=value;
+  if(typeof kind!=='string'||!Object.hasOwn(formats,kind)||typeof name!=='string'||!name||name.length>200||name.trim()!==name||/[\\/]/.test(name)||Array.from(name).some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127))invalidRow();
+  const format=formats[kind as FileKind],ext=name.slice(name.lastIndexOf('.')).toLowerCase();
+  if(!Object.hasOwn(format.extensions,ext)||format.extensions[ext]!==mime||typeof byteLength!=='number'||!Number.isSafeInteger(byteLength)||byteLength<1||byteLength>format.max||typeof value.sha256!=='string'||!(/^[a-f0-9]{64}$/).test(value.sha256))invalidRow();
+  return {kind:kind as FileKind,name,mime:mime as string,byteLength,sha256:value.sha256};
+}
+function savedUri(value:unknown):string|null{if(value===null)return null;if(typeof value!=='string'||value.slice(7).includes('/'))invalidRow();return publicIpfsUri(value);}
+export function publicRow(value:unknown,expectedId?:string):PublicWorkRow{
+  const v=record(value,['id','plan','metadataJson','files','createdAt']),id=identity(v.id),p=record(v.plan,['version','id','tokenId','title','description','rightsScope','files','publicDisclosureConfirmed']);
+  if((expectedId!==undefined&&id!==expectedId)||p.version!==1||p.id!==id||p.publicDisclosureConfirmed!==true||typeof p.description!=='string'||p.description.length>12000||!['token','collection'].includes(p.rightsScope as string)||!Array.isArray(p.files)||p.files.length<2||p.files.length>3)invalidRow();
+  const original=p.files.map(f=>fileDescription(record(f,['kind','name','mime','byteLength','sha256']))),kinds=new Set(original.map(f=>f.kind));
+  if(kinds.size!==original.length||!kinds.has('image')||!kinds.has('rights')||kinds.has('metadata'))invalidRow();
+  if(!Array.isArray(v.files)||v.files.length!==original.length+(v.metadataJson===null?0:1))invalidRow();
+  const files=v.files.map(input=>{const f=record(input,['kind','name','mime','byteLength','sha256','attempts','issuedAt','candidateUri','verifiedUri']),description=fileDescription(f);
+    if(typeof f.attempts!=='number'||!Number.isInteger(f.attempts)||f.attempts<0||f.attempts>20)invalidRow();
+    const issuedAt=f.issuedAt===null?null:timestamp(f.issuedAt),candidateUri=savedUri(f.candidateUri),verifiedUri=savedUri(f.verifiedUri);
+    if((f.attempts===0)!==(issuedAt===null)||(verifiedUri!==null&&verifiedUri!==candidateUri))invalidRow();
+    return {...description,attempts:f.attempts,issuedAt,candidateUri,verifiedUri};});
+  if(new Set(files.map(f=>f.kind)).size!==files.length)invalidRow();
+  for(const f of original){const saved=files.find(x=>x.kind===f.kind);if(!saved||saved.name!==f.name||saved.mime!==f.mime||saved.byteLength!==f.byteLength||saved.sha256!==f.sha256)invalidRow();}
+  let metadataJson:string|null=null;
+  if(v.metadataJson!==null){
+    if(typeof v.metadataJson!=='string')invalidRow();const bytes=new TextEncoder().encode(v.metadataJson),metadata=files.find(f=>f.kind==='metadata');
+    if(bytes.length>131072||!metadata||metadata.byteLength!==bytes.length||metadata.sha256!==hex(sha256(bytes)))invalidRow();metadataJson=v.metadataJson;
+  }
+  return {id,plan:{version:1,id,tokenId:tokenId(p.tokenId),title:title(p.title),description:p.description,rightsScope:p.rightsScope as 'token'|'collection',files:original,publicDisclosureConfirmed:true},files,metadataJson,createdAt:timestamp(v.createdAt)};
+}
+export interface PublicWorkHistory {items:{id:string;title:string;tokenId:string;createdAt:string}[];nextCursor:string|null}
+export function publicHistory(value:unknown):PublicWorkHistory{
+  const v=record(value,['items','nextCursor']);if(!Array.isArray(v.items)||v.items.length>50)invalidRow();
+  const items=v.items.map(input=>{const r=record(input,['id','title','tokenId','createdAt']);return {id:identity(r.id),title:title(r.title),tokenId:tokenId(r.tokenId),createdAt:timestamp(r.createdAt)};});
+  if(new Set(items.map(r=>r.id)).size!==items.length)invalidRow();
+  const nextCursor=v.nextCursor===null?null:identity(v.nextCursor);if(nextCursor!==null&&nextCursor!==items.at(-1)?.id)invalidRow();return {items,nextCursor};
 }
 export async function uploadWithCapability(value:unknown,expected:PublicSlot,file:File,signal:AbortSignal):Promise<string>{
   const cap=value as {url:string;expiresAt:string;kind:string;sha256:string;byteLength:number;publicOnly:boolean};
