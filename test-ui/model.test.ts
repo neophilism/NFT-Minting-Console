@@ -8,11 +8,13 @@ const challenge = () => ({ challengeId: 'a'.repeat(64), chainId,
   expiresAt: new Date(now + 300000).toISOString(),
   message: `${origin} wants you to sign in with your Ethereum account:\n${OWNER}\n\n${SIGN_IN_STATEMENT}\n\nURI: ${origin}/\nVersion: 1\nChain ID: ${chainId}\nNonce: ${'b'.repeat(64)}\nIssued At: ${new Date(now).toISOString()}\nExpiration Time: ${new Date(now + 8 * 3600000).toISOString()}` });
 const config = { chainId, chainName: 'Local test', production: false, productionReady: false, loginConfigured: true,
-  pinningConfigured: false, authStore: 'memory', capabilities: { opaqueReleaseApi: false, deploy: false, mintJournal: false, localMint: false, publicLaunch: false } };
+  pinningConfigured: false, authStore: 'memory', capabilities: { opaqueReleaseApi: false, deploy: false, mintJournal: false, localMint: false, publicLaunch: false, publicPublication: false } };
 test('reads supported configuration without enabling unfinished features', () => {
   assert.deepEqual(configuration(config), config);
   assert.equal(Object.hasOwn(configuration({ ...config, capabilities: { publish: true, mint: true } }).capabilities, 'mint'), false);
   assert.throws(() => configuration({ ...config, chainId: 10 }));
+  for (const value of [undefined, false, 'true', 1, {}]) assert.equal(configuration({ ...config, capabilities: { publicPublication: value } }).capabilities.publicPublication, false);
+  assert.equal(configuration({ ...config, capabilities: { publicPublication: true } }).capabilities.publicPublication, true);
 });
 test('validates session identity, chain, role, CSRF and timestamps', () => {
   const value = { wallet: OWNER, chainId, role: 'owner', csrf: 'c'.repeat(64), expiresAt: new Date(now + 1000).toISOString(), idleExpiresAt: new Date(now + 500).toISOString() };
