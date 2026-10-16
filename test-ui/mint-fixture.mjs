@@ -36,6 +36,7 @@ export async function startMintFixture(hre){
         if(params.length!==1||typeof params[0]!=='string'||params[0].length>262144)throw new Error('Invalid signed fixture');
         const tx=Transaction.from(params[0]);
         const publicSigner=[testWallets[4].address.toLowerCase(),testWallets[5].address.toLowerCase()].includes(tx.from?.toLowerCase());
+        const uploadSigner=[testWallets[6].address.toLowerCase(),testWallets[7].address.toLowerCase()].includes(tx.from?.toLowerCase());
         let publicAllowed=publicSigner&&tx.to===tx.from&&tx.data==='0x'&&tx.gasLimit===21000n;
         if(publicSigner&&tx.to===null&&tx.data.startsWith(artifact.bytecode)){
           const args=AbiCoder.defaultAbiCoder().decode(['string','string','uint256','uint96','address','address','address'],'0x'+tx.data.slice(artifact.bytecode.length));
@@ -43,6 +44,12 @@ export async function startMintFixture(hre){
         }else if(publicSigner&&publicCollections.has(tx.to?.toLowerCase())){
           const parsed=iface.parseTransaction({data:tx.data});const work=parsed?.args[0]?.[0];
           publicAllowed=parsed?.name==='mintWorksBatch'&&parsed.args[0].length===1&&work?.tokenId===87n&&work?.title==='Browser public work';
+        }
+        if(uploadSigner&&tx.to===null&&tx.data.startsWith(artifact.bytecode)){
+          const args=AbiCoder.defaultAbiCoder().decode(['string','string','uint256','uint96','address','address','address'],'0x'+tx.data.slice(artifact.bytecode.length));
+          publicAllowed=args[0]==='Browser upload integration'&&args[1]==='UPLOAD'&&args[2]===100n&&args[3]===600n&&args[4]===tx.from&&args[5]===tx.from&&args[6]===tx.from;
+        }else if(uploadSigner&&publicCollections.has(tx.to?.toLowerCase())){
+          const parsed=iface.parseTransaction({data:tx.data}),work=parsed?.args[0]?.[0];publicAllowed=parsed?.name==='mintWorksBatch'&&parsed.args[0].length===1&&work?.tokenId===61n&&['Browser uploaded work desktop','Browser uploaded work mobile'].includes(work?.title);
         }
         if(!tx.signature||tx.chainId!==31337n||tx.type!==0||tx.value!==0n||tx.gasLimit>12000000n||!tx.gasPrice||tx.gasPrice>1000000000000n||
           (!allowed.has(tx.from?.toLowerCase()+':'+tx.to?.toLowerCase()+':'+tx.data)&&!publicAllowed))throw new Error('Only exact issued fixture mints are accepted.');

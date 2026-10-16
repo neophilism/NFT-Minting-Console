@@ -16,16 +16,18 @@ import {LaunchJournal} from './launch/journal.mjs';
 import {loadCollectionArtifact} from './launch/artifacts.mjs';
 import {installLaunchRoutes} from './launch/http.mjs';
 import {installCostQuoteRoutes} from './launch/quote.mjs';
+import {installPublicationWorkbench} from './publication/workbench-http.mjs';
+import {checkPublicationSchema} from './publication/workbench-schema.mjs';
 import {localMintMode} from './operations/local-mode.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const chainRegistry=JSON.parse(fs.readFileSync(path.join(root,'config/chains.json'),'utf8'));
 const blockedFeatures=Object.freeze([
   {id:'private-workspace',milestones:['NFT-10','NFT-11','NFT-12'],description:'Low-level attachment encryption is implemented; private draft editing, recovery and ciphertext object storage integration remain unfinished.'},
-  {id:'explicit-publication',milestones:['NFT-13','NFT-19','NFT-20'],description:'Reviewed public CLI uploads and exact-byte readback are implemented. Encrypted-draft declassification and the complete GUI upload flow remain unfinished.'},
+  {id:'explicit-publication',milestones:['NFT-13','NFT-19','NFT-20'],description:'Reviewed public browser/CLI uploads and exact-byte readback are implemented. Encrypted-draft declassification, private storage and large resumable transfers remain separate unfinished work.'},
   {id:'release-experience',milestones:['NFT-14','NFT-16','NFT-17','NFT-18'],description:'Encrypted saved releases, private media editing and the complete rights workflow remain unfinished.'},
   {id:'verified-chain-workflow',milestones:['NFT-21','NFT-22','NFT-23','NFT-24','NFT-25'],description:'The public EOA deployment/mint flow is browser-tested. Automated validator-policy provisioning and live production transaction evidence remain outstanding.'},
   {id:'marketplace',milestones:['NFT-26','NFT-27','NFT-28','NFT-29'],description:'Seaport order signing and OpenSea submission components exist. The complete user flow, active-listing verification and real-sale checks remain unfinished.'},
-  {id:'production-evidence',milestones:['NFT-30','NFT-31','NFT-32','NFT-33','NFT-34','NFT-35','NFT-36'],description:'Production database-target setup, owner configuration, a verified live mint and real-sale acceptance remain pending. External human review is deferred by owner policy.'},
+  {id:'production-evidence',milestones:['NFT-30','NFT-31','NFT-32','NFT-33','NFT-34','NFT-35','NFT-36'],description:'Durable database and first-run setup are implemented. Live runtime configuration, a verified user mint and real-sale acceptance remain separate checks. External human review is deferred by owner policy.'},
 ]);
 const closed=(res,code,error)=>res.status(409).json({code,error,productionReady:false});
 export function createApp({env=process.env,authService,launchContentOptions}={}) {
@@ -50,11 +52,11 @@ export function createApp({env=process.env,authService,launchContentOptions}={})
     if(auth.origin!==origin||auth.chainId!==chainId)throw new Error('Authentication realm does not match server configuration.');
   }catch(error){provider?.destroy();void persistence?.close();throw error;}
   const launchJournal=persistence&&publicLaunch?new LaunchJournal(persistence.repository):null;
-  const ready=(persistence?.ready||Promise.resolve()).then(()=>launchJournal?.checkSchema());
+  const ready=(persistence?.ready||Promise.resolve()).then(()=>launchJournal?.checkSchema()).then(()=>launchJournal&&env.PINATA_JWT?checkPublicationSchema(persistence.repository):undefined);
   app.disable('x-powered-by');app.set('trust proxy',false);
   app.use((_req,res,next)=>{
     res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','no-referrer');res.setHeader('Cross-Origin-Resource-Policy','same-origin');
-    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    res.setHeader('Content-Security-Policy',`default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'${launchJournal&&env.PINATA_JWT?' https://uploads.pinata.cloud':''}; img-src 'self' data: blob:; media-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`);
     if(auth.origin.startsWith('https:'))res.setHeader('Strict-Transport-Security','max-age=31536000');next();
   });
   app.use('/api',(_req,res,next)=>{ready.then(()=>next(),()=>res.status(503).json({error:'Configured database authorization is unavailable. No memory fallback is permitted.',code:'database_unavailable'}));});
@@ -64,7 +66,8 @@ export function createApp({env=process.env,authService,launchContentOptions}={})
   const requireAction=installAuthRoutes(app,auth,{production});
   if(persistence){installReleaseRoutes(app,requireAction,persistence.repository);installJournalRoutes(app,requireAction,persistence.journal,provider);}
   if(launchJournal){installLaunchRoutes(app,requireAction,{journal:launchJournal,provider,artifact:launchArtifact,enabled:publicLaunch,chainId,contentOptions:launchContentOptions});installCostQuoteRoutes(app,requireAction,{journal:launchJournal,provider,artifact:launchArtifact,enabled:publicLaunch,chainId,contentOptions:launchContentOptions});}
-  app.get('/api/config',(_req,res)=>res.json({chainId,chainSlug:profile.slug,chainName:profile.name,production:profile.production,deploymentFactory:factoryAddress,pinningReady:false,pinningConfigured:Boolean(env.PINATA_JWT),loginConfigured:roles.size>0&&Boolean(provider),validator:env.TRANSFER_VALIDATOR_ADDRESS||profile.validator,signedZone:env.OPENSEA_SIGNED_ZONE||profile.signedZone,productionReady:false,authStore:persistence?'postgresql':'development-memory',capabilities:{publicLaunch,localMint,mintJournal:Boolean(persistence),privateDrafts:false,opaqueReleaseApi:Boolean(persistence),publish:false,mint:false,list:false,deploy:chainId!==1&&Boolean(factoryAddress)}}));
+  if(launchJournal&&env.PINATA_JWT)installPublicationWorkbench(app,requireAction,{repository:persistence.repository,jwt:env.PINATA_JWT,contentOptions:launchContentOptions});
+  app.get('/api/config',(_req,res)=>res.json({chainId,chainSlug:profile.slug,chainName:profile.name,production:profile.production,deploymentFactory:factoryAddress,pinningReady:false,pinningConfigured:Boolean(env.PINATA_JWT),loginConfigured:roles.size>0&&Boolean(provider),validator:env.TRANSFER_VALIDATOR_ADDRESS||profile.validator,signedZone:env.OPENSEA_SIGNED_ZONE||profile.signedZone,productionReady:false,authStore:persistence?'postgresql':'development-memory',capabilities:{publicPublication:Boolean(launchJournal&&env.PINATA_JWT),publicLaunch,localMint,mintJournal:Boolean(persistence),privateDrafts:false,opaqueReleaseApi:Boolean(persistence),publish:false,mint:false,list:false,deploy:chainId!==1&&Boolean(factoryAddress)}}));
   app.get('/api/health',(_req,res)=>res.json({ok:true,productionReady:false}));
   app.get('/api/launch-readiness',requireAction('read'),(_req,res)=>res.json({productionReady:false,mintingEvidence:'not-verified',listingEvidence:'not-verified',blockers:blockedFeatures,authentication:'software-integration-accepted',storage:persistence?'durable-configured-not-production-accepted':'development-memory',note:'These are software gates, not a live wallet inventory or security certification.'}));
   app.get('/api/artifact',requireAction('deploy'),(_req,res)=>{

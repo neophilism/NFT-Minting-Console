@@ -14,8 +14,6 @@ import {PostgresAuthStore} from '../console/auth/postgres.mjs';
 import {createAuthService,AuthError} from '../console/auth/core.mjs';
 import {ReleaseRepository} from '../console/data/releases.mjs';
 import {databaseOptions} from '../console/data/pool.mjs';
-// PGlite runs actual PostgreSQL, not SQL stubs. Its one connection is leased
-// serially. The opt-in native mode exercises node-postgres on multiple clients.
 class EmbeddedPool {
   constructor(db){this.db=db;this.tail=Promise.resolve();}
   async connect(){const previous=this.tail;let unlock;this.tail=new Promise(resolve=>{unlock=resolve;});await previous;let released=false;return {query:(...args)=>this.db.query(...args),release:()=>{if(!released){released=true;unlock();}}};}
@@ -40,14 +38,14 @@ test('durable store and release API repository against PostgreSQL',async t=>{
   const repo=new ReleaseRepository({pool,knownRoles:()=>roles});
   t.diagnostic(native?'Native PostgreSQL through pg; synthetic data only.':'Embedded PostgreSQL; serialized connection leases, not a native pg-driver claim.');
   await t.test('baseline and authorization migrations are checksum-bound and repeatable',async()=>{
-    assert.deepEqual(baseline,['001_release_model.sql']);assert.deepEqual(authorization,['001_auth_store.sql','002_release_rbac.sql','003_mint_journal.sql','004_public_launch_journal.sql','005_launch_nonce_resolution.sql','006_browser_installation.sql']);
+    assert.deepEqual(baseline,['001_release_model.sql']);assert.deepEqual(authorization,['001_auth_store.sql','002_release_rbac.sql','003_mint_journal.sql','004_public_launch_journal.sql','005_launch_nonce_resolution.sql','006_browser_installation.sql','007_publication_workbench.sql']);
     assert.deepEqual(await migrate(db),[]);assert.deepEqual(await migrateAuth(db),[]);
     const directory=await mkdtemp(path.join(os.tmpdir(),'nft-auth-migration-'));
     try{
       for(const name of authorization)await writeFile(path.join(directory,name),await readFile(new URL('../db/auth-migrations/'+name,import.meta.url)));
       const first=await readFile(path.join(directory,authorization[0]),'utf8');await writeFile(path.join(directory,authorization[0]),first+'\n-- modified history');
       await assert.rejects(migrateAuth(db,directory),/migration changed/);await writeFile(path.join(directory,authorization[0]),first);
-      await writeFile(path.join(directory,'007_failure.sql'),'CREATE TABLE nft_console_auth.rollback_fixture(id integer); SELECT deliberately_missing_function();');
+      await writeFile(path.join(directory,'008_failure.sql'),'CREATE TABLE nft_console_auth.rollback_fixture(id integer); SELECT deliberately_missing_function();');
       await assert.rejects(migrateAuth(db,directory));assert.equal((await db.query("SELECT to_regclass('nft_console_auth.rollback_fixture') AS name")).rows[0].name,null);
     }finally{await rm(directory,{recursive:true,force:true});}
   });
@@ -66,8 +64,6 @@ test('durable store and release API repository against PostgreSQL',async t=>{
     const results=await Promise.all([store.consumeChallenge(id,binding),second.consumeChallenge(id,binding)]);assert.equal(results.filter(Boolean).length,1);
   });
   await t.test('authentication survives service recreation and logout stays final',async()=>{
-    // Proof verification is deliberately mocked here; real EOA/ERC-1271 proof
-    // tests remain in test/AuthWallet.cjs. Persistence runs the real SQL.
     const auth=()=>createAuthService({origin,chainId,roles:()=>roles,store:new PostgresAuthStore({pool,origin,chainId,roles}),checksumAddress:x=>x,verifyWallet:async()=>({valid:true,kind:'eoa'})});
     const first=auth(),challenge=await first.challenge({wallet:W,chainId,origin,ip:'fixture'});
     const login=await first.verify({wallet:W,chainId,origin,ip:'fixture',signature:'0xabcd',challengeId:challenge.response.challengeId,message:challenge.response.message,binding:challenge.binding});

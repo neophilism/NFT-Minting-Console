@@ -1,172 +1,45 @@
 # NFT Console
 
-A general-purpose workspace for independent NFT collections, using this
-project's custom ERC-721C-compatible collection family. Not an AOTV-only product.
+A general-purpose workspace for independent NFT collections, using this project's custom ERC-721C-compatible collection family. Not an Androids Of The Vine-only product.
 
-> **Public first-mint flow implemented; live deployment configuration pending.**
-> The Deploy & mint screen supports finalized public releases: exact collection
-> deployment, public-file integrity checks, wallet fee review, signing, durable
-> recovery and verified mint receipts. Enable it only after configuring the
-> restricted database, RPC and authorized wallet; use the
-> [public launch runbook](docs/PUBLIC_LAUNCH.md) and
-> [owner input checklist](docs/MINT_INPUT_CHECKLIST.md). Private draft editing and
-> automated OpenSea listing remain separate unfinished capabilities. No mainnet
-> mint, active listing or security certification has been claimed.
+> **Public browser workflows are implemented; full product and live installation acceptance remain distinct.**
+> Browser administrator enrollment, final public file publication, exact-byte readback, configuration presets, total-cost review, wallet deployment/minting and transaction recovery are implemented. Check the exact PR head and deployment evidence before relying on a particular build. Private encrypted workspaces, large resumable transfers, complete validator-policy provisioning and automated marketplace listing remain unfinished. Development labeling is not removed merely because code deploys or NODE_ENV changes. No user mint, active listing or security certification is claimed here.
 
 ## First-run administrator registration
 
-The [browser-first installation flow](docs/BROWSER_INSTALLATION.md) lets the
-installation owner use a hosting setup code plus an exact wallet message to
-register the first administrator directly in the interface. No wallet address
-needs to be sent in chat. Ownership is durable and single-winner, and is not
-reopened by rotating the setup code. Existing environment-allowlisted
-installations remain supported. Apply the new forward authorization migration
-before enabling this mode. The complete [browser completion plan](docs/BROWSER_COMPLETION_PLAN.md)
-keeps unfinished publication/private/marketplace work and development labeling
-explicit; registration alone does not complete the whole platform.
+The [browser-first installation flow](docs/BROWSER_INSTALLATION.md) lets the installation owner enter a hosting setup code, connect a wallet and review a purpose-bound message to register the first administrator directly in the interface. No wallet address needs to be sent in chat. Ownership is durable and single-winner, and rotating the setup code does not reopen the installation. Existing environment-allowlisted installations remain supported; do not combine the two modes.
 
-## Help, tutorials and saved configurations
+The [owner checklist](docs/MINT_INPUT_CHECKLIST.md) documents exact hosting variables and provider links. Apply all forward database migrations and use the restricted runtime login, never a migration-owner credential. The [browser completion plan](docs/BROWSER_COMPLETION_PLAN.md) separates implementation, accepted release scope, deployment and actual NFT evidence.
 
-**Help & tutorials** is always available, including before sign-in. Twelve
-searchable guides cover Administrator Setup, wallets, collection creation,
-configuration reuse, rights/metadata, AOTV companion materials, publication,
-deployment, minting, recovery, marketplace handoff and troubleshooting. Each
-supports step highlighting, Back/Next, Close/Escape and local progress/resume.
-The guide asks before navigating away from unsaved work and never signs,
-publishes, changes a network or spends money. See the
-[complete tutorial catalog and scope](docs/GUIDED_TUTORIALS.md).
+## Public upload-to-mint workflow
 
-**Saved configurations** appears in collection setup and Deploy & mint. Explicit
-saving keeps named copies of non-confidential constructor settings on this
-browser, scoped by wallet and network. Load a copy, change any desired fields,
-and prepare a new collection using the existing pinned contract generator.
-JSON import/export provides a backup and manual transfer to another device.
-These public presets are unencrypted, are not cloud sync or private drafts, and
-never contain credentials, rights files, signatures or transaction approvals.
-For more NFTs in an existing collection, use its verified deployment instead of
-deploying a preset again. Start with the [exact inputs and provider links](docs/MINT_INPUT_CHECKLIST.md).
+In **Deploy & mint**, the [public browser workbench](docs/BROWSER_PUBLICATION.md) lets the owner select final artwork or a poster, complete rights and optional audio/video, inspect local previews and approve saving immutable public commitments. Selection alone never uploads. Each Publish and verify action uses a short-lived, MIME/size/public-scoped Pinata permission; the account JWT stays on the backend. Independent gateway readback checks the exact original SHA-256 and length. A returned CID is not proof of verified bytes.
 
-## Current user interface
+Saved public work history survives reload and restart. An uncertain upload can be recovered by its existing CID without uploading again. Generate canonical metadata from verified files, review it, publish/verify it, and send the result directly to total-cost and mint review. Repeat for additional works. No CLI or JSON download/import step is required for this public path; existing CLI bundles remain supported.
 
-The default page is a bundled TypeScript/React application with collection
-navigation, wallet connection, release-record inventory, an in-memory editable
-collection form with explicit public preset saving, release readiness and
-settings. Desktop/mobile keyboard and accessibility checks are in CI. See
-[UI acceptance evidence](docs/PR15_UI_ACCEPTANCE.md) and
-[guidance verification scope](docs/GUIDED_TUTORIALS.md#verification).
+The [total-cost panel](docs/PRE_MINT_COST_REVIEW.md) covers a new deployment plus all supplied mint batches, or only remaining mints for an existing collection. It separates simulated network-fee estimates, the gas-margin budget and wallet funding shortfalls. Quotes expire and changed inputs invalidate them. Unknown provider subscriptions, approvals and marketplace charges are excluded rather than represented as zero. The required sequential simulation must be supported by the configured RPC; an unavailable quote is not a zero price or permission to sign.
 
-The setup form does **not automatically** save or upload fields. Do not enter
-confidential artwork or terms. Existing record IDs and workflow stages can be
-listed when the database is configured; private content is not unlocked by this
-build. Legacy local/Sepolia deployment rehearsal remains at `/legacy/`, separately
-gated. Public file publication currently uses the reviewed operations tool,
-not an in-app media uploader; the publication tutorial explains this boundary.
+Deployment and minting require a separate current wallet simulation, explicit fee approval and wallet signature. The server does not hold signing keys or broadcast user transactions. Receipt verification and durable recovery remain mandatory. Additional NFTs in the same collection use its verified existing contract, not another deployment.
 
-## Local rights and metadata preparation
+This public workflow does not implement encrypted private drafts, legal approval, large resumable transfers or marketplace listing. Limits and acceptance evidence are in the linked documents.
 
-The collection setup screen includes an owner-only, local preparation panel.
-Review a UTF-8 text/Markdown or PDF rights file (up to 8 MiB), preserve its exact
-SHA-256, explicitly select collection-wide or token-specific scope, and prepare
-an allowlisted public metadata JSON file. A separate button downloads that exact
-JSON. Replacing the rights file or editing any field invalidates the preview and
-review acknowledgment. Sign-out, navigation and reload clear page state.
+## Help and reusable configurations
 
-Use test or already-public documents while private-workspace acceptance is
-pending. This panel does not encrypt, save drafts, upload, retrieve IPFS content,
-validate legal terms, sign transactions or create orders. Media digests and IPFS
-locations are user-supplied claims, not verified asset retrieval. PDF bytes are
-hashed but never rendered. See [scope and reproduction](docs/PUBLICATION_PREPARATION.md).
+**Help & tutorials** is available before sign-in. Twelve searchable guides include Administrator Setup, wallet connection, collection creation, configuration reuse, artwork/rights, AOTV companion materials, publication, deployment, minting, recovery, marketplace handoff and troubleshooting. Back/Next, target highlighting, Close/Escape and local reading-progress resume are included. The guide never performs a signature, upload or paid action. See the [catalog and boundaries](docs/GUIDED_TUTORIALS.md).
 
-## Disposable mint rehearsal and receipt verification
+**Saved configurations** is available in collection setup and Deploy & mint. Save explicitly named non-confidential constructor settings, load an editable copy, change parameters and generate another independent collection through the interface. JSON import/export provides manual backup and device transfer. These presets are unencrypted, browser-local, wallet/network scoped settings, not cloud sync or private drafts. They cannot contain credentials, artwork, rights files, signatures or transaction approvals.
 
-`npm run mint:rehearse` deploys two independent fixture collections through the
-actual local factory, mints 24 synthetic tokens and verifies their exact events
-and immutable fields. It refuses public/forked networks and non-fixture accounts.
-The reusable public-data module prepares deterministic unsigned batches,
-simulates them and reconciles receipts without a signer or transaction broadcast.
-This is not the user-facing mint workflow, a public upload or an OpenSea listing.
-See [mint component and rehearsal boundaries](docs/MINT_RECONCILIATION.md).
+The separate [local rights workbench](docs/PUBLICATION_PREPARATION.md) hashes exact text/Markdown/PDF bytes and prepares a public metadata preview. It is not itself an uploader, encryption workflow, PDF renderer or legal review. The public publication workbench is a different, explicitly approved flow.
 
-## Client attachment encryption component
+## Androids Of The Vine rights
 
-The client-only [attachment module](docs/CLIENT_ATTACHMENT_CRYPTO.md) provides
-fresh per-file AES-256-GCM keys, authenticated chunks and streaming hash checks.
-It is not yet connected to encrypted draft storage or authorized-device key
-delivery. Private workspaces remain unavailable until that integration passes.
+The optional token-specific Creator's Companion Portfolio identifies exactly two projects and their existing informational/creative materials in each enabled token's final Schedule A. Disabled tokens receive no such portfolio. The [40-by-2 schedule tooling](docs/AOTV_COMPANION_ALLOCATION.md) generates drafts only.
 
-## Durable transaction recovery
+The original rights and metadata are frozen historical references. The [revised Token #1 working agreement and provisional schedule](releases/androids-of-the-vine/token-001/README.md) are not approved final release bytes. Do not reuse a historical rights hash for revised text. The separate future collector-allocation language in Section 5 remains a review issue. A preset or successful test cannot approve offering terms.
 
-Authenticated wallet accounts have a persistent mint-operation journal with
-one-winner wallet reservations, idempotent transaction recording, immutable
-runtime audit events and receipt reconciliation after restart. It stores only
-routing commitments and public transaction references, never unpublished
-calldata or private drafts. Apply the new forward-only authorization migration
-before starting a configured database-backed server. See [API, safety and
-recovery rules](docs/MINT_JOURNAL.md). This does not enable production signing.
+## Build and run
 
-## Wallet transaction screen
-
-Open **Mint transactions** for saved operations, receipt checks and interrupted
-wallet-response recovery. A separately enabled loopback/chain-31337 rehearsal
-supports public test-manifest import, explicit simulation disclosure, fee review,
-a single wallet request and durable receipt recovery. It does not enable mainnet
-or Sepolia signing. See [wallet UI boundaries and reproduction](docs/MINT_WALLET_UI.md).
-
-## Token #1 rights revision (not finalized)
-
-For **Androids Of The Vine**, the Creator's current instruction replaces
-historical investor-priority language with an **optional**, fixed, token-specific
-**Creator's Companion Portfolio**. When enabled for a token, its own Schedule A
-identifies exactly two projects and their existing informational/creative
-materials; when disabled there is no such additional benefit. The [40-by-2
-offline assignment and Schedule A tooling](docs/AOTV_COMPANION_ALLOCATION.md)
-creates drafts only. The original rights/metadata remain byte-exact historical
-references; the [new working rights and provisional Token #1 schedule](releases/androids-of-the-vine/token-001/README.md)
-are **not ready to publish or mint**. Do not reuse the historical rights hash
-or assert a template is an approved offering. The separate future NFT collector
-allocation in Section 5 is unchanged and remains a legal-review issue.
-
-## Exact public-file readback
-
-The [public readback verifier](docs/PUBLIC_FILE_VERIFICATION.md) compares independently reviewed SHA-256 and length commitments against intentionally published IPFS content through strict HTTPS gateways. This is verification only: it never publishes, signs, mints, or submits an OpenSea order.
-
-## Owner security-review instruction
-
-Independent human/external review is deferred and does not block development,
-merge or deployment. The implementing agent performs substantive source/security
-review and applicable tests, fixes actual defects and records evidence. This does
-not mark external review complete or claim certification. See [AGENTS.md](AGENTS.md)
-and [review policy](security/review-policy.json).
-
-## Start here for development or handoff
-
-1. [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package Development Plan](docs/DEVELOPMENT_PLAN.md)
-   and [canonical registry](registry/prs.json).
-2. [Recovered Decisions](docs/HANDOFF_CONTEXT.md) and the dated [historical handoff audit](docs/HANDOFF_STATUS.md).
-3. [Durable authorization](docs/PR09_DURABLE_STORAGE.md), [native PostgreSQL and actual Safe acceptance](docs/PR09_RUNTIME_ACCEPTANCE.md)
-   and [React/browser acceptance](docs/PR15_UI_ACCEPTANCE.md) and [combined browser/Safe/PostgreSQL acceptance](docs/PR09_BROWSER_ACCEPTANCE.md). These supersede earlier execution blockers, not the full product plan.
-4. [Frozen original source/rights](reference/androids-of-the-vine/), [Contract Parity Audit](docs/CONTRACT_PARITY_AUDIT.md),
-   [real-validator assertions](docs/REAL_VALIDATOR_SECURITY_ASSERTIONS.md) and [Release Data Model](docs/RELEASE_DATA_MODEL.md).
-5. [E2EESA applicability and owner-authorized AI review process](docs/E2EESA_APPLICABILITY.md),
-   [Threat Model](docs/THREAT_MODEL.md), [Privacy Inventory](docs/PRIVACY_INVENTORY.md)
-   and [scoped security progress](security/e2eesa-status.json).
-
-## Product invariants
-
-Every collection selects its own name, symbol, supply, owner/minter, royalty
-recipient/rate, artwork and exact rights bytes. Deploy once per collection; mint
-later works at that same address. Never restore validator-wide automatic approval
-or a seizure path. Public IPFS content is not private encrypted storage.
-
-The intended workflow is encrypted drafting, explicit public publication,
-wallet-signed deployment and validator setup, verified minting, then a separately
-signed and independently verified marketplace order. A URL is not an order; a
-unit-test pass is not an audit or mainnet rehearsal. No wallet signing keys or
-seed phrases are collected. Authentication does not authorize asset transfers.
-
-## Build and run locally
-
-Use **Node 22.20.0 / npm 10.9.3** and the committed lockfile:
+Use the pinned **Node 22.20.0 / npm 10.9.3** and committed lockfile:
 
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund
@@ -174,24 +47,11 @@ npm run build
 npm start
 ```
 
-Use [console/.env.example](console/.env.example) to configure a repository-root
-`.env` or injected backend environment. Default origin is `http://localhost:3000`,
-network Sepolia `11155111`, and bind address loopback. Set an exact `PUBLIC_ORIGIN`,
-a matching `RPC_URL`, and public `ADMIN_WALLETS` addresses; optional editor/viewer
-allowlists cannot overlap with conflicting roles. Never put private keys in this
-configuration. Missing UI builds return 503 rather than falling back to a prototype.
+Configure [console/.env.example](console/.env.example) through the backend environment. `RPC_URL` is the complete HTTPS endpoint; `PINATA_JWT` is backend-only. An exact `PUBLIC_ORIGIN`, matching network and restricted durable database are required. Browser enrollment additionally needs `NFT_SETUP_ENABLED=1`, a random `NFT_SETUP_CODE`, and empty environment wallet allowlists. Mainnet public mode requires the explicit real-fee acknowledgment. See the installation runbook before activation.
 
-For durable storage, follow [restricted-role provisioning and migrations](docs/PR09_DURABLE_STORAGE.md).
-Runtime database credentials must not be migration-owner credentials. A configured
-database failure cannot fall back to memory. Without a configured database,
-authentication is development-memory only and inventory is unavailable.
+Migration credentials belong in a separate operations environment. Configured database failure never falls back to memory. Missing UI artifacts return 503. Development mode is not a production workaround. Local/Sepolia legacy rehearsal remains separately gated at `/legacy/`.
 
-`NODE_ENV=production` intentionally refuses startup until the production gates
-are accepted. Do not use development mode as a substitute production deployment.
-The Vite dev server uses port 5173; when developing through its proxy, set the
-backend's exact `PUBLIC_ORIGIN=http://localhost:5173` for that development session.
-
-## Verification
+## Verification and operating references
 
 ```sh
 npm run ci
@@ -200,13 +60,14 @@ npx --no-install playwright install --with-deps chromium
 npm run test:ui:browser
 ```
 
-CI additionally runs the pinned real transfer validator, actual Safe 1.4.1 and
-native PostgreSQL/multi-instance HTTP suites. See the linked acceptance documents
-for exact pins, commands, executed results and limits. Test wallets use public
-local-only fixtures, never user wallets or funds. Browser evidence is synthetic;
-manual wallet-product and production rehearsals remain distinct checks.
+CI exercises real local contracts, a pinned transfer validator, Safe 1.4.1, native PostgreSQL, browser/accessibility workflows and pinned Geth sequential simulation. Publication browser tests use actual multipart bytes with an explicitly synthetic local provider, not genuine Pinata credentials. The cost-response UI fixture and real simulation-engine tests are separately identified. User funds, user signing keys and genuine private artwork are never test fixtures.
 
-The source-owned E2EESA status separates implementation, complete testing and
-independent expert review. Read [adoption instructions](docs/E2EESA_ADOPTION.md)
-and run `python3 scripts/validate_e2eesa_status.py`. Record integrity does not
-certify security. The owner superseded the pre-crypto external-review prerequisite on October 13, 2026.
+Start with the [Product Charter](docs/PRODUCT_CHARTER.md), [36-work-package plan](docs/DEVELOPMENT_PLAN.md), [canonical registry](registry/prs.json) and [current progress](repo-development-progress.md). Additional references: [durable authorization](docs/PR09_DURABLE_STORAGE.md), [native/Safe acceptance](docs/PR09_RUNTIME_ACCEPTANCE.md), [UI acceptance](docs/PR15_UI_ACCEPTANCE.md), [public launch operations](docs/PUBLIC_LAUNCH.md), [exact public readback](docs/PUBLIC_FILE_VERIFICATION.md), [mint journal](docs/MINT_JOURNAL.md), [wallet recovery](docs/MINT_WALLET_UI.md), [factory rehearsal](docs/MINT_RECONCILIATION.md) and [production database initialization](docs/PRODUCTION_DATABASE_20261016.md). Dated historical acceptance documents do not override current implementation or deployment evidence.
+
+## Security and product invariants
+
+Names, supply, wallet roles, royalties, artwork and rights are independently chosen per collection. Deployed immutable economics and finalized token fields cannot be rewritten by loading a preset. Never restore validator-wide automatic approval or a seizure path. Public IPFS is not private encrypted storage. A mint is not an active order; a URL is not proof of a listing; signing in is not asset-transfer approval.
+
+The [client attachment component](docs/CLIENT_ATTACHMENT_CRYPTO.md) supplies chunked AEAD and hashes but does not by itself complete device authorization, key delivery, recovery or encrypted workspace storage. See the [threat model](docs/THREAT_MODEL.md), [privacy inventory](docs/PRIVACY_INVENTORY.md), [applicability/profile](docs/E2EESA_APPLICABILITY.md) and [scoped status](security/e2eesa-status.json).
+
+Under [AGENTS.md](AGENTS.md), independent human/external review is deferred, not a development or deployment prerequisite. Implementing agents perform source/security review and applicable tests, fix real defects and retain source-bound evidence. Failed checks and actual vulnerabilities still block merge. Neither assistant review nor record integrity is independent certification. Run `python3 scripts/validate_e2eesa_status.py` for the status record, not as a substitute for acceptance testing.

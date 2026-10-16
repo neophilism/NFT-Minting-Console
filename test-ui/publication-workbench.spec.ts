@@ -1,0 +1,48 @@
+import {test,expect} from '@playwright/test';
+import {getBytes} from 'ethers';
+import AxeBuilder from '@axe-core/playwright';
+import {testWallets} from './fixtures.mjs';
+declare global {interface Window {__publishSign(data:string):Promise<string>;__publishRpc(method:string,params:unknown[]):Promise<unknown>;__publishSends:number;}}
+async function rpc(method:string,params:unknown[]=[]){const response=await fetch('http://127.0.0.1:4174',{method:'POST',headers:{'Content-Type':'application/json','X-NFT-Test':'disposable-local-only'},body:JSON.stringify({method,params})});if(!response.ok)throw new Error('Disposable fixture refused request');return(await response.json()).result;}
+test('raw files flow through publication recovery, exact readback, cost handoff and actual local-chain mint',async({page},info)=>{
+  test.setTimeout(90000);
+  const signer=testWallets[info.project.name==='mobile'?7:6]!;
+  await page.exposeFunction('__publishSign',(data:string)=>signer.signMessage(getBytes(data)));
+  await page.exposeFunction('__publishRpc',async(method:string,params:unknown[])=>{if(method!=='eth_sendTransaction')return rpc(method,params);const tx=params[0] as Record<string,string>;if(tx.from?.toLowerCase()!==signer.address.toLowerCase())throw new Error('Wrong fixture signer');return rpc('eth_sendRawTransaction',[await signer.signTransaction({type:0,chainId:31337,from:signer.address,...(tx.to?{to:tx.to}:{}),data:tx.data,nonce:Number(BigInt(tx.nonce!)),gasLimit:BigInt(tx.gas!),gasPrice:BigInt(tx.gasPrice!),value:BigInt(tx.value!)})]);});
+  await page.addInitScript(address=>{window.__publishSends=0;window.ethereum={async request({method,params}){if(method==='eth_accounts'||method==='eth_requestAccounts')return[address];if(method==='eth_chainId')return'0x7a69';if(method==='personal_sign')return window.__publishSign((params as string[])[0]!);if(method==='eth_sendTransaction')window.__publishSends++;return window.__publishRpc(method,params as unknown[]||[]);},on(){},removeListener(){}};},signer.address);
+  let uploads=0,lostCid='';
+  await page.route('https://uploads.pinata.cloud/v3/files?*',async route=>{
+    uploads++;
+    const request=route.request();expect(request.headers().authorization).toBeUndefined();
+    const query=new URL(request.url()).search;
+    const response=await fetch('http://127.0.0.1:4177/upload'+query,{method:'POST',headers:{'Content-Type':request.headers()['content-type']!,'X-NFT-Test':'disposable-publication-only'},body:new Uint8Array(request.postDataBuffer()!).buffer});
+    const bytes=await response.text();expect(response.status).toBe(200);
+    if(uploads===1){lostCid=JSON.parse(bytes).data.cid;return route.abort('failed');}
+    await route.fulfill({status:200,contentType:'application/json',body:bytes});
+  });
+  await page.goto('/#/launch');await page.locator('.topbar').getByRole('button',{name:'Connect wallet',exact:true}).click();await page.getByRole('button',{name:'Browser wallet',exact:true}).click();await expect(page.getByRole('dialog')).not.toBeVisible();
+  const panel=page.getByRole('region',{name:'Upload artwork and prepare NFTs'});
+  await panel.getByLabel('Token ID',{exact:true}).fill('61');await panel.getByLabel('NFT title',{exact:true}).fill('Browser uploaded work '+info.project.name);await panel.getByLabel('NFT public description',{exact:true}).fill('Synthetic provider and local-chain acceptance only.');
+  const image={name:'poster.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA7sAAAAASUVORK5CYII=','base64')};
+  const rights={name:'rights.md',mimeType:'text/markdown',buffer:Buffer.from('Final synthetic public rights '+info.project.name)};
+  await panel.getByLabel('Artwork image / poster (up to 32 MiB)',{exact:true}).setInputFiles(image);await expect(panel.getByText(/poster.png, \d+ bytes/)).toBeVisible();
+  await panel.getByLabel('Final rights document (up to 8 MiB)',{exact:true}).setInputFiles(rights);await expect(panel.getByText(/rights.md, \d+ bytes/)).toBeVisible();expect(uploads).toBe(0);
+  await panel.getByRole('checkbox',{name:/I reviewed the complete final artwork/}).check();await panel.getByRole('button',{name:'Save reviewed public work',exact:true}).click();await expect(panel.getByRole('heading',{name:'Token #61: Browser uploaded work '+info.project.name,exact:true})).toBeVisible();
+  const workId=await panel.getByLabel('Saved public works').inputValue();
+  let releaseRefresh:()=>void=()=>{},refreshStarted:()=>void=()=>{};
+  const blockedRefresh=new Promise<void>(resolve=>{releaseRefresh=resolve;}),startedRefresh=new Promise<void>(resolve=>{refreshStarted=resolve;});
+  await page.route('**/api/publication/works/'+workId,async route=>{refreshStarted();await blockedRefresh;await route.continue();},{times:1});
+  page.once('dialog',d=>d.accept());await panel.getByRole('button',{name:'Publish image and verify',exact:true}).click();
+  await startedRefresh;await expect(panel.getByRole('button',{name:'New public work',exact:true})).toBeDisabled();releaseRefresh();
+  await expect(panel.getByRole('alert')).toBeVisible();expect(uploads).toBe(1);expect(lostCid).toMatch(/^b/);expect(await page.evaluate(()=>window.__publishSends)).toBe(0);
+  await page.reload();await panel.getByLabel('Saved public works').selectOption(workId);await panel.getByRole('button',{name:'Open saved work',exact:true}).click();await expect(panel.getByText('Upload requested; verify its result before another upload',{exact:true})).toBeVisible();expect(uploads).toBe(1);
+  await panel.getByLabel('Existing public CID for image recovery').fill(lostCid);const imageRow=panel.locator('.public-file-row').filter({has:page.getByRole('heading',{name:'image: poster.png',exact:true})});await imageRow.getByRole('button',{name:'Verify existing file without re-uploading',exact:true}).click();await expect(imageRow.getByText('Verified exact public bytes',{exact:true})).toBeVisible();expect(uploads).toBe(1);
+  await panel.getByLabel('Final rights document (up to 8 MiB)',{exact:true}).setInputFiles(rights);await expect(panel.getByText(/rights.md, \d+ bytes/)).toBeVisible();page.once('dialog',d=>d.accept());await panel.getByRole('button',{name:'Publish rights and verify',exact:true}).click();await expect(panel.getByText('Verified exact public bytes',{exact:true})).toHaveCount(2);
+  await panel.getByRole('button',{name:'Generate metadata from verified files',exact:true}).click();await panel.getByText('Review the exact public metadata JSON',{exact:true}).click();await expect(panel.getByRole('region',{name:'Exact generated public metadata'})).toContainText('Browser uploaded work '+info.project.name);page.once('dialog',d=>d.accept());await panel.getByRole('button',{name:'Publish metadata and verify',exact:true}).click();await expect(panel.getByText('Verified exact public bytes',{exact:true})).toHaveCount(3);expect(uploads).toBe(3);
+  await panel.getByRole('button',{name:'Use verified NFT for cost review and minting',exact:true}).click();const cost=page.getByRole('region',{name:'Estimate total minting cost'});await expect(cost.getByText('1 bundle file(s); 1 NFT(s) selected.',{exact:true})).toBeVisible();
+  await page.getByLabel('Collection name',{exact:true}).fill('Browser upload integration');await page.getByLabel('Symbol',{exact:true}).fill('UPLOAD');await page.getByLabel('Maximum number of NFTs',{exact:true}).fill('100');
+  await cost.getByRole('checkbox').check();await cost.getByRole('button',{name:'Calculate total cost',exact:true}).click();await expect(cost.getByRole('alert')).toContainText('unavailable, not zero');expect(await page.evaluate(()=>window.__publishSends)).toBe(0);
+  await page.getByRole('checkbox',{name:/approve storing them as public launch data/}).check();await page.getByRole('button',{name:'Prepare collection deployment',exact:true}).click();await page.getByRole('button',{name:'Simulate and review network fee',exact:true}).click();await page.getByRole('checkbox',{name:/approve these exact public settings/}).check();await page.getByRole('button',{name:'Sign collection deployment',exact:true}).click();await page.getByRole('button',{name:'Verify on chain',exact:true}).click();await page.getByRole('button',{name:'Use this collection for minting',exact:true}).click();
+  await page.getByRole('checkbox',{name:/approve checking their public IPFS bytes/}).check();await page.getByRole('button',{name:'Verify public files and prepare mint',exact:true}).click();await page.getByRole('button',{name:'Simulate and review network fee',exact:true}).click();await page.getByRole('checkbox',{name:/approve these exact public settings/}).check();await page.getByRole('button',{name:'Sign mint transaction',exact:true}).click();await page.getByRole('button',{name:'Verify on chain',exact:true}).click();await expect(page.getByText(/Your mint receipt and immutable token fields are verified/)).toBeVisible();expect(await page.evaluate(()=>window.__publishSends)).toBe(2);
+  expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze()).violations).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await panel.screenshot({path:`test-results/${info.project.name}-public-publication.png`});
+});

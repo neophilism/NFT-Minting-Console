@@ -11,3 +11,6 @@
 .skip-link:not(:focus) { clip-path: inset(50%); }
 .rights-workbench select { width: 100%; min-height: 45px; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: inherit; }
 .rights-workbench select:focus-visible, .rights-workbench textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+
+/* Explicit public uploads extend, rather than replace, local rights review. */
+.publication-workbench .mono{overflow-wrap:anywhere}.publication-workbench .button{white-space:normal;max-width:100%;overflow-wrap:anywhere}.publication-actions{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center}.public-file-row{border-top:1px solid #d6dfd8;margin-block:1rem;padding-top:1rem}.public-file-row .field{margin-top:1rem}.publication-workbench .public-json{white-space:pre-wrap;overflow-wrap:anywhere}.publication-workbench input[type=file]{max-width:100%}.local-publication-preview img,.local-publication-preview video{max-width:100%;max-height:24rem;object-fit:contain}.local-publication-preview audio{max-width:100%}

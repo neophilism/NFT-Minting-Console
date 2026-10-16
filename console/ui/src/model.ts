@@ -6,7 +6,7 @@ export type Route = 'releases' | 'create' | 'readiness' | 'settings' | 'transact
 export interface Configuration {
   chainId: number; chainName: string; production: boolean; productionReady: boolean;
   loginConfigured: boolean; pinningConfigured: boolean; authStore: string;
-  capabilities: { opaqueReleaseApi: boolean; deploy: boolean; mintJournal: boolean; localMint: boolean; publicLaunch?: boolean };
+  capabilities: { opaqueReleaseApi: boolean; deploy: boolean; mintJournal: boolean; localMint: boolean; publicLaunch?: boolean; publicPublication?: boolean };
 }
 export interface Session {
   wallet: string; chainId: number; role: Role; csrf: string; expiresAt: string; idleExpiresAt: string;
@@ -42,7 +42,7 @@ export function configuration(value: unknown): Configuration {
     loginConfigured: v.loginConfigured === true, pinningConfigured: v.pinningConfigured === true,
     authStore: string(v.authStore, 80), capabilities: {
       opaqueReleaseApi: capabilities.opaqueReleaseApi === true, deploy: capabilities.deploy === true,
-      publicLaunch: capabilities.publicLaunch === true, mintJournal: capabilities.mintJournal === true, localMint: v.chainId === 31337 && capabilities.localMint === true,
+      publicLaunch: capabilities.publicLaunch === true, publicPublication: capabilities.publicPublication === true, mintJournal: capabilities.mintJournal === true, localMint: v.chainId === 31337 && capabilities.localMint === true,
     } };
 }
 export function session(value: unknown, chainId: number): Session {
