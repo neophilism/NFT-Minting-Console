@@ -1,5 +1,6 @@
 import {BrowserProvider, getAddress, keccak256, toQuantity} from 'ethers';
 import {simulateDeployment,verifyCollection,mintActionId} from '../../launch/contracts.mjs';
+import {launchFeeBudget,LAUNCH_FEE_LIMITS as FEE} from '../../launch/fees.mjs';
 import type {DeployPlan,CollectionExpected} from '../../launch/contracts.mjs';
 import {prepareMintPlan,simulateMintBatch} from '../../chain/mint.mjs';
 import type {MintBatch} from '../../chain/mint.mjs';
@@ -48,12 +49,13 @@ export async function reviewLaunch(wallet:WalletProvider,input:LaunchOperation,s
     if(await provider.getCode(plan.from)!=='0x')fail('The public launch signer must be a direct EOA wallet.');
     const tx={from:plan.from,...(plan.to?{to:plan.to}:{}),data:plan.data,value:'0x0'};
     const estimate=quantity(await wallet.request({method:'eth_estimateGas',params:[tx]}));active(signal);
-    const gas=(estimate*120n+99n)/100n,price=quantity(await wallet.request({method:'eth_gasPrice'}));active(signal);
+    const price=quantity(await wallet.request({method:'eth_gasPrice'}));active(signal);
     const nonce=quantity(await wallet.request({method:'eth_getTransactionCount',params:[plan.from,'pending']}));active(signal);
     const balance=quantity(await wallet.request({method:'eth_getBalance',params:[plan.from,'pending']}));active(signal);
     if(nonce!==BigInt(plan.nonce))fail('The wallet nonce changed. Prepare a fresh operation before signing.');
-    if(gas<21000n||gas>12000000n||price<1n||price>1000000000000n||gas*price>100000000000000000n)fail('Estimated fees exceed the launch limits. Check network fees before continuing.');
-    if(balance<gas*price)fail('The signing wallet needs '+String(gas*price-balance)+' additional wei to cover this fee cap.');
+    const budget=launchFeeBudget(estimate,price,balance),gas=BigInt(budget.gasLimit);
+    if(!budget.withinLimits)fail('Estimated fees exceed the launch limits. Check network fees before continuing.');
+    if(!budget.funded)fail('The signing wallet needs '+budget.additionalWei+' additional wei to cover this fee cap.');
     await matching(wallet,plan,session,signal);
     return {intentId:row.intentId,reviewedAt:Date.now(),gas:toQuantity(gas),gasPrice:toQuantity(price),maximumCost:String(gas*price),nonce:toQuantity(nonce),commitment:commitment(plan)};
   }catch(e){if(e instanceof MintFlowError)throw e;active(signal);return fail('Wallet simulation or fee verification failed. No transaction was requested.');}finally{provider.destroy();}
@@ -62,8 +64,8 @@ export async function sendLaunch(wallet:WalletProvider,input:LaunchOperation,rev
   const row=launchOperation(input,session),plan=row.plan,review=structuredClone(reviewInput);
   if(row.state!=='prepared'||review.intentId!==row.intentId||review.commitment!==commitment(plan)||!Number.isSafeInteger(review.reviewedAt)||
     Date.now()-review.reviewedAt>120000||review.reviewedAt>Date.now()+1000||quantity(review.nonce)!==BigInt(plan.nonce)||
-    quantity(review.gas)<21000n||quantity(review.gas)>12000000n||quantity(review.gasPrice)<1n||quantity(review.gasPrice)>1000000000000n||
-    review.maximumCost!==String(quantity(review.gas)*quantity(review.gasPrice))||BigInt(review.maximumCost)>100000000000000000n)fail('The reviewed transaction expired or changed. Review its fees again.');
+    quantity(review.gas)<FEE.minimumGas||quantity(review.gas)>FEE.maximumGas||quantity(review.gasPrice)<1n||quantity(review.gasPrice)>FEE.maximumGasPrice||
+    review.maximumCost!==String(quantity(review.gas)*quantity(review.gasPrice))||BigInt(review.maximumCost)>FEE.maximumCost)fail('The reviewed transaction expired or changed. Review its fees again.');
   await matching(wallet,plan,session,signal);
   const root='/api/launch/operations/'+row.intentId;
   const post=(path:string,body:unknown)=>call(root+path,{method:'POST',body,csrf:session.csrf,signal});

@@ -713,7 +713,11 @@
         "NFT-35"
       ],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        47
+      ],
+      "publicLaunchOperatorScope": "PR 47 adds a read-only configuration/runtime-role/constructor simulation and shared deployment-fee check. Production credentials, database target setup, public-chain mint evidence and complete roadmap acceptance remain pending."
     }
   ],
   "pullRequests": [

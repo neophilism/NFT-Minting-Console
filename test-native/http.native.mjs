@@ -7,6 +7,7 @@ import { createApp } from '../console/server.mjs';
 import { createAuthService } from '../console/auth/core.mjs';
 import { PostgresAuthStore } from '../console/auth/postgres.mjs';
 import { GuardedDatabasePool, databaseOptions } from '../console/data/pool.mjs';
+import { inspectLaunchDatabase } from '../console/launch/doctor.mjs';
 
 // This file is intentionally excluded from the in-memory test glob. It only
 // runs against the isolated PostgreSQL CI service, with a real restricted login.
@@ -48,6 +49,15 @@ test('native restricted-runtime PostgreSQL and actual Express HTTP', async t => 
     TO nft_console_ci_runtime WITH ADMIN FALSE, INHERIT FALSE, SET TRUE`);
   const raw = new pg.Pool(databaseOptions(runtimeUrl.toString())); extraPools.add(raw);
   const pool = new GuardedDatabasePool(raw);
+  await t.test('launch doctor uses an actual restricted native login and leaves no active transaction or role change',async()=>{
+    const client=new pg.Client(databaseOptions(runtimeUrl.toString()));await client.connect();
+    try{
+      const report=await inspectLaunchDatabase(client);assert.equal(report.mutationPerformed,false);assert.equal(report.forcedRlsVerified,true);
+      const identity=(await client.query('SELECT current_user,session_user')).rows[0];
+      assert.deepEqual(identity,{current_user:'nft_console_ci_runtime',session_user:'nft_console_ci_runtime'});
+    }finally{await client.end();}
+    await assert.rejects(inspectLaunchDatabase(admin),/restricted runtime login/);
+  });
   const store = () => new PostgresAuthStore({ pool, origin: ORIGIN, chainId: 11155111, roles });
   async function openApp() {
     const auth = createAuthService({ origin: ORIGIN, chainId: 11155111, store: store(),
