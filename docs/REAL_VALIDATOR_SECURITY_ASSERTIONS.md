@@ -1,3 +1,5 @@
+> **Current owner review policy:** [AGENTS.md](../AGENTS.md) and [security/review-policy.json](../security/review-policy.json) authorize AI source/security review and applicable passing tests for implementation, merge and deployment. Independent human review is deferred follow-up, with no claim that AI review is independent certification. Concrete defects, missing functionality/credentials and actual wallet approvals still apply.
+
 # Real Validator Security Assertions
 
 ## Versioned test subject
@@ -62,5 +64,7 @@ Review of the incoming draft found a Solidity inherited-member encoding error,
 ruleset metadata rejected by the real purity check, an EOA test whose initial
 holder was a contract, and a differently compiled collection test subject.
 These are corrected without modifying the production collection contract.
-Independent review of the final follow-up changes is still required by development-plan
-section 6 before merge; this author's verification is not that independent review.
+Independent human review of these changes has not occurred and remains deferred under
+the owner policy above. The source review and applicable exact-head CI are the operational
+review process; they do not establish an independent audit. Test counts in this section
+record the original validator follow-up, not the current full application suite.
