@@ -13,7 +13,7 @@ const works=[{tokenId:'1',title:'Exact final title',metadataURI:'ipfs://metadata
 function fixture({separate=false,mutate,changed=false,delegated=false}={}){
   const request=requestFor(separate?other:wallet),creation=prepareCollectionCreation(artifact,request.collection,{requester:wallet,nonce:0}),sent=[];let simulated=false;
   const valueFor=call=>{
-    const p=iface.parseTransaction({data:call.input}),name=p.name,w=works.find(w=>BigInt(w.tokenId)===p.args[0]);
+    const p=iface.parseTransaction({data:call.input}),name=p.name,tokenId=p.args.length?p.args[0]:null,w=works.find(w=>BigInt(w.tokenId)===tokenId);
     const plain={owner:request.collection.owner,MINTER:request.collection.minter,SERIES_SIZE:request.collection.seriesSize,CREATOR_ROYALTY_BPS:request.collection.royaltyBps,
       ROYALTY_RECIPIENT:request.collection.royaltyRecipient,name:request.collection.name,symbol:request.collection.symbol,totalMinted:works.length,mintingClosed:false,getTransferValidator:validator};
     const fields={workTitle:'title',tokenURI:'metadataURI',mediaSHA256:'mediaHash',rightsURI:'rightsURI',rightsSHA256:'rightsHash'};
