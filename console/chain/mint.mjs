@@ -65,8 +65,14 @@ function work(value) {
   return Object.freeze({ tokenId: value.tokenId, title: text(value.title, 512), metadataURI: text(value.metadataURI, 2048, true),
     mediaHash: digest(value.mediaHash), rightsURI: text(value.rightsURI, 2048, true), rightsHash: digest(value.rightsHash) });
 }
+/** Exact, bounded calldata; no chain authorization or broadcast. */
+export function prepareMintWorks(value) {
+  const works = Object.freeze(list(value, 10).map(work));
+  if (new Set(works.map(item => item.tokenId)).size !== works.length) stop('DUPLICATE_TOKEN_ID');
+  return Object.freeze({ works, data: iface.encodeFunctionData('mintWorksBatch', [works]) });
+}
 function makeBatch(context, works) {
-  const data = iface.encodeFunctionData('mintWorksBatch', [works]);
+  const data = prepareMintWorks(works).data;
   const id = keccak256(coder.encode(['uint256', 'address', 'address', 'bytes32', 'bytes32'],
     [context.chainId, context.collection, context.minter, context.runtimeCodeHash, keccak256(data)]));
   return Object.freeze({ ...context, works: Object.freeze(works), id, data, value: '0x0', version: 1, status: 'prepared-unverified' });

@@ -9,3 +9,5 @@ export function verifyCollection(provider:unknown,expected:CollectionExpected,ch
 export function verifyDeploymentReceipt(provider:unknown,plan:DeployPlan,hash:string,options?:{minConfirmations?:number}):Promise<unknown>;
 
 export function mintActionId(batchId:string,nonce:number):string;
+
+export function prepareCollectionCreation(artifact:CollectionArtifact,input:CollectionConfig,context:{requester:string;nonce:number}):Omit<DeployPlan,'version'|'kind'|'intentId'|'chainId'>;

@@ -40,17 +40,20 @@ export function expectedRuntime(artifact,config){
   }
   return '0x'+bytes.join('');
 }
-export function prepareCollectionDeployment(artifact,input,{chainId,requester,nonce}){
-  const config=collectionConfig(input);chain(chainId);requester=address(requester);
+/** Chain-independent constructor bytes for read-only multi-call simulation. */
+export function prepareCollectionCreation(artifact,input,{requester,nonce}){
+  const config=collectionConfig(input);requester=address(requester);
   if(!Number.isSafeInteger(nonce)||nonce<0)stop('INVALID_NONCE');
   if(!/^0x(?:[a-f0-9]{2})+$/i.test(artifact?.bytecode)||!Array.isArray(artifact.abi))stop('INVALID_ARTIFACT');
-  const args=CONFIG_KEYS.map(key=>config[key]);
-  const data=artifact.bytecode+new Interface(artifact.abi).encodeDeploy(args).slice(2);
-  const collection=getCreateAddress({from:requester,nonce});
-  const runtime=expectedRuntime(artifact,config),runtimeCodeHash=keccak256(runtime);
-  const intentId=keccak256(AbiCoder.defaultAbiCoder().encode(['string','uint256','address','uint256','bytes32'],['nft-console.direct-deploy.v1',chainId,requester,nonce,keccak256(data)]));
-  return Object.freeze({version:1,kind:'deploy',intentId,chainId,from:requester,to:null,data,value:'0x0',nonce,
-    expected:Object.freeze({collection,config,runtimeCodeHash}),runtime});
+  const data=artifact.bytecode+new Interface(artifact.abi).encodeDeploy(CONFIG_KEYS.map(key=>config[key])).slice(2);
+  const collection=getCreateAddress({from:requester,nonce}),runtime=expectedRuntime(artifact,config);
+  return Object.freeze({from:requester,to:null,data,value:'0x0',nonce,
+    expected:Object.freeze({collection,config,runtimeCodeHash:keccak256(runtime)}),runtime});
+}
+export function prepareCollectionDeployment(artifact,input,{chainId,requester,nonce}){
+  chain(chainId);const creation=prepareCollectionCreation(artifact,input,{requester,nonce});
+  const intentId=keccak256(AbiCoder.defaultAbiCoder().encode(['string','uint256','address','uint256','bytes32'],['nft-console.direct-deploy.v1',chainId,creation.from,nonce,keccak256(creation.data)]));
+  return Object.freeze({version:1,kind:'deploy',intentId,chainId,...creation});
 }
 export async function anchor(provider,chainId){
   if((await provider.getNetwork()).chainId!==BigInt(chain(chainId)))stop('WRONG_CHAIN');
