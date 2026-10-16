@@ -1,3 +1,5 @@
+> **Current owner review policy:** [AGENTS.md](../AGENTS.md) and [security/review-policy.json](../security/review-policy.json) authorize AI source/security review and applicable passing tests for implementation, merge and deployment. Independent human review is deferred follow-up, with no claim that AI review is independent certification. Concrete defects, missing functionality/credentials and actual wallet approvals still apply.
+
 # PR-09a separate assistant security self-review
 
 **Date: 2026-10-12. Reviewer: the implementing assistant, in a separate review pass.**
@@ -45,5 +47,7 @@ need successful exact-head CI. Missing/running/failed checks are not accepted as
 
 **Disposition:** scoped implementation and containment work is ready to submit for verification;
 not approved to merge without passing checks, not accepted as complete PR-09, and not approved
-for mainnet/private media. Additional crypto work must retain the plan's independent-review
-requirement. Nothing in this self-review waives an external launch or legal gate.
+for mainnet/private media. Additional crypto work must retain the applicable source review, cryptographic controls and
+passing tests under the current owner policy. Independent human review remains deferred.
+This historical self-review does not assert current launch acceptance or approve legal terms.
+See [public launch evidence](PUBLIC_LAUNCH.md) for the later implemented scope.

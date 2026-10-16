@@ -1,3 +1,5 @@
+> **Current owner review policy:** [AGENTS.md](../AGENTS.md) and [security/review-policy.json](../security/review-policy.json) authorize AI source/security review and applicable passing tests for implementation, merge and deployment. Independent human review is deferred follow-up, with no claim that AI review is independent certification. Concrete defects, missing functionality/credentials and actual wallet approvals still apply.
+
 # NFT Console — Recovered Product Decisions and Handoff Context
 
 **Read this after [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md), before editing the code.**  
