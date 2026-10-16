@@ -1,3 +1,4 @@
+import {verifyNonceCancellation} from './cancellation.mjs';
 import { Contract } from 'ethers';
 import { LaunchError, exact, stop, prepareCollectionDeployment, simulateDeployment, verifyDeploymentReceipt, verifyCollection, mintActionId, verifyFailedTransaction } from './contracts.mjs';
 import { JournalError } from './journal.mjs';
@@ -54,8 +55,14 @@ export function installLaunchRoutes(app,requireAction,{journal,provider,artifact
   for(const [route,method] of [['claim','claim'],['wallet-outcome','walletOutcome'],['transaction','attach'],['cancel','cancel']]){
     app.post(`/api/launch/operations/:id/${route}`,requireAction('deploy'),wrap(async(req,res)=>res.json(await journal[method](req.actor,req.params.id,req.body))));
   }
+  app.post('/api/launch/operations/:id/resolve-nonce',requireAction('deploy'),wrap(async(req,res)=>{
+    exact(req.body,['expectedRevision','transactionHash']);const row=await journal.get(req.actor,req.params.id);
+    if(row.nonceResolution||!['wallet_pending','submitted','attention'].includes(row.state))stop('OPERATION_NOT_UNRESOLVED');
+    const proof=await verifyNonceCancellation(provider,row.plan,req.body.transactionHash);
+    res.json(await journal.resolveNonce(req.actor,row.intentId,req.body.expectedRevision,proof));
+  }));
   app.post('/api/launch/operations/:id/reconcile',requireAction('deploy'),wrap(async(req,res)=>{
-    exact(req.body,[]);const row=await journal.get(req.actor,req.params.id);if(!row.transactionHash)stop('TRANSACTION_REQUIRED');
+    exact(req.body,[]);const row=await journal.get(req.actor,req.params.id);if(row.nonceResolution)stop('NONCE_ALREADY_RESOLVED');if(!row.transactionHash)stop('TRANSACTION_REQUIRED');
     let observation;
     try{
       if(row.plan.kind==='mint'){const tx=await provider.getTransaction(row.transactionHash);if(tx&&tx.nonce!==row.plan.nonce)stop('TRANSACTION_MISMATCH');}

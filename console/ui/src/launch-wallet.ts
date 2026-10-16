@@ -12,7 +12,8 @@ import {operation,HASH} from './mint-model.ts';
 import type {MintOperation} from './mint-model.ts';
 export interface PublicMintPlan {version:1;kind:'mint';intentId:string;chainId:number;from:string;to:string;data:string;value:'0x0';nonce:number;expected:CollectionExpected;batch:MintBatch;publicFilesVerifiedAt:string;validator:string;validatorPolicyVerified:false}
 export type LaunchPlan=DeployPlan|PublicMintPlan;
-export interface LaunchOperation extends MintOperation {plan:LaunchPlan}
+export interface NonceResolution {version:1;kind:'finalized-self-cancellation';chainId:number;wallet:string;nonce:number;transactionHash:string;blockNumber:number;blockHash:string;finalizedBlockNumber:number;finalizedBlockHash:string;confirmations:number;originalActionVerified:false;transactionSent:false}
+export interface LaunchOperation extends MintOperation {plan:LaunchPlan;nonceResolution:NonceResolution|null}
 export interface LaunchReview {intentId:string;reviewedAt:number;gas:string;gasPrice:string;maximumCost:string;nonce:string;commitment:string}
 const fail=(message:string):never=>{throw new MintFlowError(message);};
 const active=(signal:AbortSignal)=>{if(signal.aborted)fail('Wallet session changed. Recover any pending operation before continuing.');};
@@ -30,7 +31,21 @@ export function launchOperation(value:unknown,session:Session):LaunchOperation {
     const batch=prepareMintPlan({chainId:plan.batch.chainId,collection:plan.batch.collection,minter:plan.batch.minter,runtimeCodeHash:plan.batch.runtimeCodeHash,works:plan.batch.works}).batches[0]!;
     if(plan.to.toLowerCase()!==base.collection||mintActionId(batch.id,plan.nonce)!==base.intentId||batch.data!==plan.data||batch.collection.toLowerCase()!==base.collection||batch.minter.toLowerCase()!==session.wallet.toLowerCase())fail('The mint calldata does not match its public token fields.');
   }
-  return {...base,plan:structuredClone(plan)};
+  const raw=(value as {nonceResolution?:unknown}).nonceResolution;
+  let resolution:NonceResolution|null=null;
+  if(raw!==undefined&&raw!==null){
+    const r=raw as NonceResolution;
+    if(typeof r!=='object'||r.version!==1||r.kind!=='finalized-self-cancellation'||r.chainId!==session.chainId||
+      typeof r.wallet!=='string'||getAddress(r.wallet)!==getAddress(plan.from)||r.nonce!==plan.nonce||
+      !HASH.test(r.transactionHash)||!HASH.test(r.blockHash)||!HASH.test(r.finalizedBlockHash)||
+      !Number.isSafeInteger(r.blockNumber)||r.blockNumber<1||!Number.isSafeInteger(r.finalizedBlockNumber)||r.finalizedBlockNumber<=r.blockNumber||
+      !Number.isSafeInteger(r.confirmations)||r.confirmations!==Math.min(r.finalizedBlockNumber-r.blockNumber+1,2147483647)||
+      r.originalActionVerified!==false||r.transactionSent!==false||base.state!=='attention'||base.lastCode!=='NONCE_CANCELLED'||
+      base.observedBlock!==r.blockNumber||base.observedBlockHash!==r.blockHash||base.confirmations!==r.confirmations)fail('The nonce recovery record could not be verified.');
+    resolution=structuredClone(r);
+  }
+  if(base.lastCode==='NONCE_CANCELLED'&&!resolution)fail('The nonce recovery proof is missing.');
+  return {...base,plan:structuredClone(plan),nonceResolution:resolution};
 }
 async function matching(wallet:WalletProvider,plan:LaunchPlan,session:Session,signal:AbortSignal){
   active(signal);const network=quantity(await wallet.request({method:'eth_chainId'}));active(signal);

@@ -11,7 +11,7 @@ const session:Session={wallet,chainId:1,role:'owner',csrf:'a'.repeat(64),expires
 function input():LaunchOperation{
   const batch=prepareMintPlan({chainId:1,collection,minter:wallet,runtimeCodeHash:hash('a'),works:[{tokenId:'1',title:'Public fixture',metadataURI:'ipfs://fixture/1.json',mediaHash:hash('b'),rightsURI:'ipfs://fixture/rights',rightsHash:hash('c')}]}).batches[0]!;
   const intentId=mintActionId(batch.id,0);
-  return {intentId,chainId:1,collection,runtimeCodeHash:hash('a'),state:'prepared',revision:'1',attemptId:null,transactionHash:null,observedBlock:null,observedBlockHash:null,confirmations:0,lastCode:null,updatedAt:new Date().toISOString(),listingVerified:false,
+  return {intentId,chainId:1,collection,runtimeCodeHash:hash('a'),state:'prepared',revision:'1',attemptId:null,transactionHash:null,observedBlock:null,observedBlockHash:null,confirmations:0,lastCode:null,updatedAt:new Date().toISOString(),listingVerified:false,nonceResolution:null,
     plan:{version:1,kind:'mint',intentId,chainId:1,from:wallet,to:collection,data:batch.data,value:'0x0',nonce:0,expected:{collection,runtimeCodeHash:hash('a'),config:{name:'Fixture',symbol:'TST',seriesSize:'87',royaltyBps:'600',owner:wallet,minter:wallet,royaltyRecipient:wallet}},batch,publicFilesVerifiedAt:new Date().toISOString(),validator:collection,validatorPolicyVerified:false}};
 }
 const review=(row:LaunchOperation):LaunchReview=>({intentId:row.intentId,reviewedAt:Date.now(),gas:'0x186a0',gasPrice:'0x1',maximumCost:'100000',nonce:'0x0',commitment:keccak256(new TextEncoder().encode(JSON.stringify(row.plan)))});
@@ -48,4 +48,14 @@ for(const mode of ['rejected','unknown','lost-save','abort-after-send'])test('pr
 });
 test('tampered fee or transaction review is rejected before any request',async()=>{
   for(const change of [{maximumCost:'0'},{commitment:hash('c')},{reviewedAt:Date.now()-121000},{gas:'0xffffffffff'}]){const h=harness(),row=h.row();await assert.rejects(sendLaunch(h.provider,row,{...review(row),...change},session,h.controller.signal,h.call));assert.equal(h.requests.length,0);assert.equal(h.calls.length,0);}
+});
+
+test('finalized cancellation display requires a complete proof bound to the original operation',()=>{
+  const row=input(),proof={version:1,kind:'finalized-self-cancellation',chainId:1,wallet,nonce:0,transactionHash:hash('d'),
+    blockNumber:2,blockHash:hash('e'),finalizedBlockNumber:10,finalizedBlockHash:hash('f'),confirmations:9,originalActionVerified:false,transactionSent:false};
+  const resolved={...row,state:'attention',lastCode:'NONCE_CANCELLED',observedBlock:2,observedBlockHash:hash('e'),confirmations:9,nonceResolution:proof};
+  assert.equal(launchOperation(resolved,session).nonceResolution?.transactionHash,hash('d'));
+  for(const change of [{nonce:1},{wallet:collection},{originalActionVerified:true},{finalizedBlockNumber:1},{confirmations:1}])
+    assert.throws(()=>launchOperation({...resolved,nonceResolution:{...proof,...change}},session));
+  assert.throws(()=>launchOperation({...resolved,nonceResolution:null},session));
 });

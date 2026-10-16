@@ -20,6 +20,17 @@ describe('First-mint direct collection deployment',function(){
     const tx=await from.sendTransaction({data:plan.data});await tx.wait();await ethers.provider.send('evm_mine');
     expect((await m.verifyDeploymentReceipt(ethers.provider,plan,tx.hash)).config).deep.eq(second);
   });
+  it('reconciles a real disposable-chain self-cancellation without resending the planned action',async()=>{
+    const {verifyNonceCancellation}=await import('../console/launch/cancellation.mjs');
+    const nonce=await from.getNonce(),plan=m.prepareCollectionDeployment(artifact,config,{chainId:31337,requester:from.address,nonce});
+    const tx=await from.sendTransaction({to:from.address,value:0n,data:'0x',gasLimit:21000n,nonce});
+    await tx.wait();await ethers.provider.send('evm_mine');await ethers.provider.send('evm_mine');
+    const proof=await verifyNonceCancellation(ethers.provider,plan,tx.hash);
+    expect(proof.nonce).eq(nonce);expect(proof.originalActionVerified).eq(false);expect(proof.transactionSent).eq(false);
+    expect(await ethers.provider.getCode(plan.expected.collection)).eq('0x');
+    const count=await from.getNonce();await verifyNonceCancellation(ethers.provider,plan,tx.hash);expect(await from.getNonce()).eq(count);
+    await expect(verifyNonceCancellation(ethers.provider,{...plan,nonce:nonce+1},tx.hash)).rejectedWith('CANCELLATION_MISMATCH');
+  });
   it('rejects malformed configuration, unsupported chain and incomplete immutable maps',()=>{
     for(const change of [{seriesSize:'0'},{royaltyBps:'10001'},{owner:ethers.ZeroAddress},{privateKey:'secret'}])expect(()=>m.prepareCollectionDeployment(artifact,{...config,...change},{chainId:1,requester:from.address,nonce:0})).to.throw();
     expect(()=>m.prepareCollectionDeployment(artifact,config,{chainId:5,requester:from.address,nonce:0})).to.throw('WRONG_CHAIN');
