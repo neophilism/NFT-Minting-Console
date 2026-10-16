@@ -6,24 +6,49 @@ project's custom ERC-721C-compatible collection family. Not an AOTV-only product
 > **Public first-mint flow implemented; live deployment configuration pending.**
 > The Deploy & mint screen supports finalized public releases: exact collection
 > deployment, public-file integrity checks, wallet fee review, signing, durable
-> recovery and verified mint receipts. All required CI jobs, including desktop
-> and mobile browser deployment/mint tests, pass at PR #44. Enable it only after
-> configuring the restricted database, RPC and authorized wallet; use the
-> [public launch runbook](docs/PUBLIC_LAUNCH.md). Private draft editing and
+> recovery and verified mint receipts. Enable it only after configuring the
+> restricted database, RPC and authorized wallet; use the
+> [public launch runbook](docs/PUBLIC_LAUNCH.md) and
+> [owner input checklist](docs/MINT_INPUT_CHECKLIST.md). Private draft editing and
 > automated OpenSea listing remain separate unfinished capabilities. No mainnet
 > mint, active listing or security certification has been claimed.
+
+## Help, tutorials and saved configurations
+
+**Help & tutorials** is always available, including before sign-in. Twelve
+searchable guides cover Administrator Setup, wallets, collection creation,
+configuration reuse, rights/metadata, AOTV companion materials, publication,
+deployment, minting, recovery, marketplace handoff and troubleshooting. Each
+supports step highlighting, Back/Next, Close/Escape and local progress/resume.
+The guide asks before navigating away from unsaved work and never signs,
+publishes, changes a network or spends money. See the
+[complete tutorial catalog and scope](docs/GUIDED_TUTORIALS.md).
+
+**Saved configurations** appears in collection setup and Deploy & mint. Explicit
+saving keeps named copies of non-confidential constructor settings on this
+browser, scoped by wallet and network. Load a copy, change any desired fields,
+and prepare a new collection using the existing pinned contract generator.
+JSON import/export provides a backup and manual transfer to another device.
+These public presets are unencrypted, are not cloud sync or private drafts, and
+never contain credentials, rights files, signatures or transaction approvals.
+For more NFTs in an existing collection, use its verified deployment instead of
+deploying a preset again. Start with the [exact inputs and provider links](docs/MINT_INPUT_CHECKLIST.md).
 
 ## Current user interface
 
 The default page is a bundled TypeScript/React application with collection
-navigation, wallet connection, release-record inventory, an in-memory collection
-setup preview, release readiness and settings. Desktop/mobile keyboard and
-accessibility checks are in CI. See [UI acceptance evidence](docs/PR15_UI_ACCEPTANCE.md).
+navigation, wallet connection, release-record inventory, an in-memory editable
+collection form with explicit public preset saving, release readiness and
+settings. Desktop/mobile keyboard and accessibility checks are in CI. See
+[UI acceptance evidence](docs/PR15_UI_ACCEPTANCE.md) and
+[guidance verification scope](docs/GUIDED_TUTORIALS.md#verification).
 
-The setup preview does **not** save or upload fields. Do not enter confidential
-artwork or terms. Existing record IDs and workflow stages can be listed when the
-database is configured; private content is not unlocked by this build. Legacy
-local/Sepolia deployment rehearsal remains at `/legacy/`, separately gated.
+The setup form does **not automatically** save or upload fields. Do not enter
+confidential artwork or terms. Existing record IDs and workflow stages can be
+listed when the database is configured; private content is not unlocked by this
+build. Legacy local/Sepolia deployment rehearsal remains at `/legacy/`, separately
+gated. Public file publication currently uses the reviewed operations tool,
+not an in-app media uploader; the publication tutorial explains this boundary.
 
 ## Local rights and metadata preparation
 

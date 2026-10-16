@@ -5,6 +5,8 @@ import type { Configuration, Plan, Session } from './model';
 import { Icon, Notice, SignInPrompt } from './components';
 import { RightsWorkbench } from './RightsWorkbench';
 import { CompanionPlanner } from './CompanionPlanner';
+import { PresetControls } from './PresetControls';
+import { planPreset, presetPlan } from './presets';
 
 const labels: Record<keyof Plan, string> = { name: 'Collection name', symbol: 'Token symbol', supply: 'Maximum supply', royalty: 'Creator royalty (%)', price: 'Initial listing price (ETH)', owner: 'OWNER wallet', minter: 'MINTER wallet', recipient: 'Royalty recipient' };
 type PlannerProps = { current: Session | null; config: Configuration; connect: () => void };
@@ -29,12 +31,12 @@ function PlannerContent({ current, config, connect }: PlannerProps) {
     <small id={`help-${name}`}>{help}</small>{errors[name] && <small className="field-error" id={`error-${name}`}>{errors[name]}</small>}
   </div>;
   return <>
-    <Notice><strong>Local setup preview only.</strong> These fields are not saved or uploaded. Do not enter confidential information. Encrypted drafts, media uploads and publication are not yet enabled.</Notice>
+    <Notice><strong>Local setup preview only.</strong> Form fields are not automatically saved or uploaded. Use Saved configurations below to explicitly retain non-confidential settings. Do not enter confidential information. Encrypted drafts and in-app media uploads remain unavailable.</Notice>
     <div className="wizard-strip" aria-label="Release workflow"><span className="active"><b>01</b> Collection setup</span><span><b>02</b> Add your works <Icon name="lock"/></span><span><b>03</b> Review &amp; publish <Icon name="lock"/></span></div>
-    {preview ? <section className="panel setup-preview"><div className="section-heading"><div><span className="eyebrow">LOCAL PREVIEW</span><h2 tabIndex={-1} ref={previewRef}>Review {plan.name.trim()}</h2></div><span className="badge">Nothing saved</span></div>
+    {preview ? <section className="panel setup-preview"><div className="section-heading"><div><span className="eyebrow">LOCAL PREVIEW</span><h2 tabIndex={-1} ref={previewRef}>Review {plan.name.trim()}</h2></div><span className="badge">Preview only</span></div>
       <dl className="preview-grid">{(Object.keys(labels) as (keyof Plan)[]).map(name => <div key={name}><dt>{labels[name]}</dt><dd className={['owner','minter','recipient'].includes(name) ? 'mono' : ''}>{plan[name]}</dd></div>)}<div><dt>Target network</dt><dd>{config.chainName}</dd></div></dl>
       <Notice>This validates form inputs only, not contract safety, gas cost, ownership or marketplace compatibility. This summary does not publish rights or media, mint tokens, or create marketplace orders.</Notice>
-      <div className="form-actions"><button className="button secondary" onClick={() => setPreview(false)}>Back to editing</button><button className="button primary" disabled><Icon name="lock"/>Save private release</button></div><p className="muted">Saving requires the accepted client-encryption workflow. Refreshing or leaving this screen discards the preview.</p>
+      <div className="form-actions"><button className="button secondary" onClick={() => setPreview(false)}>Back to editing</button><button className="button primary" disabled><Icon name="lock"/>Save private release</button></div><p className="muted">Private release saving requires the accepted client-encryption workflow. Explicit public presets below are separate. Refreshing or leaving this screen discards unsaved form fields.</p>
     </section> : <form onSubmit={submit} className="panel planner" noValidate>
       <div className="section-heading"><div><span className="eyebrow">01 / COLLECTION IDENTITY</span><h2>Make it your collection</h2><p className="muted">Each release has its own name, supply, roles and rights.</p></div><span className="badge">{config.chainName}</span></div>
       {Object.keys(errors).length > 0 && <div className="error-summary" tabIndex={-1} ref={errorRef} role="alert"><strong>Check these fields before continuing.</strong><ul>{(Object.keys(errors) as (keyof Plan)[]).map(name => <li key={name}><a href={`#plan-${name}`} onClick={event => { event.preventDefault(); document.getElementById(`plan-${name}`)?.focus(); }}>{labels[name]}: {errors[name]}</a></li>)}</ul></div>}
@@ -43,6 +45,7 @@ function PlannerContent({ current, config, connect }: PlannerProps) {
       <div className="form-grid wallet-fields">{field('owner','Maintains the collection transfer policy.','0x...')}{field('minter','Mints NFTs to itself; never gives the server a signing key.','0x...')}{field('recipient','Receives the configured creator royalty.','0x...')}</div>
       <div className="form-actions"><p><Icon name="lock"/>No upload, signature or transaction at this step.</p><button className="button primary" type="submit">Review setup <Icon name="arrow"/></button></div>
     </form>}
+    <PresetControls wallet={current.wallet} chainId={config.chainId} value={planPreset(plan)} onLoad={value=>{setPlan(presetPlan(value));setPreview(false);setErrors({});}}/>
     <RightsWorkbench key={`${current.wallet}:${current.chainId}:${current.csrf}`}/>
     <CompanionPlanner key={`companion:${current.wallet}:${current.chainId}:${current.csrf}`}/>
   </>;
