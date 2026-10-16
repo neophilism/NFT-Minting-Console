@@ -23,8 +23,34 @@ function SetupWizard({status}:{status:SetupStatus}){
   async function run(label:string,fn:(version:number)=>Promise<void>){if(running.current)return;running.current=true;const version=++epoch.current;setBusy(label);setError('');try{await fn(version);}catch(e){if(active(version))setError(e instanceof ApiError?e.message:'The wallet or registration request did not complete. Check the selected network and retry. No transaction was sent.');}finally{running.current=false;if(!lifetime.current?.signal.aborted)setBusy('');}}
   async function account(selected:WalletChoice,request=false){const accounts=await selected.provider.request({method:request?'eth_requestAccounts':'eth_accounts'}),network=await selected.provider.request({method:'eth_chainId'});if(typeof network!=='string'||BigInt(network)!==BigInt(status.chainId))throw new Error('Wrong network');if(!Array.isArray(accounts)||typeof accounts[0]!=='string')throw new Error('Wallet unavailable');return getAddress(accounts[0]);}
   const select=(selected:WalletChoice)=>run('Connecting the selected wallet',async version=>{const address=await account(selected,true);if(active(version)){setChoice(selected);setWallet(address);setChallenge(null);setApproved(false);}});
-  const prepare=()=>run('Preparing administrator registration',async version=>{if(!choice||await account(choice)!==wallet)throw new Error('Wallet changed');const value=await api('/api/setup/challenge',{method:'POST',body:{setupCode:code,wallet,chainId:status.chainId},signal:lifetime.current?.signal});const checked=readSetupChallenge(value,{origin:location.origin,wallet,chainId:status.chainId});if(active(version)){setChallenge(checked);setApproved(false);}});
-  const register=()=>run('Review the registration message in your wallet',async version=>{if(!choice||!challenge||!approved||await account(choice)!==wallet)throw new Error('Wallet changed');readSetupChallenge(challenge,{origin:location.origin,wallet,chainId:status.chainId});if(!active(version))return;const signature=await choice.provider.request({method:'personal_sign',params:[hexlify(toUtf8Bytes(challenge.message)),wallet]});if(!active(version)||await account(choice)!==wallet)return;if(typeof signature!=='string'||!/^0x[0-9a-fA-F]{130}$/.test(signature))throw new Error('Invalid signature');const value=await api('/api/setup/claim',{method:'POST',body:{setupCode:code,challengeId:challenge.challengeId,signature},signal:lifetime.current?.signal}) as {registered?:boolean;transactionSent?:boolean};if(value.registered!==true||value.transactionSent!==false)throw new Error('Registration unverified');if(active(version)){setCode('');setChallenge(null);setRegistered(true);}});
+  const prepare=()=>run('Preparing administrator registration',async version=>{
+    if(!choice)return;
+    const connected=await account(choice);
+    // Every wallet await can synchronously emit account/network/disconnect events.
+    // Recheck the operation epoch AFTER the await, before any server mutation.
+    if(!active(version))return;
+    if(connected!==wallet)throw new Error('Wallet changed');
+    const value=await api('/api/setup/challenge',{method:'POST',body:{setupCode:code,wallet,chainId:status.chainId},signal:lifetime.current?.signal});
+    if(!active(version))return;
+    const checked=readSetupChallenge(value,{origin:location.origin,wallet,chainId:status.chainId});
+    setChallenge(checked);setApproved(false);
+  });
+  const register=()=>run('Review the registration message in your wallet',async version=>{
+    if(!choice||!challenge||!approved)return;
+    const connected=await account(choice);
+    if(!active(version))return;
+    if(connected!==wallet)throw new Error('Wallet changed');
+    readSetupChallenge(challenge,{origin:location.origin,wallet,chainId:status.chainId});
+    const signature=await choice.provider.request({method:'personal_sign',params:[hexlify(toUtf8Bytes(challenge.message)),wallet]});
+    if(!active(version))return;
+    if(typeof signature!=='string'||!/^0x[0-9a-fA-F]{130}$/.test(signature))throw new Error('Invalid signature');
+    const signingAccount=await account(choice);
+    if(!active(version))return;
+    if(signingAccount!==wallet)throw new Error('Wallet changed');
+    const value=await api('/api/setup/claim',{method:'POST',body:{setupCode:code,challengeId:challenge.challengeId,signature},signal:lifetime.current?.signal}) as {registered?:boolean;transactionSent?:boolean};
+    if(value.registered!==true||value.transactionSent!==false)throw new Error('Registration unverified');
+    if(active(version)){setCode('');setChallenge(null);setRegistered(true);}
+  });
   return <main id="main-content" tabIndex={-1} className="main-content setup-wizard"><span className="eyebrow">FIRST-RUN ADMINISTRATOR SETUP</span><h1>Make this your NFT workspace</h1><p>Register your administrator directly in this interface. You do not need to send a wallet address in chat. The installation setup code prevents someone else from claiming this site.</p>
     <section className="panel"><h2>1. Verify the installation</h2><dl className="preview-grid"><div><dt>Site</dt><dd>{location.origin}</dd></div><div><dt>Network</dt><dd className="network-badge">{status.chainName} / {status.chainId}</dd></div><div><dt>Database</dt><dd>{status.databaseVerified?'Restricted database verified':'Database setup required'}</dd></div></dl><p>In your existing Render service, open Environment and copy <strong>NFT_SETUP_CODE</strong> into the field below. This code is separate from your wallet seed, Pinata JWT and Alchemy key. It is used only for this first registration, stays out of URLs, and is never saved in browser storage.</p><div className="field"><label htmlFor="installation-code">Installation setup code</label><input id="installation-code" type="password" autoComplete="off" maxLength={64} value={code} disabled={!!busy||registered} onChange={e=>{setCode(e.target.value);setChallenge(null);setApproved(false);}}/><small>64 hexadecimal characters from NFT_SETUP_CODE. Never enter a seed phrase or private key.</small></div></section>
     <section className="panel"><h2>2. Select your administrator wallet</h2><p>Use a directly controlled Ethereum account and select the displayed network in your wallet. Connecting requests your public address only; it does not transfer funds.</p>{wallets.length?wallets.map(item=><button key={item.id} className="button secondary" disabled={!!busy||registered} onClick={()=>void select(item)}>Connect {item.name}</button>):<Notice>No wallet is detected. Open this site in a wallet-enabled browser or your wallet's browser, then reload.</Notice>}{wallet&&<p className="mono address-full">{wallet}</p>}<button className="button primary" disabled={!!busy||registered||!wallet||!/^[a-f0-9]{64}$/.test(code)} onClick={()=>void prepare()}>Prepare administrator registration</button></section>
