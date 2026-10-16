@@ -15,6 +15,7 @@ import {publicLaunchMode} from './launch/mode.mjs';
 import {LaunchJournal} from './launch/journal.mjs';
 import {loadCollectionArtifact} from './launch/artifacts.mjs';
 import {installLaunchRoutes} from './launch/http.mjs';
+import {installCostQuoteRoutes} from './launch/quote.mjs';
 import {localMintMode} from './operations/local-mode.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const chainRegistry=JSON.parse(fs.readFileSync(path.join(root,'config/chains.json'),'utf8'));
@@ -58,10 +59,11 @@ export function createApp({env=process.env,authService,launchContentOptions}={})
   });
   app.use('/api',(_req,res,next)=>{ready.then(()=>next(),()=>res.status(503).json({error:'Configured database authorization is unavailable. No memory fallback is permitted.',code:'database_unavailable'}));});
   app.use('/api/launch/mint',express.json({limit:'1536kb',strict:true}));
+  app.use('/api/launch/quote',express.json({limit:'8mb',strict:true}));
   app.use(express.json({limit:'64kb',strict:true}));
   const requireAction=installAuthRoutes(app,auth,{production});
   if(persistence){installReleaseRoutes(app,requireAction,persistence.repository);installJournalRoutes(app,requireAction,persistence.journal,provider);}
-  if(launchJournal)installLaunchRoutes(app,requireAction,{journal:launchJournal,provider,artifact:launchArtifact,enabled:publicLaunch,chainId,contentOptions:launchContentOptions});
+  if(launchJournal){installLaunchRoutes(app,requireAction,{journal:launchJournal,provider,artifact:launchArtifact,enabled:publicLaunch,chainId,contentOptions:launchContentOptions});installCostQuoteRoutes(app,requireAction,{journal:launchJournal,provider,artifact:launchArtifact,enabled:publicLaunch,chainId,contentOptions:launchContentOptions});}
   app.get('/api/config',(_req,res)=>res.json({chainId,chainSlug:profile.slug,chainName:profile.name,production:profile.production,deploymentFactory:factoryAddress,pinningReady:false,pinningConfigured:Boolean(env.PINATA_JWT),loginConfigured:roles.size>0&&Boolean(provider),validator:env.TRANSFER_VALIDATOR_ADDRESS||profile.validator,signedZone:env.OPENSEA_SIGNED_ZONE||profile.signedZone,productionReady:false,authStore:persistence?'postgresql':'development-memory',capabilities:{publicLaunch,localMint,mintJournal:Boolean(persistence),privateDrafts:false,opaqueReleaseApi:Boolean(persistence),publish:false,mint:false,list:false,deploy:chainId!==1&&Boolean(factoryAddress)}}));
   app.get('/api/health',(_req,res)=>res.json({ok:true,productionReady:false}));
   app.get('/api/launch-readiness',requireAction('read'),(_req,res)=>res.json({productionReady:false,mintingEvidence:'not-verified',listingEvidence:'not-verified',blockers:blockedFeatures,authentication:'software-integration-accepted',storage:persistence?'durable-configured-not-production-accepted':'development-memory',note:'These are software gates, not a live wallet inventory or security certification.'}));

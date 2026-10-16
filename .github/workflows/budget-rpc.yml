@@ -6,7 +6,7 @@ on:
       - "console/chain/**"
       - "contracts/**"
       - "scripts/budget-launch.mjs"
-      - "test-native/budget.rpc.mjs"
+      - "test-native/budget*.rpc.mjs"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/budget-rpc.yml"
@@ -17,7 +17,7 @@ on:
       - "console/chain/**"
       - "contracts/**"
       - "scripts/budget-launch.mjs"
-      - "test-native/budget.rpc.mjs"
+      - "test-native/budget*.rpc.mjs"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/budget-rpc.yml"
@@ -57,7 +57,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run compile
-      - name: Exercise actual read-only simulation with no peers, user keys or public-chain transactions
+      - name: Exercise new and existing collection quotes on a no-peer disposable chain
         env:
           NFT_TEST_DISPOSABLE_GETH: "yes"
           NFT_BUDGET_TEST_RPC: http://127.0.0.1:18545
@@ -68,6 +68,7 @@ jobs:
           trap 'kill "$budget_geth_pid" 2>/dev/null || true' EXIT
           curl --retry 20 --retry-delay 1 --retry-connrefused --max-time 2 --fail --silent --show-error -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"web3_clientVersion","params":[]}' http://127.0.0.1:18545 > /tmp/nft-budget-geth-ready.json
           node --test test-native/budget.rpc.mjs
+          node --test test-native/budget-existing.rpc.mjs
       - name: Retain synthetic-node diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
