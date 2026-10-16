@@ -19,12 +19,12 @@ import {localMintMode} from './operations/local-mode.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const chainRegistry=JSON.parse(fs.readFileSync(path.join(root,'config/chains.json'),'utf8'));
 const blockedFeatures=Object.freeze([
-  {id:'private-workspace',milestones:['NFT-10','NFT-11','NFT-12'],description:'Reviewed client encryption, recovery and ciphertext object storage are not implemented.'},
-  {id:'explicit-publication',milestones:['NFT-13','NFT-19','NFT-20'],description:'Exact-byte rights and public-metadata preparation are implemented; encrypted publication and content read-back remain unaccepted.'},
-  {id:'release-experience',milestones:['NFT-14','NFT-16','NFT-17','NFT-18'],description:'The approved multi-release user experience and rights workflow are unfinished.'},
-  {id:'verified-chain-workflow',milestones:['NFT-21','NFT-22','NFT-23','NFT-24','NFT-25'],description:'Validator provisioning, wallet flows and complete mint read-back require implementation and rehearsal.'},
-  {id:'marketplace',milestones:['NFT-26','NFT-27','NFT-28','NFT-29'],description:'Order signing, posting, independent active-listing and royalty verification are not implemented.'},
-  {id:'production-evidence',milestones:['NFT-30','NFT-31','NFT-32','NFT-33','NFT-34','NFT-35','NFT-36'],description:'Audits, deployed infrastructure, real-sale rehearsal and final acceptance are not complete.'},
+  {id:'private-workspace',milestones:['NFT-10','NFT-11','NFT-12'],description:'Low-level attachment encryption is implemented; private draft editing, recovery and ciphertext object storage integration remain unfinished.'},
+  {id:'explicit-publication',milestones:['NFT-13','NFT-19','NFT-20'],description:'Reviewed public CLI uploads and exact-byte readback are implemented. Encrypted-draft declassification and the complete GUI upload flow remain unfinished.'},
+  {id:'release-experience',milestones:['NFT-14','NFT-16','NFT-17','NFT-18'],description:'Encrypted saved releases, private media editing and the complete rights workflow remain unfinished.'},
+  {id:'verified-chain-workflow',milestones:['NFT-21','NFT-22','NFT-23','NFT-24','NFT-25'],description:'The public EOA deployment/mint flow is browser-tested. Automated validator-policy provisioning and live production transaction evidence remain outstanding.'},
+  {id:'marketplace',milestones:['NFT-26','NFT-27','NFT-28','NFT-29'],description:'Seaport order signing and OpenSea submission components exist. The complete user flow, active-listing verification and real-sale checks remain unfinished.'},
+  {id:'production-evidence',milestones:['NFT-30','NFT-31','NFT-32','NFT-33','NFT-34','NFT-35','NFT-36'],description:'Production database-target setup, owner configuration, a verified live mint and real-sale acceptance remain pending. External human review is deferred by owner policy.'},
 ]);
 const closed=(res,code,error)=>res.status(409).json({code,error,productionReady:false});
 export function createApp({env=process.env,authService,launchContentOptions}={}) {
