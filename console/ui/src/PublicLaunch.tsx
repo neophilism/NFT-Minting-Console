@@ -10,11 +10,12 @@ import type {LaunchOperation,LaunchReview} from './launch-wallet';
 import type {CollectionConfig} from '../../launch/contracts.mjs';
 import {MintFlowError} from './mint-wallet';
 import {HASH,statusText} from './mint-model';
+import {PresetControls} from './PresetControls';
 interface Props {current:Session|null;config:Configuration;connect:()=>void;expired:()=>void;walletProvider:()=>WalletProvider|null}
 const keys=['name','symbol','seriesSize','royaltyBps','owner','minter','royaltyRecipient'] as const;
 const labels:Record<keyof CollectionConfig,string>={name:'Collection name',symbol:'Symbol',seriesSize:'Maximum number of NFTs',royaltyBps:'Royalty in basis points (600 = 6%)',owner:'Collection owner wallet',minter:'Mint recipient / minter wallet',royaltyRecipient:'Royalty recipient wallet'};
 export function PublicLaunch(props:Props){
-  if(!props.config.capabilities.publicLaunch)return <section className="panel"><h2>Public mint setup</h2><p>Deploy a collection, publish finalized materials, mint through your wallet, and recover recorded transactions.</p><Notice>The public mint flow needs an authorized wallet, an RPC connection, the restricted database and explicit launch configuration. No money or wallet signature is requested until setup and transaction checks pass.</Notice><p>Prepare your wallet’s public address, finalized artwork and rights, Pinata access and an Ethereum RPC endpoint. OpenSea credentials are only needed for automated listing.</p></section>;
+  if(!props.config.capabilities.publicLaunch)return <section className="panel"><h2>Public mint setup</h2><p>Deploy a collection, publish finalized materials, mint through your wallet, and recover recorded transactions.</p><Notice>The public mint flow needs an authorized wallet, an RPC connection, the restricted database and explicit launch configuration. No money or wallet signature is requested until setup and transaction checks pass.</Notice><p>Prepare your wallet’s public address, finalized artwork and rights, Pinata access and an Ethereum RPC endpoint. OpenSea credentials are only needed for automated listing. Open Help &amp; tutorials for Administrator Setup.</p></section>;
   if(!props.current)return <SignInPrompt connect={props.connect}/>;
   return <LaunchWorkspace key={`${props.current.wallet}:${props.current.chainId}:${props.current.csrf}`} {...props} current={props.current}/>;
 }
@@ -22,6 +23,7 @@ function LaunchWorkspace({current,config,expired,walletProvider}:Props&{current:
   const [rows,setRows]=useState<LaunchOperation[]>([]),[selected,setSelected]=useState<LaunchOperation|null>(null),[review,setReview]=useState<LaunchReview|null>(null);
   const [error,setError]=useState(''),[busy,setBusy]=useState(''),[returnedHash,setReturnedHash]=useState(''),[recovery,setRecovery]=useState(''),[approved,setApproved]=useState(false);
   const [configInput,setConfig]=useState<CollectionConfig>({name:'',symbol:'',seriesSize:'',royaltyBps:'600',owner:current.wallet,minter:current.wallet,royaltyRecipient:current.wallet});
+  const [listingPreference,setListingPreference]=useState<string|null>(null);
   const [deployConsent,setDeployConsent]=useState(false),[deploymentId,setDeploymentId]=useState(''),[bundle,setBundle]=useState<unknown[]|null>(null),[mintConsent,setMintConsent]=useState(false),[cursor,setCursor]=useState<string|null>(null);
   const lifetime=useRef(new AbortController()),working=useRef(false),fileVersion=useRef(0);
   useEffect(()=>{const c=new AbortController();lifetime.current=c;return()=>{c.abort();fileVersion.current++;};},[]);
@@ -59,6 +61,7 @@ function LaunchWorkspace({current,config,expired,walletProvider}:Props&{current:
       {selected.state==='verified'&&selected.plan.kind==='mint'&&<Notice>Your mint receipt and immutable token fields are verified at block {selected.observedBlock}. Token IDs: {selected.plan.batch.works.map(x=>x.tokenId).join(', ')}. Listing remains a separate step.</Notice>}
     </section>}
     {owner&&<section className="panel"><h2>1. Deploy a new collection</h2><p>Deploy once, then add NFTs up to the chosen maximum supply. Minter, royalty recipient, supply and royalty rate are immutable. The owner can transfer ownership and maintain transfer policy.</p><div className="form-grid">{keys.map(key=><div className="field" key={key}><label htmlFor={'launch-'+key}>{labels[key]}</label><input id={'launch-'+key} value={configInput[key]} disabled={!!busy} maxLength={key==='name'?120:key==='symbol'?16:100} onChange={e=>{setConfig(p=>({...p,[key]:e.target.value}));setDeployConsent(false);}}/></div>)}</div>
+      <PresetControls wallet={current.wallet} chainId={config.chainId} value={{config:configInput,listingPriceEth:listingPreference}} disabled={!!busy||pending} onLoad={value=>{setConfig({...value.config});setListingPreference(value.listingPriceEth);setDeployConsent(false);}}/>
       <label className="review-checkbox"><input type="checkbox" checked={deployConsent} onChange={e=>setDeployConsent(e.target.checked)}/><span>I reviewed these settings and approve storing them as public launch data. The owner can maintain transfer policy, including settings that can block transfers.</span></label>
       <button className="button primary" disabled={!!busy||!deployConsent||pending} onClick={()=>void task('Preparing and simulating collection creation',async()=>{for(const key of ['owner','minter','royaltyRecipient'] as const)getAddress(configInput[key]);remember(await post('/deploy',{config:configInput,publicDisclosureConfirmed:true}));})}>Prepare collection deployment</button>
     </section>}
