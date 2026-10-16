@@ -1,0 +1,8 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readSetupChallenge,readSetupStatus} from '../console/ui/src/setup-model.ts';
+import {setupMessage} from '../console/setup/message.mjs';
+const expected={origin:'https://console.example',wallet:'0x1111111111111111111111111111111111111111',chainId:1},now=Date.parse('2026-10-16T20:00:00Z');
+const value={version:1,challengeId:'a'.repeat(64),issuedAt:new Date(now).toISOString(),expiresAt:new Date(now+300000).toISOString(),message:''};value.message=setupMessage({...expected,nonce:value.challengeId,issuedAt:value.issuedAt,expiresAt:value.expiresAt});
+test('setup message is byte-bound to installation, wallet, network, purpose and time',()=>{assert.deepEqual(readSetupChallenge(value,expected,now),value);for(const patch of [{origin:'https://attacker.invalid'},{chainId:11155111},{wallet:'0x2222222222222222222222222222222222222222'}])assert.throws(()=>readSetupChallenge(value,{...expected,...patch},now));assert.throws(()=>readSetupChallenge({...value,message:value.message.replace('Register','Transfer')},expected,now));assert.throws(()=>readSetupChallenge(value,expected,now+300001));});
+test('setup status never claims the full product is complete',()=>{const s={version:1,required:true,chainId:1,chainName:'Ethereum mainnet',databaseVerified:true,codeConfigured:true,runtimeReady:false,fullProductReady:false};assert.deepEqual(readSetupStatus(s),s);for(const patch of [{fullProductReady:true},{databaseVerified:false},{chainId:999}, {required:'yes'}])assert.throws(()=>readSetupStatus({...s,...patch}));});

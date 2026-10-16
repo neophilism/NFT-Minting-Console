@@ -2,9 +2,11 @@ import { Component, StrictMode } from 'react';
 import type { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import {SetupGate} from './SetupGate';
 import {TutorialCenter} from './TutorialCenter';
 import './styles.css';
 import './accessibility.css';
+import './setup.css';
 class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
@@ -12,4 +14,4 @@ class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
 }
 const root = document.getElementById('root');
 if (!root) throw new Error('Application root missing.');
-createRoot(root).render(<StrictMode><Boundary><App/><TutorialCenter/></Boundary></StrictMode>);
+createRoot(root).render(<StrictMode><Boundary><SetupGate><App/></SetupGate><TutorialCenter/></Boundary></StrictMode>);
