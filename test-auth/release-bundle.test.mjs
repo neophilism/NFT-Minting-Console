@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';
 import os from 'node:os';import path from 'node:path';
-import {inspectRelease,publishRelease} from '../console/launch/bundle.mjs';
+import {inspectRelease,publishRelease,reconcilePublication} from '../console/launch/bundle.mjs';
 const cid='bafkreibm6jg3ux5qumhcn2b3flc3tyu6dmlb4xa7u5bf44yegnrjhc4yeq';
 test('reviewed public release builds exact linked mint bundle; resumed successful files are not uploaded again',async t=>{
   const dir=await mkdtemp(path.join(os.tmpdir(),'public-release-'));t.after(()=>rm(dir,{recursive:true,force:true}));
@@ -24,4 +24,20 @@ test('uncertain public upload leaves a blocking checkpoint across process restar
   const review=await inspectRelease(file);let calls=0;const publish=async()=>{calls++;throw new Error('Lost upload response');};
   await assert.rejects(publishRelease(file,review.reviewSha256,output,{publish}));
   await assert.rejects(publishRelease(file,review.reviewSha256,output,{publish}),e=>e.code==='UNCERTAIN_UPLOAD_REQUIRES_RECONCILIATION');assert.equal(calls,1);
+});
+
+test('read-only CID reconciliation clears an uncertain upload only after exact digest readback',async t=>{
+  const dir=await mkdtemp(path.join(os.tmpdir(),'public-reconcile-'));t.after(()=>rm(dir,{recursive:true,force:true}));
+  const output=path.join(dir,'bundle.json'),bytes=Buffer.from('exact already public bytes');
+  const {createHash}=await import('node:crypto');
+  const pending={kind:'image',name:'image.png',sha256:createHash('sha256').update(bytes).digest('hex'),byteLength:bytes.length,cid};
+  await writeFile(output+'.publication.json',JSON.stringify({version:1,reviewSha256:'a'.repeat(64),pending,uploaded:{}}));
+  let posts=0;
+  const options={fetchImpl:async(_url,request)=>{if(request.method!=='GET')posts++;return new Response(bytes,{status:200});}};
+  const result=await reconcilePublication(output,cid,options);assert.equal(result.reconciled,true);assert.equal(posts,0);
+  const state=JSON.parse(await readFile(output+'.publication.json','utf8'));assert.equal(state.pending,null);assert.equal(state.uploaded.image.sha256,pending.sha256);
+  await assert.rejects(reconcilePublication(output,cid,options),e=>e.code==='NO_PENDING_UPLOAD');
+  await writeFile(output+'.publication.json',JSON.stringify({version:1,reviewSha256:'a'.repeat(64),pending,uploaded:{}}));
+  await assert.rejects(reconcilePublication(output,cid,{fetchImpl:async()=>new Response(Buffer.alloc(bytes.length),{status:200})}),e=>e.code==='DIGEST_MISMATCH');
+  assert.ok(JSON.parse(await readFile(output+'.publication.json','utf8')).pending);
 });

@@ -3,11 +3,15 @@
 A general-purpose workspace for independent NFT collections, using this
 project's custom ERC-721C-compatible collection family. Not an AOTV-only product.
 
-> **DEVELOPMENT / REHEARSAL ONLY.** Wallet authentication, durable release
-> authorization and the responsive React interface are implemented and tested.
-> Private client encryption, public publication, complete minting and real
-> OpenSea orders are unfinished. Production startup and those actions remain
-> disabled. No NFT URL is presented as a verified listing.
+> **Public first-mint flow implemented; live deployment configuration pending.**
+> The Deploy & mint screen supports finalized public releases: exact collection
+> deployment, public-file integrity checks, wallet fee review, signing, durable
+> recovery and verified mint receipts. All required CI jobs, including desktop
+> and mobile browser deployment/mint tests, pass at PR #44. Enable it only after
+> configuring the restricted database, RPC and authorized wallet; use the
+> [public launch runbook](docs/PUBLIC_LAUNCH.md). Private draft editing and
+> automated OpenSea listing remain separate unfinished capabilities. No mainnet
+> mint, active listing or security certification has been claimed.
 
 ## Current user interface
 

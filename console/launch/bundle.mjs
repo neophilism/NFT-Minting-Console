@@ -4,6 +4,8 @@ import {openAsBlob} from 'node:fs';
 import path from 'node:path';
 import {exact,stop} from './contracts.mjs';
 import {publishReviewedFile,PUBLIC_UPLOAD_TYPES} from '../publication/pinata-public.mjs';
+import {verifyPublicFiles} from '../publication/readback.mjs';
+import {publicIpfsUri} from '../publication/ipfs-uri.mjs';
 import {reviewedWork} from './public-content.mjs';
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 /** Operator-only: local inputs become public only after an exact-file digest review and explicit consent. */
@@ -47,7 +49,9 @@ export async function publishRelease(file,reviewSha256,output,{jwt,publish=publi
   const upload=async(kind,name,blob,digest)=>{
     if(state.uploaded[kind])return state.uploaded[kind];
     state.pending={kind,name,sha256:digest,byteLength:blob.size};await checkpoint(stateFile,state);
-    const result=await publish({kind,name,blob,sha256:digest,acknowledgePublic:true,jwt});
+    let result;
+    try{result=await publish({kind,name,blob,sha256:digest,acknowledgePublic:true,jwt});}
+    catch(e){if(typeof e.cid==='string'){state.pending.cid=e.cid;await checkpoint(stateFile,state);}throw e;}
     state.uploaded[kind]=result.manifest.files[0];state.pending=null;await checkpoint(stateFile,state);return state.uploaded[kind];
   };
   for(const [kind,asset] of Object.entries(inspected.assets))await upload(kind,asset.name,await openAsBlob(asset.source),asset.sha256);
@@ -59,4 +63,18 @@ export async function publishRelease(file,reviewSha256,output,{jwt,publish=publi
   const work={tokenId:release.tokenId,title:release.title,metadataURI:f.metadata.uri,mediaHash:'0x'+(f.media||f.image).sha256,rightsURI:f.rights.uri,rightsHash:'0x'+f.rights.sha256};
   const item={work,files:{version:1,publicDisclosureConfirmed:true,files:Object.values(f)},metadataJson};reviewedWork(item);
   const bundle={version:1,works:[item]};await exclusiveJson(path.resolve(output),bundle);return {output:path.resolve(output),tokenId:release.tokenId,publicFilesVerified:true,mintAuthorized:false};
+}
+
+/** Read-only recovery: prove the pending exact bytes already exist before clearing an uncertain upload. */
+export async function reconcilePublication(output,cid,options={}){
+  const stateFile=path.resolve(output)+'.publication.json';
+  const state=JSON.parse(await readFile(stateFile,'utf8'));
+  if(state.version!==1||!state.pending||!state.uploaded||typeof state.reviewSha256!=='string')stop('NO_PENDING_UPLOAD');
+  const pending=state.pending,uri=publicIpfsUri('ipfs://'+cid);
+  if(pending.cid&&pending.cid!==cid)stop('PENDING_CID_MISMATCH');
+  const file={kind:pending.kind,uri,sha256:pending.sha256,byteLength:pending.byteLength};
+  await verifyPublicFiles({version:1,publicDisclosureConfirmed:true,files:[file]},options);
+  if(state.uploaded[pending.kind])stop('PUBLICATION_STATE_MISMATCH');
+  state.uploaded[pending.kind]=file;state.pending=null;await checkpoint(stateFile,state);
+  return {reconciled:true,kind:file.kind,uri,mintAuthorized:false};
 }
