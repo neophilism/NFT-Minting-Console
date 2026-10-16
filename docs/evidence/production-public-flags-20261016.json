@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-16T19:47:50.707611+00:00",
+  "sourceRun": 38957535626,
+  "readOnly": true,
+  "credentialAuthenticationTested": false,
+  "healthStatus": 200,
+  "healthOk": true,
+  "configStatus": 200,
+  "pinningConfigured": true,
+  "loginConfigured": false,
+  "chainId": 11155111,
+  "authStore": "development-memory",
+  "publicLaunch": false,
+  "notes": "Public flags only. The Pinata value is present but authentication is not tested. The chain is Sepolia, the runtime database is not wired and no authorized wallet policy is configured. Separately initialized Neon production schema does not imply application connectivity. No secret was fetched or logged."
+}

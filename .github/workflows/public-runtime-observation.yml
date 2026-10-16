@@ -1,0 +1,45 @@
+name: Public runtime observation
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/public-runtime-observation.yml"
+      - "docs/PRODUCTION_DATABASE_20261016.md"
+permissions:
+  contents: read
+jobs:
+  read-public-flags:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Read public health and allowlisted configuration flags only
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, datetime
+          origin = 'https://nft-minting-console-preview.onrender.com'
+          report = {'checkedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'readOnly': True, 'credentialAuthenticationTested': False}
+          for path in ['/api/health', '/api/config']:
+              try:
+                  with urllib.request.urlopen(origin + path, timeout=90) as response:
+                      raw = response.read(16385)
+                      if len(raw) > 16384:
+                          raise ValueError('response too large')
+                      value = json.loads(raw)
+                      if path.endswith('health'):
+                          fields = {'ok': value.get('ok') is True}
+                      else:
+                          fields = {key: value.get(key) is True for key in ['production', 'productionReady', 'loginConfigured', 'pinningConfigured']}
+                          fields['chainId'] = value.get('chainId') if type(value.get('chainId')) is int else None
+                          fields['authStore'] = value.get('authStore') if value.get('authStore') in ['postgresql', 'development-memory'] else 'other'
+                          fields['publicLaunch'] = value.get('capabilities', {}).get('publicLaunch') is True
+                      report[path] = {'status': response.status, 'flags': fields}
+              except Exception as error:
+                  report[path] = {'available': False, 'errorType': type(error).__name__}
+          print(json.dumps(report, indent=2))
+          with open('public-runtime-observation.json', 'w') as output:
+              json.dump(report, output, indent=2)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-runtime-observation
+          path: public-runtime-observation.json
+          retention-days: 3
