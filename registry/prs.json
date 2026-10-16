@@ -86,8 +86,7 @@
       "origin": "original",
       "prs": [
         10,
-        16,
-        43
+        16
       ],
       "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
       "dependsOn": [
@@ -95,22 +94,27 @@
         "NFT-05"
       ],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        43
+      ]
     },
     {
       "id": "NFT-07",
       "title": "Release schema, ownership and data migrations",
       "origin": "original",
       "prs": [
-        12,
-        44
+        12
       ],
       "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
       "dependsOn": [
         "NFT-01"
       ],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        44
+      ]
     },
     {
       "id": "NFT-08",
@@ -136,8 +140,7 @@
       "prs": [
         18,
         20,
-        22,
-        44
+        22
       ],
       "implementationStatus": "complete",
       "acceptanceStatus": "passed",
@@ -156,7 +159,10 @@
         "NFT-08"
       ],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        44
+      ]
     },
     {
       "id": "NFT-10",
@@ -210,10 +216,7 @@
       "id": "NFT-13",
       "title": "Publishing boundary and public-media preflight",
       "origin": "original",
-      "prs": [
-        44,
-        45
-      ],
+      "prs": [],
       "dependsOn": [
         "NFT-10",
         "NFT-11",
@@ -228,8 +231,11 @@
       "implementationStatus": "partial",
       "acceptanceStatus": "pending",
       "contributingPrs": [
-        37
-      ]
+        37,
+        44,
+        45
+      ],
+      "scopeNote": "Recent PRs contribute the separately tested public-only EOA launch flow. They do not establish completion of all acceptance criteria in this work package."
     },
     {
       "id": "NFT-14",
@@ -286,9 +292,7 @@
       "id": "NFT-16",
       "title": "Multi-release dashboard and saved settings",
       "origin": "original",
-      "prs": [
-        44
-      ],
+      "prs": [],
       "dependsOn": [
         "NFT-07",
         "NFT-09",
@@ -296,7 +300,11 @@
         "NFT-15"
       ],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        44
+      ],
+      "scopeNote": "Recent PRs contribute the separately tested public-only EOA launch flow. They do not establish completion of all acceptance criteria in this work package."
     },
     {
       "id": "NFT-17",
@@ -386,11 +394,7 @@
       "id": "NFT-21",
       "title": "Automated validator policy provisioning",
       "origin": "original",
-      "prs": [
-        43,
-        44,
-        45
-      ],
+      "prs": [],
       "dependsOn": [
         "NFT-05",
         "NFT-06",
@@ -398,7 +402,8 @@
         "NFT-20"
       ],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "scopeNote": "Automated validator/list/ruleset provisioning remains unimplemented. Public minting currently checks validator contract presence only."
     },
     {
       "id": "NFT-22",
@@ -454,11 +459,7 @@
       "id": "NFT-24",
       "title": "Canonical deployment wizard",
       "origin": "original",
-      "prs": [
-        43,
-        44,
-        45
-      ],
+      "prs": [],
       "dependsOn": [
         "NFT-06",
         "NFT-20",
@@ -467,16 +468,19 @@
         "NFT-23"
       ],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        43,
+        44,
+        45
+      ],
+      "scopeNote": "Recent PRs contribute the separately tested public-only EOA launch flow. They do not establish completion of all acceptance criteria in this work package."
     },
     {
       "id": "NFT-25",
       "title": "Batch mint pipeline",
       "origin": "original",
-      "prs": [
-        44,
-        45
-      ],
+      "prs": [],
       "implementationStatus": "partial",
       "acceptanceStatus": "pending",
       "evidenceFiles": [
@@ -504,8 +508,11 @@
         25,
         26,
         27,
-        37
-      ]
+        37,
+        44,
+        45
+      ],
+      "scopeNote": "Recent PRs contribute the separately tested public-only EOA launch flow. They do not establish completion of all acceptance criteria in this work package."
     },
     {
       "id": "NFT-26",
@@ -583,10 +590,7 @@
       "id": "NFT-30",
       "title": "Threat-driven audit and contract verification",
       "origin": "original",
-      "prs": [
-        44,
-        45
-      ],
+      "prs": [],
       "dependsOn": [
         "NFT-05",
         "NFT-08",
@@ -606,7 +610,12 @@
         "NFT-29"
       ],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        44,
+        45
+      ],
+      "scopeNote": "Recent PRs contribute the separately tested public-only EOA launch flow. They do not establish completion of all acceptance criteria in this work package."
     },
     {
       "id": "NFT-31",
@@ -662,15 +671,17 @@
       "id": "NFT-34",
       "title": "Production launch and staged rollout",
       "origin": "original",
-      "prs": [
-        44,
-        45
-      ],
+      "prs": [],
       "dependsOn": [
         "NFT-33"
       ],
       "externalDependencies": [],
-      "externalPrerequisites": []
+      "externalPrerequisites": [],
+      "contributingPrs": [
+        44,
+        45
+      ],
+      "scopeNote": "Recent PRs contribute the separately tested public-only EOA launch flow. They do not establish completion of all acceptance criteria in this work package."
     },
     {
       "id": "NFT-35",

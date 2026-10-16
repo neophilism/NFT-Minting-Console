@@ -68,3 +68,5 @@ No real user artwork, private wallet key, public-chain transaction or paid servi
 - The default Neon branch `br-late-forest-b4z0hjsa` remains unchanged: automatic approval review rejected migrating that specific production target. The isolated branch remains the verified migration/rehearsal environment. Final production-target setup is pending.
 
 Inputs still needed for the owner's real mint: public owner/minter/royalty addresses and supply; finalized artwork/poster and final rights; Pinata access and RPC endpoints; funded signing wallet and explicit wallet signatures. OpenSea API access is only required for automated marketplace listing. Keep service secrets in the hosting/operations environment. Never supply a seed phrase or wallet private key.
+
+Canonical PR records treat public-launch work as contributing evidence for unfinished roadmap packages. Validator provisioning, encrypted release editing, full mint-job orchestration and production rollout are not marked complete by the public-flow merges.
