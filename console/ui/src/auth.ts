@@ -46,7 +46,11 @@ export function useAuthentication(config: Configuration | null) {
   const [current, setCurrent] = useState<Session | null>(null);
   const [phase, setPhase] = useState('');
   const [error, setError] = useState('');
-  const [restoring, setRestoring] = useState(false), [retryLogout, setRetryLogout] = useState(false);
+  const [restoredConfig, setRestoredConfig] = useState<Configuration | null>(null);
+  // Readiness is bound during render, not enabled for one frame before an effect
+  // begins restoration. A click in that old gap could be silently swallowed.
+  const restoring = config !== null && restoredConfig !== config;
+  const [retryLogout, setRetryLogout] = useState(false);
   const active = useRef<Session | null>(null), epoch = useRef(0), running = useRef(false);
   const selectedProvider = useRef<WalletProvider | null>(null);
   const cleanupProvider = useRef<() => void>(() => {}), pendingLogout = useRef<string | null>(null);
@@ -73,7 +77,6 @@ export function useAuthentication(config: Configuration | null) {
   useEffect(() => {
     if (!config) return;
     const controller = new AbortController(), snapshot = epoch.current;
-    setRestoring(true);
     api('/api/auth/session', { signal: controller.signal }).then(async value => {
       if (epoch.current !== snapshot || controller.signal.aborted) return;
       const restored = readSession(value, config.chainId), provider = window.ethereum;
@@ -93,7 +96,7 @@ export function useAuthentication(config: Configuration | null) {
       pendingLogout.current = null; setSession(restored);
     }).catch(error => {
       if (!controller.signal.aborted && epoch.current === snapshot && !(error instanceof ApiError && error.status === 401)) setError('Session restore is unavailable. Connect your wallet to sign in again.');
-    }).finally(() => { if (!controller.signal.aborted) setRestoring(false); });
+    }).finally(() => { if (!controller.signal.aborted) setRestoredConfig(config); });
     return () => controller.abort();
   }, [config, logout, attachProvider]);
   useEffect(() => () => removeProvider(), []);
