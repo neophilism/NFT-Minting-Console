@@ -86,7 +86,8 @@
       "origin": "original",
       "prs": [
         10,
-        16
+        16,
+        43
       ],
       "mappingEvidence": "Merged PR title explicitly names NFT plan work package",
       "dependsOn": [
@@ -378,7 +379,9 @@
       "id": "NFT-21",
       "title": "Automated validator policy provisioning",
       "origin": "original",
-      "prs": [],
+      "prs": [
+        43
+      ],
       "dependsOn": [
         "NFT-05",
         "NFT-06",
@@ -442,7 +445,9 @@
       "id": "NFT-24",
       "title": "Canonical deployment wizard",
       "origin": "original",
-      "prs": [],
+      "prs": [
+        43
+      ],
       "dependsOn": [
         "NFT-06",
         "NFT-20",
@@ -533,7 +538,7 @@
     },
     {
       "id": "NFT-28",
-      "title": "Single “Mint & List” guided operation",
+      "title": "Single \u201cMint & List\u201d guided operation",
       "origin": "original",
       "prs": [],
       "dependsOn": [
