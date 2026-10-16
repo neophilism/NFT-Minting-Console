@@ -1,0 +1,49 @@
+name: Public CircleCI diagnostics
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/circle-public-diagnostics.yml'
+permissions:
+  contents: read
+jobs:
+  public-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Read public CircleCI workflow and browser diagnostics without credentials
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, pathlib
+          root = pathlib.Path('circle-diagnostics'); root.mkdir()
+          workflow = 'b03e98f9-fff5-4262-8419-a91b4776cfa4'
+          def read(url, name):
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as response:
+                      content = response.read(4*1024*1024+1)
+                      if len(content)>4*1024*1024: raise ValueError('oversized response')
+                  (root/name).write_bytes(content)
+                  return json.loads(content)
+              except Exception as error:
+                  print(name, type(error).__name__)
+                  return None
+          jobs = read('https://circleci.com/api/v2/workflow/'+workflow+'/job', 'workflow.json')
+          if jobs:
+              for job in jobs.get('items',[]):
+                  if job.get('name')!='browser' or not isinstance(job.get('job_number'),int): continue
+                  number = str(job['job_number'])
+                  base = 'https://circleci.com/api/v1.1/project/github/neophilism/NFT-Minting-Console/'+number
+                  data = read(base, 'browser.json')
+                  read(base+'/artifacts', 'artifacts.json')
+                  if data:
+                      for index, step in enumerate(data.get('steps',[])):
+                          for action in step.get('actions',[]):
+                              url=action.get('output_url','')
+                              if action.get('failed') and url.startswith('https://circleci.com/'):
+                                  read(url, 'failed-step-'+str(index)+'.json')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-circle-browser-diagnostics
+          path: circle-diagnostics
+          retention-days: 1
+          if-no-files-found: warn
