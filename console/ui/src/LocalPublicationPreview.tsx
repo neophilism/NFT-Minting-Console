@@ -1,0 +1,9 @@
+import {useEffect,useState} from 'react';
+export function LocalPublicationPreview({image,rights,media}:{image?:File;rights?:File;media?:File}){
+  const [imageUrl,setImageUrl]=useState(''),[mediaUrl,setMediaUrl]=useState(''),[text,setText]=useState(''),[error,setError]=useState('');
+  useEffect(()=>{if(!image){setImageUrl('');return;}const url=URL.createObjectURL(image);setImageUrl(url);return()=>URL.revokeObjectURL(url);},[image]);
+  useEffect(()=>{if(!media){setMediaUrl('');return;}const url=URL.createObjectURL(media);setMediaUrl(url);return()=>URL.revokeObjectURL(url);},[media]);
+  useEffect(()=>{let active=true;setText('');setError('');if(rights&&/\.(txt|md)$/i.test(rights.name))void rights.slice(0,32768).text().then(value=>{if(active)setText(value);}).catch(()=>{if(active)setError('The local text preview could not be read. Review the original file on your device.');});return()=>{active=false;};},[rights]);
+  if(!image&&!rights&&!media)return null;
+  return <details className="local-publication-preview"><summary>Preview the selected originals locally</summary><p>Nothing is uploaded by this preview. Review the complete original rights document; previews and hashes are not legal approval.</p>{imageUrl&&<img src={imageUrl} alt="Selected artwork or display poster"/>}{mediaUrl&&(/\.(mp3|m4a)$/i.test(media?.name||'')?<audio src={mediaUrl} controls preload="metadata"/>:<video src={mediaUrl} controls preload="metadata"/>)}{text&&<><h3>Rights text preview</h3><pre className="public-json">{text}</pre>{rights!.size>32768&&<p>The preview is truncated; the hash covers the complete original file.</p>}</>}{error&&<p role="status">{error}</p>}{rights&&/\.pdf$/i.test(rights.name)&&<p>PDF bytes are hashed exactly. Open the original PDF on your device to review its complete contents before approving publication.</p>}</details>;
+}
