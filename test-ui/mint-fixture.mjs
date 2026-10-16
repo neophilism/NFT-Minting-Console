@@ -36,7 +36,7 @@ export async function startMintFixture(hre){
         if(params.length!==1||typeof params[0]!=='string'||params[0].length>262144)throw new Error('Invalid signed fixture');
         const tx=Transaction.from(params[0]);
         const publicSigner=[testWallets[4].address.toLowerCase(),testWallets[5].address.toLowerCase()].includes(tx.from?.toLowerCase());
-        let publicAllowed=false;
+        let publicAllowed=publicSigner&&tx.to===tx.from&&tx.data==='0x'&&tx.gasLimit===21000n;
         if(publicSigner&&tx.to===null&&tx.data.startsWith(artifact.bytecode)){
           const args=AbiCoder.defaultAbiCoder().decode(['string','string','uint256','uint96','address','address','address'],'0x'+tx.data.slice(artifact.bytecode.length));
           publicAllowed=args[0].startsWith('Browser public launch')&&args[1]==='BPL'&&args[2]===87n&&args[3]===600n&&args[4]===tx.from&&args[5]===tx.from&&args[6]===tx.from;

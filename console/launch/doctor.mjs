@@ -37,19 +37,22 @@ export async function inspectLaunchDatabase(client){
     await verifyRuntimeConnection(client);
     const policies=await client.query(`SELECT n.nspname AS schema,c.relname AS name,c.relrowsecurity AS rls,c.relforcerowsecurity AS forced
       FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
-      WHERE (n.nspname='nft_console' AND c.relname IN('releases','mint_journal','launch_journal'))
+      WHERE (n.nspname='nft_console' AND c.relname IN('releases','mint_journal','launch_journal','launch_nonce_resolutions'))
          OR (n.nspname='nft_console_auth' AND c.relname='launch_events')`);
-    if(policies.rows.length!==4||policies.rows.some(row=>row.rls!==true||row.forced!==true))throw new Error('schema');
+    if(policies.rows.length!==5||policies.rows.some(row=>row.rls!==true||row.forced!==true))throw new Error('schema');
     await client.query('SET LOCAL ROLE nft_console_api');
     await client.query('SELECT intent_id,state,revision,public_plan FROM nft_console.launch_journal LIMIT 0');
     await client.query('SELECT revision,state FROM nft_console_auth.launch_events LIMIT 0');
+    await client.query('SELECT proof FROM nft_console.launch_nonce_resolutions LIMIT 0');
     const permissions=await client.query(`SELECT
       has_table_privilege(current_user,'nft_console.launch_journal','DELETE') AS delete_journal,
       has_table_privilege(current_user,'nft_console_auth.launch_events','INSERT,UPDATE,DELETE') AS change_events,
-      has_column_privilege(current_user,'nft_console.launch_journal','public_plan','UPDATE') AS change_plan`);
-    if(Object.values(permissions.rows[0]||{}).length!==3||Object.values(permissions.rows[0]).some(Boolean))throw new Error('permissions');
+      has_column_privilege(current_user,'nft_console.launch_journal','public_plan','UPDATE') AS change_plan,
+      has_table_privilege(current_user,'nft_console.launch_nonce_resolutions','UPDATE,DELETE') AS change_resolution`);
+    if(Object.values(permissions.rows[0]||{}).length!==4||Object.values(permissions.rows[0]).some(Boolean))throw new Error('permissions');
     const visibility=await client.query('SELECT count(*)::text AS n FROM nft_console.launch_journal');
     if(visibility.rows[0]?.n!=='0')throw new Error('unbound rows');
+    if((await client.query('SELECT count(*)::text AS n FROM nft_console.launch_nonce_resolutions')).rows[0]?.n!=='0')throw new Error('unbound recovery rows');
     return {restrictedRoleVerified:true,launchSchemaVerified:true,forcedRlsVerified:true,unboundVisibilityVerified:true,mutationPerformed:false,migrationChecksumsVerified:false};
   }finally{await client.query('ROLLBACK');}
 }

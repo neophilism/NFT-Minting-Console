@@ -34,6 +34,35 @@ export async function launchCases(t,repo,actor,other){
     assert.equal(claim.state,'wallet_pending');
     await assert.rejects(journal.walletOutcome(actor,next.intentId,{expectedRevision:next.revision,attemptId:claim.attemptId,outcome:'rejected'}),code('operation_conflict'));
   });
+  await t.test('finalized nonce recovery retains the original hash and an immutable proof, then releases a different fresh plan',async()=>{
+    // Finish the preceding fixture's still-pending wallet attempt first.
+    next=await journal.get(actor,next.intentId);
+    next=await journal.walletOutcome(actor,next.intentId,{expectedRevision:next.revision,attemptId:next.attemptId,outcome:'rejected'});
+    const p=plan();let row=await journal.create(actor,p);
+    row=await journal.claim(actor,row.intentId,{expectedRevision:row.revision});
+    const originalHash=hash();row=await journal.attach(actor,row.intentId,{transactionHash:originalHash});
+    const proof={version:1,kind:'finalized-self-cancellation',chainId:actor.chainId,wallet:actor.wallet,nonce:p.nonce,
+      transactionHash:hash(),blockNumber:3,blockHash:hash(),finalizedBlockNumber:12,finalizedBlockHash:hash(),confirmations:10,
+      originalActionVerified:false,transactionSent:false};
+    await assert.rejects(journal.resolveNonce(actor,row.intentId,'1',proof),code('operation_conflict'));
+    await assert.rejects(journal.resolveNonce({...actor,role:'editor'},row.intentId,row.revision,proof),code('forbidden'));
+    row=await journal.resolveNonce(actor,row.intentId,row.revision,proof);
+    assert.equal(row.transactionHash,originalHash);assert.equal(row.lastCode,'NONCE_CANCELLED');assert.deepEqual(row.nonceResolution,proof);
+    const recreated=await second.get(actor,row.intentId);assert.deepEqual(recreated.nonceResolution,proof);
+    assert.deepEqual((await second.create(actor,p)).nonceResolution,proof);
+    await assert.rejects(second.attach(actor,row.intentId,{transactionHash:hash()}),code('operation_conflict'));
+    await assert.rejects(second.observe(actor,row.intentId,row.revision,{state:'verified',block:3,blockHash:hash(),confirmations:2,code:null}),code('operation_conflict'));
+    await assert.rejects(second.resolveNonce(actor,row.intentId,row.revision,proof),code('operation_conflict'));
+    const fresh=await journal.create(actor,{...plan(),nonce:1});
+    let claimed=await second.claim(actor,fresh.intentId,{expectedRevision:fresh.revision});assert.equal(claimed.state,'wallet_pending');
+    claimed=await second.walletOutcome(actor,fresh.intentId,{expectedRevision:claimed.revision,attemptId:claimed.attemptId,outcome:'unknown'});
+    const unknownProof={...proof,nonce:1,transactionHash:hash()};
+    const resolvedUnknown=await journal.resolveNonce(actor,fresh.intentId,claimed.revision,unknownProof);
+    assert.equal(resolvedUnknown.transactionHash,null);assert.deepEqual(resolvedUnknown.nonceResolution,unknownProof);
+    for(const sql of ['UPDATE nft_console.launch_nonce_resolutions SET proof=proof','DELETE FROM nft_console.launch_nonce_resolutions'])
+      await assert.rejects(repo.transaction(actor,null,c=>c.query(sql)),code('42501'));
+    assert.equal((await repo.transaction(other,null,c=>c.query('SELECT * FROM nft_console.launch_nonce_resolutions'))).rows.length,0);
+  });
   await t.test('public plan identity and append-only audit history are protected by SQL privileges',async()=>{
     for(const sql of ["UPDATE nft_console.launch_journal SET public_plan='{}'::jsonb",'DELETE FROM nft_console.launch_journal',
       'DELETE FROM nft_console_auth.launch_events',"UPDATE nft_console_auth.launch_events SET state='verified'"])

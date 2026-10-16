@@ -40,14 +40,14 @@ test('durable store and release API repository against PostgreSQL',async t=>{
   const repo=new ReleaseRepository({pool,knownRoles:()=>roles});
   t.diagnostic(native?'Native PostgreSQL through pg; synthetic data only.':'Embedded PostgreSQL; serialized connection leases, not a native pg-driver claim.');
   await t.test('baseline and authorization migrations are checksum-bound and repeatable',async()=>{
-    assert.deepEqual(baseline,['001_release_model.sql']);assert.deepEqual(authorization,['001_auth_store.sql','002_release_rbac.sql','003_mint_journal.sql','004_public_launch_journal.sql']);
+    assert.deepEqual(baseline,['001_release_model.sql']);assert.deepEqual(authorization,['001_auth_store.sql','002_release_rbac.sql','003_mint_journal.sql','004_public_launch_journal.sql','005_launch_nonce_resolution.sql']);
     assert.deepEqual(await migrate(db),[]);assert.deepEqual(await migrateAuth(db),[]);
     const directory=await mkdtemp(path.join(os.tmpdir(),'nft-auth-migration-'));
     try{
       for(const name of authorization)await writeFile(path.join(directory,name),await readFile(new URL('../db/auth-migrations/'+name,import.meta.url)));
       const first=await readFile(path.join(directory,authorization[0]),'utf8');await writeFile(path.join(directory,authorization[0]),first+'\n-- modified history');
       await assert.rejects(migrateAuth(db,directory),/migration changed/);await writeFile(path.join(directory,authorization[0]),first);
-      await writeFile(path.join(directory,'004_failure.sql'),'CREATE TABLE nft_console_auth.rollback_fixture(id integer); SELECT deliberately_missing_function();');
+      await writeFile(path.join(directory,'006_failure.sql'),'CREATE TABLE nft_console_auth.rollback_fixture(id integer); SELECT deliberately_missing_function();');
       await assert.rejects(migrateAuth(db,directory));assert.equal((await db.query("SELECT to_regclass('nft_console_auth.rollback_fixture') AS name")).rows[0].name,null);
     }finally{await rm(directory,{recursive:true,force:true});}
   });

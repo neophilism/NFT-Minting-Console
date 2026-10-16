@@ -716,9 +716,10 @@
       "externalPrerequisites": [],
       "contributingPrs": [
         47,
-        49
+        49,
+        50
       ],
-      "publicLaunchOperatorScope": "PRs 47 and 49 add read-only configuration/runtime-role, deployment and combined first-batch funding checks. Production credentials, database target setup, public-chain mint evidence and complete roadmap acceptance remain pending."
+      "publicLaunchOperatorScope": "PRs 47 and 49 add read-only configuration/runtime-role, deployment and combined first-batch funding checks. Production credentials, database target setup, public-chain mint evidence and complete roadmap acceptance remain pending. PR 50 adds read-only finalized wallet cancellation recovery without replacing original transaction hashes or retrying unresolved intents."
     }
   ],
   "pullRequests": [
