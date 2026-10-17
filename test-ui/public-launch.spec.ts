@@ -22,13 +22,13 @@ test('public launch deploys and mints with wallet review, durable reload and exa
   await page.goto('/#/launch');await page.locator('.topbar').getByRole('button',{name:'Connect wallet',exact:true}).click();await page.getByRole('button',{name:'Browser wallet',exact:true}).click();await expect(page.getByRole('dialog')).not.toBeVisible();
   await page.getByLabel('Collection name',{exact:true}).fill('Browser public launch '+info.project.name);await page.getByLabel('Symbol',{exact:true}).fill('BPL');await page.getByLabel('Maximum number of NFTs',{exact:true}).fill('87');
   await page.getByRole('checkbox',{name:/approve storing them as public launch data/}).check();await page.getByRole('button',{name:'Prepare collection deployment',exact:true}).click();
-  await page.getByRole('button',{name:'Simulate and review network fee',exact:true}).click();await expect(page.getByRole('heading',{name:/Maximum fee:/})).toBeVisible();expect(await page.evaluate(()=>window.__launchWrites)).toBe(0);
+  await expect(page.getByRole('heading',{name:/Automatic rehearsal passed\. Maximum fee:/})).toBeVisible();await expect(page.getByRole('heading',{name:/Maximum fee:/})).toBeVisible();expect(await page.evaluate(()=>window.__launchWrites)).toBe(0);
   await page.getByRole('checkbox',{name:/approve these exact public settings/}).check();await page.getByRole('button',{name:'Sign collection deployment',exact:true}).click();await expect(page.getByRole('button',{name:'Verify on chain',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Verify on chain',exact:true}).click();await expect(page.getByRole('button',{name:'Use this collection for minting',exact:true})).toBeVisible();expect(await page.evaluate(()=>window.__launchWrites)).toBe(1);
   await page.reload();await page.locator('.transaction-row').getByRole('button',{name:'Open',exact:true}).first().click();await page.getByRole('button',{name:'Use this collection for minting',exact:true}).click();
   await page.getByLabel('Public mint bundle',{exact:true}).setInputFiles({name:'public-bundle.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(publicBrowserBundle))});
   await page.getByRole('checkbox',{name:/approve checking their public IPFS bytes/}).check();await page.getByRole('button',{name:'Verify public files and prepare mint',exact:true}).click();
-  await page.getByRole('button',{name:'Simulate and review network fee',exact:true}).click();await expect(page.getByRole('heading',{name:/Maximum fee:/})).toBeVisible();
+  await expect(page.getByRole('heading',{name:/Automatic rehearsal passed\. Maximum fee:/})).toBeVisible();await expect(page.getByRole('heading',{name:/Maximum fee:/})).toBeVisible();
   await page.getByRole('checkbox',{name:/approve these exact public settings/}).check();await page.getByRole('button',{name:'Sign mint transaction',exact:true}).click();await page.getByRole('button',{name:'Verify on chain',exact:true}).click();
   await expect(page.getByText(/Your mint receipt and immutable token fields are verified/)).toBeVisible();expect(await page.evaluate(()=>window.__launchWrites)).toBe(1); // reload reset; only the mint was signed
   await expect(page.getByText(/Token IDs: 87/)).toBeVisible();
@@ -36,7 +36,7 @@ test('public launch deploys and mints with wallet review, durable reload and exa
   await page.getByLabel('Symbol',{exact:true}).fill('BPL');await page.getByLabel('Maximum number of NFTs',{exact:true}).fill('87');
   await page.getByRole('checkbox',{name:/approve storing them as public launch data/}).check();
   await page.getByRole('button',{name:'Prepare collection deployment',exact:true}).click();
-  await page.getByRole('button',{name:'Simulate and review network fee',exact:true}).click();
+  await expect(page.getByRole('heading',{name:/Automatic rehearsal passed\. Maximum fee:/})).toBeVisible();
   await page.getByRole('checkbox',{name:/approve these exact public settings/}).check();
   const cancelledNonce=Number(BigInt(await rpc('eth_getTransactionCount',[signer.address,'pending'])));
   unknownNext=true;await page.getByRole('button',{name:'Sign collection deployment',exact:true}).click();
