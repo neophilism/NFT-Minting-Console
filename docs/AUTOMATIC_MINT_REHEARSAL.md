@@ -1,0 +1,22 @@
+# Automatic rehearsal of an exact public NFT mint
+
+This is a single-submission, **read-only preflight**, not an automatic transfer authorization, synthetic sale, or substitute for a wallet signature.
+
+## First-mint browser workflow
+
+1. Sign in with the enrolled administrator wallet and set the Ethereum network/collection economics once. Select final approved artwork, metadata and rights, explicitly authorize **public** Pinata publication, and verify the exact original bytes by their SHA-256 and CID.
+2. Add the verified public work(s) to the release. In **Estimate total minting cost**, approve public readback. That one consent **automatically** starts the full-release read-only rehearsal using `eth_simulateV1`: collection deployment (if new), every selected mint batch in sequence, mint events, runtime/royalty/token field readback, validator existence, peak gas and a combined wallet funding budget. This must never spend ETH or publish new material. A missing provider capability, wrong input, changed contents, failed simulated call or missing peak-gas field fails closed; no quote is displayed as zero.
+3. After reviewing the immutable plan and cost budget, choose **Prepare collection deployment** or **Verify public files and prepare mint**. The server independently verifies the exact planned operation again. The browser then automatically simulates **that same saved journal plan** through the connected wallet RPC, checks network/account/nonce/balance and presents the fee cap. There is no additional button to run the transaction dry-run and no need to manually re-enter the collection or NFT fields on a testnet.
+4. Only after both independent per-operation checks pass does a checkbox permit **Sign collection deployment** or **Sign mint transaction**. The wallet requires an explicit approval for **each** fee-bearing transaction. The server has no signing key and cannot silently broadcast after a simulation. A failed or declined check does not mint or start a new send.
+5. Verify the actual receipt, confirmations, immutable contract and per-token fields. Only then prepare the next mint batch. An unresolved wallet result is recovered from durable journal and chain evidence, never resent automatically.
+
+## Binding, limits and warnings
+
+- Immutable journal calldata, contract runtime, chain ID, selected wallet and nonce—not editable form fields—are what the wallet rehearses and subsequently receives. The client verifies the commitment again immediately before authorizing the send. The server rechecks the operation and pending nonce after the fee review, and wallet accounts/chain/nonce are checked again after reservation.
+- Cost quotes are attached to the SHA-256 of the exact JSON request (configuration, uploaded-work commitments, account/network scope) and expire after two minutes. Changing an input clears its quote and consent. **At present a full-release cost quote is a separate read-only review from the journal operations**; it does not itself create or authorize deployment or mint, and it is not a durable cross-transaction execution ticket.
+- Network conditions can change between simulation and inclusion. Each live transaction still needs a fresh fee/nonce check, its own wallet approval, confirmation and receipt validation. A successful preview cannot guarantee a transaction will not fail on-chain or that gas cost is final.
+- Each real mint operation handles a batch of up to ten NFTs; a release can have multiple batches. A collection deployment is one separate transaction. Full automation of **all** batches with a single signing gesture would require a different preauthorized account or atomic contract method, and is *not* implemented.
+- The read-only entire-release quote requires RPC `eth_simulateV1` with `maxUsedGas` support. Presence of `RPC_URL` alone is not a successful provider integration test. The actual live Pinata upload/readback and production Alchemy sequential-simulation capability must be verified with real final public assets before claiming full first-mint acceptance.
+- This flow does not approve legal terms or change immutable royalties, nor does minting prove marketplace listing, validator-policy setup, saleability or that the full product roadmap is complete.
+
+The automatic rehearsal is deliberately tied to the submitted public values. No separate testnet mint is required for routine user acceptance, but the project's independent automated contract/local-EVM, PostgreSQL, security and browser regression suites are still mandatory for software changes.
