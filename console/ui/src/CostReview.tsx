@@ -11,6 +11,7 @@ interface Props {current:Session;config:Configuration;collection:CollectionConfi
 export function CostReview({current,config,collection,deployments,expired,providedWorks}:Props){
   const [mode,setMode]=useState<'new'|'existing'>('new'),[deployment,setDeployment]=useState(''),[works,setWorks]=useState<unknown[]>([]),[names,setNames]=useState<string[]>([]),[consent,setConsent]=useState(false),[busy,setBusy]=useState(false),[reading,setReading]=useState(false),[error,setError]=useState(''),[quote,setQuote]=useState<{key:string;value:CostQuote}|null>(null),[now,setNow]=useState(Date.now());
   const controller=useRef<AbortController|null>(null),sequence=useRef(0),filesVersion=useRef(0),alive=useRef(true),result=useRef<HTMLHeadingElement>(null);
+  const lastAutomaticAttempt=useRef<string|null>(null),[consentKey,setConsentKey]=useState<string|null>(null);
   const key=useMemo(()=>JSON.stringify({wallet:current.wallet,chainId:config.chainId,mode,config:mode==='new'?collection:null,deploymentIntentId:mode==='existing'?deployment:null,works}),[current.wallet,config.chainId,mode,collection,deployment,works]);
   useEffect(()=>{alive.current=true;return()=>{alive.current=false;sequence.current++;filesVersion.current++;controller.current?.abort();};},[]);
   useEffect(()=>{if(providedWorks!==undefined){setWorks(providedWorks);setNames(providedWorks.length?['Verified files prepared in this workspace']:[]);setQuote(null);setConsent(false);}},[providedWorks]);
