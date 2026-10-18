@@ -27,7 +27,17 @@ cap. Files use `console/crypto/attachments.mjs`, whose private manifest must
 remain within an authenticated encrypted draft; it must not be placed in API
 metadata. Larger drafts and resumable ciphertext objects belong to NFT-12.
 
-Verification: `node --test test-crypto/workspace.test.mjs` covers round-trip,
+`console/crypto/draft-api.mjs` connects the client envelope to the existing
+authenticated release API. It sends only the three opaque fields, checks that
+the create response echoes the exact encrypted record, and decrypts a GET
+response only for the expected release ID. The request callback must be the
+same-origin authenticated API transport. UI exposure remains disabled until
+the device key lifecycle is implemented and reviewed.
+
+Verification: `node --test test-crypto/workspace.test.mjs
+test-crypto/draft-api.test.mjs` covers round-trip,
 freshness, server-visible field minimization, wrong-key and substitution
-failure, tampering, invalid base64 and extractable-key rejection. Browser,
-end-to-end server-compromise and cross-device acceptance remain pending.
+failure, tampering, invalid base64 and extractable-key rejection. The existing
+browser CI command picks up `workspace.browser.mjs` for actual Chromium
+WebCrypto verification. End-to-end server-compromise and cross-device
+acceptance remain pending.
