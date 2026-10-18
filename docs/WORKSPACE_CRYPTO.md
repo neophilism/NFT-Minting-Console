@@ -41,5 +41,8 @@ test-crypto/draft-api.test.mjs` covers round-trip,
 freshness, server-visible field minimization, wrong-key and substitution
 failure, tampering, invalid base64 and extractable-key rejection. The existing
 browser CI command picks up `workspace.browser.mjs` for actual Chromium
-WebCrypto verification. End-to-end server-compromise and cross-device
-acceptance remain pending.
+WebCrypto verification. `draft-attachment.integration.test.mjs` exercises a
+synthetic untrusted server that receives only encrypted release metadata and
+attachment chunks, then verifies authorized recovery and wrong-key/missing-
+chunk failure. A deployed API/object-store server-compromise exercise and
+cross-device acceptance remain pending.
