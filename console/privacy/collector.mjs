@@ -5,7 +5,7 @@ const hash = /^0x[0-9a-fA-F]{64}$/;
 /** Only public chain identifiers may cross this boundary. No customer contact data. */
 export function publicCollectorReceipt(input) {
   const keys = ['chainId', 'contract', 'tokenId', 'transactionHash'];
-  if (!validObject(input) || Object.keys(input).length !== keys.length ||
+  if (!validObject(input) || Reflect.ownKeys(input).length !== keys.length ||
       keys.some(key => !Object.hasOwn(input, key) ||
         !Object.getOwnPropertyDescriptor(input, key) ||
         !Object.hasOwn(Object.getOwnPropertyDescriptor(input, key), 'value'))) fail();
