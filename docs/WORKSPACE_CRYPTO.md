@@ -32,7 +32,9 @@ authenticated release API. It sends only the three opaque fields, checks that
 the create response echoes the exact encrypted record, and decrypts a GET
 response only for the expected release ID. The request callback must be the
 same-origin authenticated API transport. UI exposure remains disabled until
-the device key lifecycle is implemented and reviewed.
+the device key lifecycle is implemented and reviewed. Edits reseal with a
+fresh content key and nonces, send the server's compare-and-swap revision,
+and accept only an echoed encrypted record at exactly the next revision.
 
 Verification: `node --test test-crypto/workspace.test.mjs
 test-crypto/draft-api.test.mjs` covers round-trip,

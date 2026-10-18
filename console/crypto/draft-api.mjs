@@ -14,6 +14,10 @@ function record(value, id) {
       typeof value.revision !== 'string' || !/^[1-9][0-9]{0,18}$/.test(value.revision)) fail();
   return value;
 }
+function revision(value) {
+  if (typeof value !== 'string' || !/^[1-9][0-9]{0,18}$/.test(value) || BigInt(value) >= (1n << 63n) - 1n) fail();
+  return value;
+}
 export async function createEncryptedRelease(draft, { id, wrappingKey, request } = {}) {
   transport(request, id, wrappingKey);
   const sealed = await sealReleaseDraft(draft, { id, wrappingKey });
@@ -26,4 +30,16 @@ export async function readEncryptedRelease(id, { wrappingKey, request } = {}) {
   const returned = record(await request(`/api/releases/${id}`), id);
   const draft = await openReleaseDraft(returned, { expectedId: id, wrappingKey });
   return Object.freeze({ id, revision: returned.revision, draft });
+}
+
+/** The server uses expectedRevision for compare-and-swap; each edit reseals
+ * with a fresh content key and nonces, even when the plaintext is identical. */
+export async function updateEncryptedRelease(draft, { id, expectedRevision, wrappingKey, request } = {}) {
+  transport(request, id, wrappingKey); revision(expectedRevision);
+  const sealed = await sealReleaseDraft(draft, { id, wrappingKey });
+  const returned = record(await request(`/api/releases/${id}`, { method: 'PUT',
+    body: { ciphertext: sealed.ciphertext, nonce: sealed.nonce, expectedRevision } }), id);
+  if (returned.ciphertext !== sealed.ciphertext || returned.nonce !== sealed.nonce ||
+      BigInt(returned.revision) !== BigInt(expectedRevision) + 1n || returned.changed !== true) fail();
+  return Object.freeze({ id, revision: returned.revision });
 }
