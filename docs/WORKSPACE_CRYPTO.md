@@ -14,8 +14,12 @@ holds only a wrapped content key and encrypted draft bytes. Opening rejects
 wrong keys, release substitutions, modified ciphertext and nonces.
 
 This is a **client primitive, not an enabled private workspace**. A generated
-wrapping key is ephemeral. The product must not turn on Save private release
-until NFT-11 provides authenticated device enrollment, key persistence,
+wrapping key is ephemeral unless explicitly stored by
+`local-key-store.mjs` in this browser's IndexedDB. The store refuses to
+silently replace a missing key when opening a record and separates keys by
+wallet and chain. It is a single-browser building block, not proof of device
+authorization or recoverability. The product must not turn on Save private release
+until NFT-11 provides authenticated device enrollment, authorized key
 transfer and recovery, and NFT-12 provides the full private object lifecycle.
 Wallet login authenticates an account but does not establish an encryption key
 or authorize a device. A compromised code-serving origin or client can still
@@ -45,4 +49,5 @@ WebCrypto verification. `draft-attachment.integration.test.mjs` exercises a
 synthetic untrusted server that receives only encrypted release metadata and
 attachment chunks, then verifies authorized recovery and wrong-key/missing-
 chunk failure. A deployed API/object-store server-compromise exercise and
-cross-device acceptance remain pending.
+cross-device acceptance remain pending. `local-key-store.browser.mjs` checks
+Chromium IndexedDB persistence across a page reload and account separation.
