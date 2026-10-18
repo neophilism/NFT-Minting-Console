@@ -6,7 +6,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const fail = () => { throw new Error('Encrypted release response failed validation.'); };
 function transport(request, id, wrappingKey) {
   if (typeof request !== 'function' || typeof id !== 'string' || !UUID.test(id) ||
-      !(wrappingKey instanceof CryptoKey)) fail();
+      !(wrappingKey instanceof globalThis.CryptoKey)) fail();
 }
 function record(value, id) {
   if (!value || typeof value !== 'object' || value.id !== id ||

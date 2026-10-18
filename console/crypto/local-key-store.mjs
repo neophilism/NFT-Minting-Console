@@ -12,14 +12,14 @@ function accountKey(wallet, chainId) {
   return `${chainId}:${wallet.toLowerCase()}`;
 }
 function validKey(key) {
-  return key instanceof CryptoKey && key.type === 'secret' && !key.extractable &&
+  return key instanceof globalThis.CryptoKey && key.type === 'secret' && !key.extractable &&
     key.algorithm.name === 'AES-GCM' && key.algorithm.length === 256 &&
     key.usages.includes('encrypt') && key.usages.includes('decrypt');
 }
 function openDatabase() {
   if (!globalThis.indexedDB || !globalThis.isSecureContext) fail();
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = globalThis.indexedDB.open(DB_NAME, 1);
     request.onupgradeneeded = () => {
       if (!request.result.objectStoreNames.contains(STORE)) request.result.createObjectStore(STORE);
     };

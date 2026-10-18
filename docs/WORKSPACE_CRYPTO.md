@@ -12,6 +12,9 @@ in the envelope. Both authenticated operations bind the release ID and distinct
 domain strings as additional authenticated data. The versioned binary envelope
 holds only a wrapped content key and encrypted draft bytes. Opening rejects
 wrong keys, release substitutions, modified ciphertext and nonces.
+Draft JSON validation rejects accessors, functions, non-finite numbers,
+prototype-sensitive names, sparse arrays and over-deep trees before sealing,
+so a save cannot silently drop fields or produce an unusable record.
 
 This is a **client primitive, not an enabled private workspace**. A generated
 wrapping key is ephemeral unless explicitly stored by

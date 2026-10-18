@@ -11,23 +11,49 @@ const aad = (domain, id) => encoder.encode(`${domain}\u0000${id}`);
 const base64 = bytes => {
   let binary = '';
   for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary);
+  return globalThis.btoa(binary);
 };
 function decodeBase64(value, min, max) {
   if (typeof value !== 'string' || value.length > Math.ceil(max / 3) * 4 ||
       !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) fail();
   let binary;
-  try { binary = atob(value); } catch { fail(); }
+  try { binary = globalThis.atob(value); } catch { fail(); }
   const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
   if (bytes.length < min || bytes.length > max || base64(bytes) !== value) fail();
   return bytes;
 }
 function validateKey(key) {
-  if (!(key instanceof CryptoKey) || key.type !== 'secret' || key.extractable ||
+  if (!(key instanceof globalThis.CryptoKey) || key.type !== 'secret' || key.extractable ||
       key.algorithm.name !== 'AES-GCM' || key.algorithm.length !== 256 ||
       !key.usages.includes('encrypt') || !key.usages.includes('decrypt')) fail();
 }
 function validateId(id) { if (typeof id !== 'string' || !UUID.test(id)) fail(); }
+function validateDraftTree(value, seen = new Set(), depth = 0, budget = { nodes: 0 }) {
+  if (depth > 32 || ++budget.nodes > 10000) fail();
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return;
+  if (typeof value === 'number') { if (!Number.isFinite(value)) fail(); return; }
+  if (!value || typeof value !== 'object' || seen.has(value) || Object.getOwnPropertySymbols(value).length) fail();
+  if (Array.isArray(value)) {
+    if (value.length > 10000 || Object.keys(value).length !== value.length) fail();
+    seen.add(value);
+    for (let i = 0; i < value.length; i++) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, String(i));
+      if (!descriptor || !Object.hasOwn(descriptor, 'value')) fail();
+      validateDraftTree(descriptor.value, seen, depth + 1, budget);
+    }
+    seen.delete(value);
+    return;
+  }
+  if (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null) fail();
+  seen.add(value);
+  for (const name of Object.getOwnPropertyNames(value)) {
+    if (['__proto__', 'constructor', 'prototype'].includes(name)) fail();
+    const descriptor = Object.getOwnPropertyDescriptor(value, name);
+    if (!descriptor?.enumerable || !Object.hasOwn(descriptor, 'value')) fail();
+    validateDraftTree(descriptor.value, seen, depth + 1, budget);
+  }
+  seen.delete(value);
+}
 
 /** The caller retains this non-extractable wrapping key on the trusted client.
  * Device authorization, transfer and recovery are separate NFT-11 work. */
@@ -38,6 +64,7 @@ export async function createReleaseWrappingKey() {
 export async function sealReleaseDraft(draft, { id, wrappingKey } = {}) {
   validateId(id); validateKey(wrappingKey);
   if (!draft || typeof draft !== 'object' || Array.isArray(draft) || Object.getPrototypeOf(draft) !== Object.prototype) fail();
+  validateDraftTree(draft);
   let plaintext;
   try { plaintext = encoder.encode(JSON.stringify(draft)); } catch { fail(); }
   if (plaintext.length < 2 || plaintext.length > MAX_PLAINTEXT) fail();
@@ -76,6 +103,7 @@ export async function openReleaseDraft(record, { expectedId, wrappingKey } = {})
     if (plaintext.length > MAX_PLAINTEXT) fail();
     const value = JSON.parse(decoder.decode(plaintext));
     if (!value || typeof value !== 'object' || Array.isArray(value)) fail();
+    validateDraftTree(value);
     return value;
   } catch { fail(); }
   finally { rawKey?.fill(0); plaintext?.fill(0); }

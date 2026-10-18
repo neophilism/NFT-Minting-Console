@@ -30,8 +30,8 @@ test('actual Chromium seals opaque release drafts and rejects hostile records', 
       const opened = await openReleaseDraft(sealed, { expectedId: id, wrappingKey: key });
       let wrongKeyRejected = false, tamperRejected = false;
       try { await openReleaseDraft(sealed, { expectedId: id, wrappingKey: wrong }); } catch { wrongKeyRejected = true; }
-      const bytes = Uint8Array.from(atob(sealed.ciphertext), char => char.charCodeAt(0)); bytes[bytes.length - 1] ^= 1;
-      try { await openReleaseDraft({ ...sealed, ciphertext: btoa(String.fromCharCode(...bytes)) }, { expectedId: id, wrappingKey: key }); }
+      const bytes = Uint8Array.from(globalThis.atob(sealed.ciphertext), char => char.charCodeAt(0)); bytes[bytes.length - 1] ^= 1;
+      try { await openReleaseDraft({ ...sealed, ciphertext: globalThis.btoa(String.fromCharCode(...bytes)) }, { expectedId: id, wrappingKey: key }); }
       catch { tamperRejected = true; }
       return { secureContext: globalThis.isSecureContext, nonExtractable: !key.extractable,
         opaque: !JSON.stringify(sealed).includes(input.name), sameDraft: JSON.stringify(opened) === JSON.stringify(input),

@@ -24,16 +24,22 @@ test('wrong key, swapped release, tampered ciphertext and nonces fail closed', a
   await assert.rejects(openReleaseDraft(sealed, { expectedId: A, wrappingKey: other }));
   await assert.rejects(openReleaseDraft({ ...sealed, id: B }, { expectedId: B, wrappingKey: key }));
   for (const field of ['ciphertext', 'nonce']) {
-    const bytes = Uint8Array.from(atob(sealed[field]), char => char.charCodeAt(0));
+    const bytes = Uint8Array.from(globalThis.atob(sealed[field]), char => char.charCodeAt(0));
     bytes[bytes.length - 1] ^= 1;
-    await assert.rejects(openReleaseDraft({ ...sealed, [field]: btoa(String.fromCharCode(...bytes)) }, { expectedId: A, wrappingKey: key }));
+    await assert.rejects(openReleaseDraft({ ...sealed, [field]: globalThis.btoa(String.fromCharCode(...bytes)) }, { expectedId: A, wrappingKey: key }));
   }
 });
 test('rejects malformed API inputs and extractable wrapping keys', async () => {
   const key = await createReleaseWrappingKey();
   await assert.rejects(sealReleaseDraft(draft, { id: 'bad', wrappingKey: key }));
-  const extractable = await crypto.subtle.generateKey({name:'AES-GCM',length:256}, true, ['encrypt','decrypt']);
+  const extractable = await globalThis.crypto.subtle.generateKey({name:'AES-GCM',length:256}, true, ['encrypt','decrypt']);
   await assert.rejects(sealReleaseDraft(draft, { id: A, wrappingKey: extractable }));
   const sealed = await sealReleaseDraft(draft, { id: A, wrappingKey: key });
   for (const field of ['ciphertext', 'nonce']) await assert.rejects(openReleaseDraft({ ...sealed, [field]: 'not base64' }, { expectedId: A, wrappingKey: key }));
+});
+test('rejects lossy or unsafe draft structures before any upload', async () => {
+  const key = await createReleaseWrappingKey();
+  const bad = [{ missing: undefined }, { count: NaN }, { items: [, 1] }, { toJSON: () => ({ name: 'hidden' }) },
+    Object.defineProperty({}, 'secret', { value: 'not serialized' }), JSON.parse('{"__proto__":{"admin":true}}')];
+  for (const draft of bad) await assert.rejects(sealReleaseDraft(draft, { id: A, wrappingKey: key }));
 });
