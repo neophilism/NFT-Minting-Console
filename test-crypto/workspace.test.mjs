@@ -39,7 +39,8 @@ test('rejects malformed API inputs and extractable wrapping keys', async () => {
 });
 test('rejects lossy or unsafe draft structures before any upload', async () => {
   const key = await createReleaseWrappingKey();
-  const bad = [{ missing: undefined }, { count: NaN }, { items: [, 1] }, { toJSON: () => ({ name: 'hidden' }) },
+  const sparse = Array(2); sparse[1] = 1;
+  const bad = [{ missing: undefined }, { count: NaN }, { items: sparse }, { toJSON: () => ({ name: 'hidden' }) },
     Object.defineProperty({}, 'secret', { value: 'not serialized' }), JSON.parse('{"__proto__":{"admin":true}}')];
   for (const draft of bad) await assert.rejects(sealReleaseDraft(draft, { id: A, wrappingKey: key }));
 });
